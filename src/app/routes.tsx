@@ -1,8 +1,10 @@
 import { createBrowserRouter } from 'react-router';
 import { MobileFrame } from './components/MobileFrame';
 import { Welcome } from './screens/Welcome';
-import { MedicationSetup } from './screens/MedicationSetup';
-import { ProfileBasics } from './screens/ProfileBasics';
+import { Demographics } from './screens/Demographics';
+import { Medication } from './screens/Medication';
+import { Baselines } from './screens/Baselines';
+import { Complete } from './screens/Complete';
 import { Dashboard } from './screens/Dashboard';
 import { LogDose } from './screens/LogDose';
 import { LogSideEffect } from './screens/LogSideEffect';
@@ -20,8 +22,10 @@ export const router = createBrowserRouter([
     Component: MobileFrame,
     children: [
       { index: true, Component: Welcome },
-      { path: 'medication-setup', Component: MedicationSetup },
-      { path: 'profile-basics', Component: ProfileBasics },
+      { path: 'demographics', Component: Demographics },
+      { path: 'medication', Component: Medication },
+      { path: 'baselines', Component: Baselines },
+      { path: 'complete', Component: Complete },
       { path: 'dashboard', Component: Dashboard },
       { path: 'log-dose', Component: LogDose },
       { path: 'log-side-effect', Component: LogSideEffect },

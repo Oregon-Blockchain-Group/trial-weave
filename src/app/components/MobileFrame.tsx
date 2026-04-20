@@ -5,7 +5,17 @@ export function MobileFrame() {
   const location = useLocation();
   
   // Screens without bottom nav
-  const noNavScreens = ['/', '/medication-setup', '/profile-basics', '/log-dose', '/log-side-effect', '/log-cost', '/switch-medication'];
+  const noNavScreens = [
+    '/',
+    '/demographics',
+    '/medication',
+    '/baselines',
+    '/complete',
+    '/log-dose',
+    '/log-side-effect',
+    '/log-cost',
+    '/switch-medication',
+  ];
   const showBottomNav = !noNavScreens.includes(location.pathname);
 
   return (

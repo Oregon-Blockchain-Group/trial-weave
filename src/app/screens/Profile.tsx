@@ -1,109 +1,183 @@
-import { useNavigate } from 'react-router';
-import { User, ChevronRight, Bell, Shield, Settings, HelpCircle, Info, Download, Trash2 } from 'lucide-react';
-import lokahiLogo from '../../imports/Lokahi-Therapeutics_logo.jpg';
+import {
+  User,
+  ChevronRight,
+  Bell,
+  Shield,
+  Settings,
+  HelpCircle,
+  Info,
+  Download,
+  Trash2,
+  Pencil,
+} from 'lucide-react';
+import { SectionHeader } from '../components/SectionHeader';
+import { MOCK_USER } from '../../data/mockUser';
+import { DEFAULT_COHORT_FILTERS } from '../../data/cohort';
+import lokahiLogo from '../../imports/Lokahi-Therapeutics_logo-Picsart-BackgroundRemover.jpg';
+
+const { demographics } = MOCK_USER;
+const DEMOGRAPHIC_ROWS = [
+  { label: 'Age', value: String(demographics.age) },
+  { label: 'Sex', value: demographics.sex },
+  { label: 'Race / Ethnicity', value: demographics.raceEthnicity },
+  { label: 'Location', value: `${demographics.city}, ${demographics.state}` },
+  { label: 'Starting weight', value: `${demographics.startingWeightLb} lb` },
+  { label: 'Height', value: `${demographics.heightFeet}' ${demographics.heightInches}"` },
+];
+
+const SETTINGS = [
+  { icon: Bell, label: 'Notification preferences' },
+  { icon: Shield, label: 'Data privacy & sharing' },
+  { icon: Settings, label: 'Units & preferences' },
+  { icon: HelpCircle, label: 'Help & support' },
+  { icon: Info, label: 'About Trial Weave' },
+];
 
 export function Profile() {
-  const navigate = useNavigate();
-
-  const settings = [
-    { icon: Bell, label: 'Notification preferences', path: '#' },
-    { icon: Shield, label: 'Data privacy & sharing', path: '#' },
-    { icon: Settings, label: 'Units & preferences', path: '#' },
-    { icon: HelpCircle, label: 'Help & support', path: '#' },
-    { icon: Info, label: 'About ai2 Trial Weave', path: '#' },
-  ];
-
   return (
-    <div className="h-full flex flex-col overflow-y-auto">
-      {/* Header */}
+    <div className="h-full flex flex-col overflow-y-auto bg-[#FAFAFA]">
       <div className="p-4 bg-white border-b border-[#E5E7EB]">
         <h1 className="text-xl font-bold text-[#1C1C1C]">Profile</h1>
       </div>
 
-      {/* Profile Info */}
-      <div className="p-6 bg-white border-b border-[#E5E7EB]">
+      {/* Identity */}
+      <div className="p-4 bg-white border-b border-[#E5E7EB]">
         <div className="flex items-center gap-4">
-          <div className="w-20 h-20 bg-[#234a67] rounded-full flex items-center justify-center">
-            <User className="w-10 h-10 text-white" />
+          <div className="w-16 h-16 bg-[#234a67] rounded-full flex items-center justify-center">
+            <User className="w-8 h-8 text-white" />
           </div>
           <div>
-            <div className="text-xl font-bold text-[#1C1C1C]">Alex Johnson</div>
-            <div className="text-sm text-[#6B7280]">Member since Oct 2025</div>
+            <div className="text-lg font-bold text-[#1C1C1C]">
+              {MOCK_USER.firstName} {MOCK_USER.lastName}
+            </div>
+            <div className="text-xs text-[#6B7280]">Member since {MOCK_USER.memberSince}</div>
           </div>
         </div>
       </div>
 
-      {/* Medications Section */}
-      <div className="p-6 bg-white border-b border-[#E5E7EB]">
-        <h2 className="font-semibold text-[#1C1C1C] mb-4">My Medications</h2>
-        <div className="space-y-3">
-          <div className="p-4 bg-[#e8f4f8] rounded-xl border border-[#234a67]">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="font-semibold text-[#1C1C1C]">Mounjaro 5mg</div>
-                <div className="text-sm text-[#6B7280]">Current • Since Jan 15, 2026</div>
-              </div>
-              <div className="px-3 py-1 bg-[#234a67] text-white text-xs font-medium rounded-full">
-                Active
-              </div>
-            </div>
-          </div>
-          <div className="p-4 bg-[#FAFAFA] rounded-xl border border-[#E5E7EB]">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="font-semibold text-[#1C1C1C]">Ozempic 0.5mg</div>
-                <div className="text-sm text-[#6B7280]">Oct 1, 2025 - Jan 14, 2026</div>
-              </div>
-              <div className="px-3 py-1 bg-[#E5E7EB] text-[#6B7280] text-xs font-medium rounded-full">
-                Past
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Settings */}
-      <div className="p-6 space-y-6">
-        <div>
-          <h2 className="font-semibold text-[#1C1C1C] mb-4">Settings</h2>
-          <div className="bg-white rounded-2xl border border-[#E5E7EB] divide-y divide-[#E5E7EB]">
-            {settings.map((setting) => (
-              <button
-                key={setting.label}
-                className="w-full p-4 flex items-center gap-3 hover:bg-[#FAFAFA] transition-colors"
+      <div className="p-4 space-y-4">
+        {/* Cohort summary */}
+        <div className="bg-white border border-[#234a67] rounded-xl p-4">
+          <SectionHeader
+            eyebrow="Your matched cohort"
+            title="People like you"
+            meta="n=1,247"
+          />
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {DEFAULT_COHORT_FILTERS.map((f) => (
+              <span
+                key={f}
+                className="px-2 py-0.5 text-[11px] bg-[#e8f4f8] text-[#234a67] rounded-full border border-[#234a67]/20"
               >
-                <setting.icon className="w-5 h-5 text-[#6B7280]" />
-                <span className="flex-1 text-left text-[#1C1C1C]">{setting.label}</span>
-                <ChevronRight className="w-5 h-5 text-[#6B7280]" />
-              </button>
+                {f}
+              </span>
+            ))}
+          </div>
+          <button className="text-xs font-semibold text-[#234a67] underline-offset-2 hover:underline">
+            Edit cohort filters
+          </button>
+        </div>
+
+        {/* Demographics */}
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+          <div className="flex items-baseline justify-between mb-3">
+            <SectionHeader eyebrow="Demographics" title="Your profile" />
+            <button className="text-xs font-semibold text-[#234a67] flex items-center gap-1 hover:underline">
+              <Pencil className="w-3 h-3" />
+              Edit
+            </button>
+          </div>
+          <div className="divide-y divide-[#E5E7EB]">
+            {DEMOGRAPHIC_ROWS.map((row) => (
+              <div
+                key={row.label}
+                className="py-2.5 flex items-center justify-between first:pt-0 last:pb-0"
+              >
+                <span className="text-xs text-[#6B7280]">{row.label}</span>
+                <span className="text-sm font-medium text-[#1C1C1C] tabular-nums">
+                  {row.value}
+                </span>
+              </div>
             ))}
           </div>
         </div>
 
-        {/* Export Data */}
-        <button className="w-full h-12 bg-white border-2 border-[#234a67] text-[#234a67] rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-[#e8f4f8] transition-colors">
-          <Download className="w-5 h-5" />
-          Export All My Data
-        </button>
+        {/* Medications */}
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+          <SectionHeader eyebrow="My medications" title="Current & history" />
+          <div className="space-y-2">
+            <div className="p-3 bg-[#e8f4f8] rounded-lg border border-[#234a67]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-semibold text-[#1C1C1C] text-sm">
+                    {MOCK_USER.currentRegimen.brand} {MOCK_USER.currentRegimen.dose}
+                  </div>
+                  <div className="text-xs text-[#6B7280]">
+                    Current · since {MOCK_USER.currentRegimen.startedAt}
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 bg-[#234a67] text-white text-[10px] font-semibold rounded">
+                  ACTIVE
+                </span>
+              </div>
+            </div>
+            <div className="p-3 bg-white rounded-lg border border-[#E5E7EB]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-semibold text-[#1C1C1C] text-sm">
+                    {MOCK_USER.previousRegimen.brand} {MOCK_USER.previousRegimen.dose}
+                  </div>
+                  <div className="text-xs text-[#6B7280]">
+                    {MOCK_USER.previousRegimen.activeRange}
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 bg-[#F3F4F6] text-[#6B7280] text-[10px] font-semibold rounded">
+                  PAST
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        {/* Delete Account */}
-        <button className="w-full h-12 bg-white border border-[#E5E7EB] text-[#DC2626] rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-red-50 transition-colors">
-          <Trash2 className="w-5 h-5" />
-          Delete Account
+        {/* Settings */}
+        <div className="bg-white border border-[#E5E7EB] rounded-xl divide-y divide-[#E5E7EB] overflow-hidden">
+          {SETTINGS.map((s) => (
+            <button
+              key={s.label}
+              className="w-full p-3.5 flex items-center gap-3 hover:bg-[#FAFAFA] transition-colors"
+            >
+              <s.icon className="w-4 h-4 text-[#6B7280]" />
+              <span className="flex-1 text-left text-sm text-[#1C1C1C]">
+                {s.label}
+              </span>
+              <ChevronRight className="w-4 h-4 text-[#6B7280]" />
+            </button>
+          ))}
+        </div>
+
+        {/* Export / Delete */}
+        <button className="w-full h-11 bg-white border-2 border-[#234a67] text-[#234a67] rounded-xl font-semibold text-sm flex items-center justify-center gap-2 hover:bg-[#e8f4f8] transition-colors">
+          <Download className="w-4 h-4" />
+          Export all my data
+        </button>
+        <button className="w-full h-11 bg-white border border-[#E5E7EB] text-[#DC2626] rounded-xl font-semibold text-sm flex items-center justify-center gap-2 hover:bg-red-50 transition-colors">
+          <Trash2 className="w-4 h-4" />
+          Delete account
         </button>
 
         {/* Footer */}
-        <div className="text-center pt-6 pb-8">
-          <div className="flex justify-center mb-4">
-            <img
-              src={lokahiLogo}
-              alt="Lōkahi Therapeutics"
-              className="h-12 w-auto opacity-80"
-            />
+        <div className="flex flex-col items-center pt-4 pb-6">
+          <img
+            src={lokahiLogo}
+            alt="Lōkahi Therapeutics"
+            className="w-24 h-auto opacity-70 mb-2"
+          />
+          <div className="text-[10px] text-[#6B7280] tabular-nums">
+            Trial Weave v1.0.0
           </div>
-          <div className="text-xs text-[#6B7280]">ai2 Trial Weave v1.0.0</div>
-          <div className="text-xs text-[#6B7280] mt-1">© 2026 Lōkahi Therapeutics, Inc.</div>
-          <div className="text-xs text-[#6B7280] mt-2 italic">Opportunity. Empathy. Balance.</div>
+          <div className="text-[10px] text-[#6B7280] mt-0.5">
+            © 2026 Lōkahi Therapeutics, Inc.
+          </div>
         </div>
       </div>
     </div>

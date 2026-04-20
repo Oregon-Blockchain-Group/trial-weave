@@ -1,197 +1,213 @@
 import { useNavigate } from 'react-router';
-import { Bell, User, Syringe, AlertCircle, DollarSign, RefreshCw, TrendingUp } from 'lucide-react';
-import lokahiLogo from '../../imports/Lokahi-Therapeutics_logo.jpg';
+import {
+  Bell,
+  User,
+  Syringe,
+  AlertCircle,
+  DollarSign,
+  RefreshCw,
+  ArrowUpRight,
+  Users,
+} from 'lucide-react';
+import { SectionHeader } from '../components/SectionHeader';
+import { MOCK_USER } from '../../data/mockUser';
+import lokahiLogo from '../../imports/Lokahi-Therapeutics_logo-Picsart-BackgroundRemover.jpg';
 
 export function Dashboard() {
   const navigate = useNavigate();
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full overflow-y-auto bg-[#FAFAFA]">
       {/* Header */}
-      <div className="bg-white p-6 border-b border-[#E5E7EB] sticky top-0 z-10">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <img
-              src={lokahiLogo}
-              alt="Lōkahi Therapeutics"
-              className="h-8 w-auto mb-2"
-            />
-            <h1 className="text-xl font-bold text-[#1C1C1C]">Good morning, Alex</h1>
-          </div>
-          <div className="flex items-center gap-3">
+      <div className="bg-white px-4 pt-4 pb-4 border-b border-[#E5E7EB] sticky top-0 z-10">
+        <div className="flex items-center justify-between mb-3 pb-3 border-b border-[#E5E7EB]">
+          <img
+            src={lokahiLogo}
+            alt="Lōkahi Therapeutics"
+            className="h-8 w-auto"
+          />
+          <div className="flex items-center gap-2">
             <button
               onClick={() => navigate('/notifications')}
-              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#e8f4f8] transition-colors relative"
+              className="w-9 h-9 flex items-center justify-center rounded-full border border-[#E5E7EB] hover:bg-[#FAFAFA] transition-colors relative"
             >
-              <Bell className="w-5 h-5 text-[#1C1C1C]" />
-              <div className="absolute top-2 right-2 w-2 h-2 bg-[#DC2626] rounded-full" />
+              <Bell className="w-4 h-4 text-[#1C1C1C]" />
+              <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-[#DC2626] rounded-full" />
             </button>
             <button
               onClick={() => navigate('/profile')}
-              className="w-10 h-10 bg-[#234a67] rounded-full flex items-center justify-center"
+              className="w-9 h-9 bg-[#234a67] rounded-full flex items-center justify-center"
             >
-              <User className="w-5 h-5 text-white" />
+              <User className="w-4 h-4 text-white" />
             </button>
           </div>
         </div>
+        <div>
+          <div className="text-[10px] font-semibold tracking-[0.12em] text-[#6B7280] uppercase mb-0.5">
+            Trial Weave · GLP-1
+          </div>
+          <h1 className="text-xl font-bold text-[#1C1C1C]">
+            Good morning, {MOCK_USER.firstName}
+          </h1>
+        </div>
       </div>
 
-      <div className="p-6 space-y-6">
-        {/* Current Medication Card */}
-        <div className="bg-white rounded-2xl p-6 border border-[#E5E7EB] shadow-sm">
-          <div className="flex items-start justify-between mb-4">
+      <div className="p-4 space-y-4">
+        {/* Current Medication */}
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+          <div className="text-[10px] font-semibold tracking-[0.12em] text-[#6B7280] uppercase mb-2">
+            Current regimen
+          </div>
+          <div className="flex items-start justify-between mb-3">
             <div>
-              <div className="text-sm text-[#6B7280] mb-1">Current Medication</div>
-              <h2 className="text-2xl font-bold text-[#1C1C1C]">Ozempic</h2>
-              <div className="text-sm text-[#6B7280] mt-1">semaglutide • 0.5mg</div>
+              <div className="text-xl font-bold text-[#1C1C1C]">
+                {MOCK_USER.currentRegimen.brand} {MOCK_USER.currentRegimen.dose}
+              </div>
+              <div className="text-xs text-[#6B7280]">
+                {MOCK_USER.currentRegimen.generic} · {MOCK_USER.currentRegimen.frequency}
+              </div>
             </div>
-            <div className="w-12 h-12 bg-[#e8f4f8] rounded-full flex items-center justify-center">
-              <Syringe className="w-6 h-6 text-[#234a67]" />
+            <div className="w-10 h-10 bg-[#e8f4f8] rounded-full flex items-center justify-center shrink-0">
+              <Syringe className="w-5 h-5 text-[#234a67]" />
             </div>
           </div>
-          <div className="flex items-center gap-4 text-sm">
-            <div>
-              <span className="text-[#6B7280]">Days on medication:</span>
-              <span className="font-semibold text-[#1C1C1C] ml-2">42</span>
-            </div>
-            <div className="h-4 w-px bg-[#E5E7EB]" />
-            <div>
-              <span className="text-[#6B7280]">Next dose:</span>
-              <span className="font-semibold text-[#234a67] ml-2">Tomorrow 8:00 AM</span>
-            </div>
+          <div className="grid grid-cols-3 gap-3 pt-3 border-t border-[#E5E7EB]">
+            <MetaStat label="Days" value={String(MOCK_USER.currentRegimen.daysActive)} />
+            <MetaStat label="Weight Δ" value={`${MOCK_USER.weightDeltaLb} lb`} />
+            <MetaStat label="Next dose" value={MOCK_USER.currentRegimen.nextDoseLabel} highlight />
           </div>
         </div>
 
-        {/* Adherence Ring */}
-        <div className="bg-white rounded-2xl p-6 border border-[#E5E7EB] shadow-sm">
-          <div className="flex items-center gap-6">
-            <button
-              onClick={() => navigate('/adherence')}
-              className="relative"
-            >
-              <svg className="w-32 h-32 -rotate-90">
+        {/* Cohort CTA */}
+        <button
+          onClick={() => navigate('/comparison')}
+          className="w-full bg-[#234a67] text-white rounded-xl p-4 text-left hover:bg-[#1c425b] transition-colors"
+        >
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center shrink-0">
+              <Users className="w-4 h-4 text-white" />
+            </div>
+            <div className="flex-1">
+              <div className="text-[10px] font-semibold tracking-[0.12em] uppercase opacity-80 mb-0.5">
+                Cohort comparison
+              </div>
+              <div className="font-semibold text-sm mb-1">
+                You're in the top 28% of people like you
+              </div>
+              <div className="text-xs opacity-90">
+                See how your results compare · n=1,247
+              </div>
+            </div>
+            <ArrowUpRight className="w-4 h-4 shrink-0 opacity-80" />
+          </div>
+        </button>
+
+        {/* Adherence */}
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+          <SectionHeader
+            eyebrow="Adherence · 30 days"
+            title="Weekly doses on schedule"
+            meta="92%"
+          />
+          <button
+            onClick={() => navigate('/adherence')}
+            className="flex items-center gap-4 w-full text-left"
+          >
+            <div className="relative w-20 h-20 shrink-0">
+              <svg className="w-20 h-20 -rotate-90">
                 <circle
-                  cx="64"
-                  cy="64"
-                  r="56"
+                  cx="40"
+                  cy="40"
+                  r="34"
                   stroke="#E5E7EB"
-                  strokeWidth="12"
+                  strokeWidth="6"
                   fill="none"
                 />
                 <circle
-                  cx="64"
-                  cy="64"
-                  r="56"
-                  stroke="#16A34A"
-                  strokeWidth="12"
+                  cx="40"
+                  cy="40"
+                  r="34"
+                  stroke="#234a67"
+                  strokeWidth="6"
                   fill="none"
-                  strokeDasharray={`${2 * Math.PI * 56 * 0.92} ${2 * Math.PI * 56}`}
+                  strokeDasharray={`${2 * Math.PI * 34 * 0.92} ${2 * Math.PI * 34}`}
                   strokeLinecap="round"
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center flex-col">
-                <div className="text-3xl font-bold text-[#1C1C1C]">92%</div>
-                <div className="text-xs text-[#6B7280]">adherence</div>
-              </div>
-            </button>
-            <div className="flex-1">
-              <h3 className="font-semibold text-[#1C1C1C] mb-2">Weekly Adherence</h3>
-              <div className="text-sm text-[#6B7280] mb-1">11 of 12 doses taken</div>
-              <div className="flex items-center gap-1 text-xs text-[#16A34A]">
-                <TrendingUp className="w-4 h-4" />
-                <span>On track</span>
+                <div className="text-xl font-bold text-[#1C1C1C] tabular-nums">
+                  92%
+                </div>
               </div>
             </div>
-          </div>
+            <div className="flex-1">
+              <div className="text-sm text-[#1C1C1C] mb-1">
+                11 of 12 doses taken
+              </div>
+              <div className="text-[11px] text-[#6B7280]">
+                Cohort median: <span className="tabular-nums">84%</span> · you're{' '}
+                <span className="text-[#15803D] font-semibold">+8 pts</span>
+              </div>
+            </div>
+          </button>
         </div>
 
         {/* Quick Actions */}
-        <div>
-          <h3 className="font-semibold text-[#1C1C1C] mb-3">Quick Actions</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <button
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+          <SectionHeader eyebrow="Log activity" title="Quick actions" />
+          <div className="grid grid-cols-2 gap-2">
+            <QuickAction
               onClick={() => navigate('/log-dose')}
-              className="h-24 bg-[#234a67] rounded-xl flex flex-col items-center justify-center text-white hover:bg-[#1c425b] transition-colors"
-            >
-              <Syringe className="w-6 h-6 mb-2" />
-              <span className="font-semibold">Log Dose</span>
-            </button>
-            <button
+              icon={Syringe}
+              label="Log dose"
+              primary
+            />
+            <QuickAction
               onClick={() => navigate('/log-side-effect')}
-              className="h-24 bg-white border-2 border-[#234a67] rounded-xl flex flex-col items-center justify-center text-[#234a67] hover:bg-[#e8f4f8] transition-colors"
-            >
-              <AlertCircle className="w-6 h-6 mb-2" />
-              <span className="font-semibold">Log Side Effect</span>
-            </button>
-            <button
+              icon={AlertCircle}
+              label="Side effect"
+            />
+            <QuickAction
               onClick={() => navigate('/log-cost')}
-              className="h-24 bg-white border-2 border-[#234a67] rounded-xl flex flex-col items-center justify-center text-[#234a67] hover:bg-[#e8f4f8] transition-colors"
-            >
-              <DollarSign className="w-6 h-6 mb-2" />
-              <span className="font-semibold">Log Cost</span>
-            </button>
-            <button
+              icon={DollarSign}
+              label="Cost"
+            />
+            <QuickAction
               onClick={() => navigate('/switch-medication')}
-              className="h-24 bg-white border-2 border-[#234a67] rounded-xl flex flex-col items-center justify-center text-[#234a67] hover:bg-[#e8f4f8] transition-colors"
-            >
-              <RefreshCw className="w-6 h-6 mb-2" />
-              <span className="font-semibold">Switch Med</span>
-            </button>
+              icon={RefreshCw}
+              label="Switch med"
+            />
           </div>
         </div>
 
-        {/* Weekly Snapshot */}
-        <div className="bg-white rounded-2xl p-6 border border-[#E5E7EB] shadow-sm">
-          <h3 className="font-semibold text-[#1C1C1C] mb-4">This Week</h3>
-          <div className="flex items-end justify-between h-32 gap-2">
+        {/* Baseline shifts */}
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+          <SectionHeader
+            eyebrow="Baseline → now"
+            title="Shifts since week 1"
+          />
+          <div className="grid grid-cols-3 gap-2">
             {[
-              { day: 'Mon', doses: 1, side: 0, height: 60 },
-              { day: 'Tue', doses: 0, side: 1, height: 40 },
-              { day: 'Wed', doses: 1, side: 0, height: 60 },
-              { day: 'Thu', doses: 1, side: 1, height: 80 },
-              { day: 'Fri', doses: 1, side: 0, height: 60 },
-              { day: 'Sat', doses: 0, side: 0, height: 0 },
-              { day: 'Sun', doses: 1, side: 0, height: 60 },
-            ].map((day) => (
-              <div key={day.day} className="flex-1 flex flex-col items-center gap-2">
-                <div className="w-full bg-[#e8f4f8] rounded-t" style={{ height: `${day.height}%` }}>
-                  {day.side > 0 && (
-                    <div className="w-full bg-[#F59E0B] h-2 rounded-t" />
-                  )}
+              { factor: 'Energy', from: 2, to: 4 },
+              { factor: 'Mood', from: 3, to: 4 },
+              { factor: 'Sleep', from: 3, to: 4 },
+              { factor: 'Appetite', from: 5, to: 3 },
+              { factor: 'Activity', from: 2, to: 3 },
+              { factor: 'Digestion', from: 4, to: 3 },
+            ].map((d) => (
+              <div
+                key={d.factor}
+                className="p-2 border border-[#E5E7EB] rounded-lg"
+              >
+                <div className="text-[10px] text-[#6B7280] uppercase tracking-wide mb-0.5">
+                  {d.factor}
                 </div>
-                <span className="text-xs text-[#6B7280]">{day.day}</span>
-              </div>
-            ))}
-          </div>
-          <div className="flex items-center gap-4 mt-4 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-[#e8f4f8] rounded" />
-              <span className="text-[#6B7280]">Doses</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-[#F59E0B] rounded" />
-              <span className="text-[#6B7280]">Side effects</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="bg-white rounded-2xl p-6 border border-[#E5E7EB] shadow-sm">
-          <h3 className="font-semibold text-[#1C1C1C] mb-4">Recent Activity</h3>
-          <div className="space-y-4">
-            {[
-              { type: 'dose', text: 'Dose logged — Ozempic 0.5mg', time: 'Today 8:00 AM', icon: Syringe, color: '#234a67' },
-              { type: 'side', text: 'Side effect — Mild nausea', time: 'Yesterday', icon: AlertCircle, color: '#F59E0B' },
-              { type: 'dose', text: 'Dose logged — Ozempic 0.5mg', time: '2 days ago', icon: Syringe, color: '#234a67' },
-              { type: 'cost', text: 'Cost logged — $25.00', time: '3 days ago', icon: DollarSign, color: '#6B7280' },
-            ].map((activity, i) => (
-              <div key={i} className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: `${activity.color}15` }}>
-                  <activity.icon className="w-5 h-5" style={{ color: activity.color }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-[#1C1C1C]">{activity.text}</div>
-                  <div className="text-xs text-[#6B7280] mt-1">{activity.time}</div>
+                <div className="flex items-baseline gap-1 tabular-nums">
+                  <span className="text-xs text-[#6B7280]">{d.from}</span>
+                  <span className="text-[#6B7280] text-xs">→</span>
+                  <span className="text-sm font-bold text-[#1C1C1C]">
+                    {d.to}
+                  </span>
                 </div>
               </div>
             ))}
@@ -199,5 +215,56 @@ export function Dashboard() {
         </div>
       </div>
     </div>
+  );
+}
+
+function MetaStat({
+  label,
+  value,
+  highlight,
+}: {
+  label: string;
+  value: string;
+  highlight?: boolean;
+}) {
+  return (
+    <div>
+      <div className="text-[10px] text-[#6B7280] uppercase tracking-wide">
+        {label}
+      </div>
+      <div
+        className={`text-sm font-semibold tabular-nums ${
+          highlight ? 'text-[#234a67]' : 'text-[#1C1C1C]'
+        }`}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function QuickAction({
+  onClick,
+  icon: Icon,
+  label,
+  primary,
+}: {
+  onClick: () => void;
+  icon: typeof Syringe;
+  label: string;
+  primary?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`h-16 rounded-xl flex items-center gap-2 px-3 transition-colors ${
+        primary
+          ? 'bg-[#234a67] text-white hover:bg-[#1c425b]'
+          : 'bg-white border border-[#E5E7EB] text-[#1C1C1C] hover:border-[#234a67]'
+      }`}
+    >
+      <Icon className="w-4 h-4 shrink-0" />
+      <span className="text-sm font-semibold">{label}</span>
+    </button>
   );
 }

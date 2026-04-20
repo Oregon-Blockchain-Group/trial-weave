@@ -1,0 +1,1240 @@
+
+
+
+
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Trial Weave — Data Schema</title>
+<style>
+  :root {
+    --ink: #1C1C1C;
+    --muted: #6B7280;
+    --border: #E5E7EB;
+    --bg: #FAFAFA;
+    --teal: #234a67;
+    --teal-dim: #1c425b;
+    --accent: #e8f4f8;
+    --soft: #F3F4F6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 24px 96px; }
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  header h1 { font-size: 28px; margin: 6px 0 4px; font-weight: 700; }
+  .sub {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 24px;
+    max-width: 820px;
+    line-height: 1.55;
+  }
+  .doc-nav {
+    display: inline-flex;
+    gap: 8px;
+    padding: 6px;
+    border: 1px solid var(--border);
+    background: white;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  .doc-nav a {
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--muted);
+  }
+  .doc-nav a.active { background: var(--teal); color: white; }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 18px;
+    padding: 12px 16px;
+    border: 1px solid var(--border); border-radius: 12px;
+    background: white; margin-bottom: 20px; font-size: 12px;
+  }
+  .legend-item { display: inline-flex; align-items: center; gap: 8px; }
+  .legend-swatch { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--border); }
+  .legend-line { width: 28px; height: 0; border-top: 2px solid var(--teal); }
+
+  .diagram {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    overflow-x: auto;
+    margin-bottom: 36px;
+  }
+  svg { display: block; width: 100%; height: auto; min-width: 900px; }
+
+  /* SVG table styling */
+  .tbl-bg { fill: white; stroke: var(--border); stroke-width: 1.5; }
+  .tbl-header { fill: var(--teal); }
+  .tbl-title { font-size: 13px; font-weight: 700; fill: white; font-family: ui-monospace, monospace; letter-spacing: 0.04em; }
+  .tbl-field { font-size: 12px; fill: var(--ink); font-family: ui-monospace, monospace; }
+  .tbl-field-pk { fill: var(--teal); font-weight: 700; }
+  .tbl-field-fk { fill: #B45309; font-weight: 600; }
+  .tbl-type { font-size: 11px; fill: var(--muted); font-family: ui-monospace, monospace; }
+  .tbl-note { font-size: 10px; fill: var(--muted); font-family: ui-sans-serif, sans-serif; font-style: italic; }
+  .group-label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; fill: var(--muted); font-weight: 700; font-family: ui-sans-serif, sans-serif; }
+
+  .edge-fk { stroke: #B45309; stroke-width: 1.5; fill: none; stroke-dasharray: 0; }
+  .edge-label { font-size: 10px; fill: #B45309; font-family: ui-monospace, monospace; font-weight: 600; }
+
+  .diagram-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 4px 8px 16px;
+  }
+  .diagram-head h2 { font-size: 18px; margin: 4px 0 0; font-weight: 700; }
+  .diagram-head .meta { font-size: 11px; color: var(--muted); }
+
+  /* Detail cards */
+  .details { margin-top: 8px; }
+  .details h2 { font-size: 22px; margin: 6px 0 4px; font-weight: 700; }
+  .details-intro {
+    color: var(--muted); font-size: 14px;
+    margin-bottom: 20px; max-width: 820px; line-height: 1.55;
+  }
+  .details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+  }
+  .card.highlight { border-color: var(--teal); border-width: 2px; }
+  .card .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .card h3 {
+    font-family: ui-monospace, monospace;
+    font-size: 15px;
+    margin: 0 0 10px;
+    font-weight: 700;
+    color: var(--teal);
+    letter-spacing: 0.02em;
+  }
+  .card .purpose {
+    font-size: 13px; color: var(--ink);
+    margin-bottom: 14px; line-height: 1.55;
+  }
+  .card h4 {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 14px 0 6px;
+    font-weight: 700;
+  }
+  .field-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+  }
+  .field-table td {
+    padding: 4px 6px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .field-table tr:last-child td { border-bottom: 0; }
+  .field-table .col-name { color: var(--ink); font-weight: 600; }
+  .field-table .col-name.pk { color: var(--teal); }
+  .field-table .col-name.fk { color: #B45309; }
+  .field-table .col-type { color: var(--muted); font-size: 11px; }
+  .field-table .col-note { color: var(--muted); font-family: ui-sans-serif, sans-serif; font-size: 11px; }
+
+  .why {
+    font-size: 12px;
+    background: var(--accent);
+    border: 1px solid rgba(35,74,103,0.15);
+    border-radius: 8px;
+    padding: 10px 12px;
+    line-height: 1.55;
+  }
+  .why strong { color: var(--teal); }
+
+  .used-by { font-size: 11px; line-height: 1.7; color: var(--ink); }
+  .pill {
+    display: inline-block; padding: 2px 8px;
+    background: var(--soft); border: 1px solid var(--border);
+    color: var(--ink); border-radius: 999px;
+    font-size: 10px; font-weight: 600;
+    font-family: ui-monospace, monospace;
+    margin-right: 4px; margin-bottom: 3px;
+  }
+  .pill.teal { background: var(--accent); border-color: rgba(35,74,103,0.2); color: var(--teal); }
+
+  .cohort-example {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    margin-top: 28px;
+  }
+  .cohort-example pre {
+    background: var(--soft);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-x: auto;
+    margin: 12px 0;
+  }
+  .cohort-example pre .kw { color: var(--teal); font-weight: 700; }
+  .cohort-example pre .cmt { color: var(--muted); font-style: italic; }
+
+  /* Data dictionary */
+  .dict-section { margin-top: 48px; }
+  .dict-legend {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    padding: 12px 16px;
+    border: 1px solid var(--border); border-radius: 12px;
+    background: white; margin-bottom: 24px;
+  }
+  .dict-chip {
+    display: inline-block; padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 11px; font-weight: 600;
+    font-family: ui-sans-serif, sans-serif;
+    white-space: nowrap;
+  }
+  .storage-rls      { background: #e8f4f8; color: #234a67; border: 1px solid rgba(35,74,103,0.2); }
+  .storage-public   { background: #F3F4F6; color: #374151; border: 1px solid var(--border); }
+  .storage-preveil  { background: #F5F3FF; color: #6D28D9; border: 1px solid #DDD6FE; }
+  .sens-phi         { background: #FEF2F2; color: #B91C1C; border: 1px solid #FCA5A5; }
+  .sens-pii         { background: #FEF3C7; color: #92400E; border: 1px solid #FBBF24; }
+  .sens-low         { background: #F0FDF4; color: #15803D; border: 1px solid #86EFAC; }
+
+  .dict-block { margin-bottom: 28px; }
+  .dict-block h3 {
+    font-family: ui-monospace, monospace;
+    font-size: 14px;
+    color: var(--teal);
+    margin: 0 0 8px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .dict-block .dict-sub {
+    font-size: 11px; color: var(--muted);
+    font-family: ui-sans-serif, sans-serif;
+    margin: -4px 0 10px;
+    font-style: italic;
+  }
+  .dict-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    font-size: 12px;
+  }
+  .dict-table thead th {
+    background: #FAFAFA;
+    text-align: left;
+    padding: 8px 10px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    border-bottom: 1px solid var(--border);
+  }
+  .dict-table tbody td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .dict-table tbody tr:last-child td { border-bottom: 0; }
+  .dict-var { font-family: ui-monospace, monospace; color: var(--ink); font-weight: 600; white-space: nowrap; }
+  .dict-type { font-family: ui-monospace, monospace; color: var(--muted); font-size: 11px; white-space: nowrap; }
+  .dict-use { color: var(--ink); line-height: 1.45; }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 16px 12px 64px; }
+    header h1 { font-size: 22px; }
+    .dict-table { font-size: 11px; }
+    .dict-table thead th, .dict-table tbody td { padding: 6px 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Trial Weave · Wireframe</div>
+    <h1>Data Schema</h1>
+    <p class="sub">A relational model for the Trial Weave wireframe. Each table is justified by a specific user-facing job: cohort matching, outcome comparison, adherence analytics, or personal history. Nothing is captured "just in case."</p>
+    <nav class="doc-nav">
+      <a href="flow.html">User flow</a>
+      <a class="active" href="data.html">Data schema</a>
+    </nav>
+  </header>
+
+  <div class="legend">
+    <span class="legend-item"><span class="legend-swatch" style="background:#234a67;"></span>Table header</span>
+    <span class="legend-item"><span style="color:#234a67; font-weight:700; font-family:ui-monospace,monospace;">PK</span>&nbsp;primary key</span>
+    <span class="legend-item"><span style="color:#B45309; font-weight:700; font-family:ui-monospace,monospace;">FK</span>&nbsp;foreign key</span>
+    <span class="legend-item"><span class="legend-line" style="border-color:#B45309;"></span>FK relationship</span>
+  </div>
+
+  <!-- ===== ERD DIAGRAM ===== -->
+  <div class="diagram">
+    <div class="diagram-head">
+      <div>
+        <div class="eyebrow">Full schema</div>
+        <h2>Tables &amp; relationships</h2>
+      </div>
+      <span class="meta">orthogonal FK connectors · layered top-to-bottom</span>
+    </div>
+    <svg viewBox="0 0 1280 1800" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Trial Weave data schema ERD">
+      <defs>
+        <marker id="fk-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#B45309"/>
+        </marker>
+      </defs>
+
+      <!-- ============ LAYER 1: IDENTITY ============ -->
+      <text x="40" y="36" class="group-label">Layer 1 · Identity &amp; cohort</text>
+
+      <!-- demographic_profile -->
+      <g>
+        <rect x="40" y="60" width="340" height="196" rx="8" class="tbl-bg"/>
+        <rect x="40" y="60" width="340" height="34" rx="8" class="tbl-header"/>
+        <rect x="40" y="80" width="340" height="14" class="tbl-header"/>
+        <text x="58" y="82" class="tbl-title">demographic_profile</text>
+        <text x="58" y="116" class="tbl-field tbl-field-fk">user_id</text>
+        <text x="362" y="116" text-anchor="end" class="tbl-type">uuid PK/FK</text>
+        <text x="58" y="134" class="tbl-field">age</text>
+        <text x="362" y="134" text-anchor="end" class="tbl-type">int</text>
+        <text x="58" y="152" class="tbl-field">sex</text>
+        <text x="362" y="152" text-anchor="end" class="tbl-type">enum</text>
+        <text x="58" y="170" class="tbl-field">race_ethnicity</text>
+        <text x="362" y="170" text-anchor="end" class="tbl-type">text[]</text>
+        <text x="58" y="188" class="tbl-field">location_city</text>
+        <text x="362" y="188" text-anchor="end" class="tbl-type">text</text>
+        <text x="58" y="206" class="tbl-field">location_state</text>
+        <text x="362" y="206" text-anchor="end" class="tbl-type">char(2)</text>
+        <text x="58" y="224" class="tbl-field">height_inches</text>
+        <text x="362" y="224" text-anchor="end" class="tbl-type">int</text>
+        <text x="58" y="242" class="tbl-field">starting_weight_lb</text>
+        <text x="362" y="242" text-anchor="end" class="tbl-type">int</text>
+      </g>
+
+      <!-- users (center) -->
+      <g>
+        <rect x="470" y="104" width="260" height="108" rx="8" class="tbl-bg"/>
+        <rect x="470" y="104" width="260" height="34" rx="8" class="tbl-header"/>
+        <rect x="470" y="124" width="260" height="14" class="tbl-header"/>
+        <text x="488" y="126" class="tbl-title">users</text>
+        <text x="488" y="160" class="tbl-field tbl-field-pk">user_id</text>
+        <text x="712" y="160" text-anchor="end" class="tbl-type">uuid PK</text>
+        <text x="488" y="178" class="tbl-field">created_at</text>
+        <text x="712" y="178" text-anchor="end" class="tbl-type">timestamp</text>
+        <text x="488" y="196" class="tbl-field">display_name</text>
+        <text x="712" y="196" text-anchor="end" class="tbl-type">text</text>
+      </g>
+
+      <!-- cohort_definitions -->
+      <g>
+        <rect x="820" y="60" width="360" height="160" rx="8" class="tbl-bg"/>
+        <rect x="820" y="60" width="360" height="34" rx="8" class="tbl-header"/>
+        <rect x="820" y="80" width="360" height="14" class="tbl-header"/>
+        <text x="838" y="82" class="tbl-title">cohort_definitions</text>
+        <text x="838" y="116" class="tbl-field tbl-field-fk">user_id</text>
+        <text x="1162" y="116" text-anchor="end" class="tbl-type">uuid PK/FK</text>
+        <text x="838" y="134" class="tbl-field">age_range</text>
+        <text x="1162" y="134" text-anchor="end" class="tbl-type">int4range</text>
+        <text x="838" y="152" class="tbl-field">sex_filter</text>
+        <text x="1162" y="152" text-anchor="end" class="tbl-type">enum[]</text>
+        <text x="838" y="170" class="tbl-field">bmi_range</text>
+        <text x="1162" y="170" text-anchor="end" class="tbl-type">numrange</text>
+        <text x="838" y="188" class="tbl-field">category_filter</text>
+        <text x="1162" y="188" text-anchor="end" class="tbl-type">int[]</text>
+        <text x="838" y="206" class="tbl-field">weeks_on_treatment</text>
+        <text x="1162" y="206" text-anchor="end" class="tbl-type">int</text>
+      </g>
+
+      <!-- FK: users ↔ demographic_profile (1:1) -->
+      <path d="M 470 160 L 380 160" class="edge-fk" marker-end="url(#fk-arrow)"/>
+      <text x="425" y="152" text-anchor="middle" class="edge-label">1:1</text>
+
+      <!-- FK: users ↔ cohort_definitions (1:1) -->
+      <path d="M 730 160 L 820 160" class="edge-fk" marker-end="url(#fk-arrow)"/>
+      <text x="775" y="152" text-anchor="middle" class="edge-label">1:1</text>
+
+      <!-- ============ LAYER 2: CATALOGS ============ -->
+      <text x="40" y="316" class="group-label">Layer 2 · Reference catalogs</text>
+
+      <!-- medication_categories -->
+      <g>
+        <rect x="40" y="340" width="340" height="124" rx="8" class="tbl-bg"/>
+        <rect x="40" y="340" width="340" height="34" rx="8" class="tbl-header"/>
+        <rect x="40" y="360" width="340" height="14" class="tbl-header"/>
+        <text x="58" y="362" class="tbl-title">medication_categories</text>
+        <text x="58" y="396" class="tbl-field tbl-field-pk">id</text>
+        <text x="362" y="396" text-anchor="end" class="tbl-type">int PK</text>
+        <text x="58" y="414" class="tbl-field">name</text>
+        <text x="362" y="414" text-anchor="end" class="tbl-type">text</text>
+        <text x="58" y="432" class="tbl-field">slug</text>
+        <text x="362" y="432" text-anchor="end" class="tbl-type">text</text>
+        <text x="58" y="450" class="tbl-field">is_active</text>
+        <text x="362" y="450" text-anchor="end" class="tbl-type">bool</text>
+      </g>
+
+      <!-- drugs -->
+      <g>
+        <rect x="470" y="340" width="360" height="142" rx="8" class="tbl-bg"/>
+        <rect x="470" y="340" width="360" height="34" rx="8" class="tbl-header"/>
+        <rect x="470" y="360" width="360" height="14" class="tbl-header"/>
+        <text x="488" y="362" class="tbl-title">drugs</text>
+        <text x="488" y="396" class="tbl-field tbl-field-pk">id</text>
+        <text x="812" y="396" text-anchor="end" class="tbl-type">int PK</text>
+        <text x="488" y="414" class="tbl-field tbl-field-fk">category_id</text>
+        <text x="812" y="414" text-anchor="end" class="tbl-type">int FK</text>
+        <text x="488" y="432" class="tbl-field">brand</text>
+        <text x="812" y="432" text-anchor="end" class="tbl-type">text</text>
+        <text x="488" y="450" class="tbl-field">generic</text>
+        <text x="812" y="450" text-anchor="end" class="tbl-type">text</text>
+        <text x="488" y="468" class="tbl-field">valid_doses</text>
+        <text x="812" y="468" text-anchor="end" class="tbl-type">text[]</text>
+      </g>
+
+      <!-- FK: drugs.category_id → medication_categories.id (orthogonal) -->
+      <path d="M 470 414 L 420 414 L 420 396 L 380 396" class="edge-fk" marker-end="url(#fk-arrow)"/>
+      <text x="400" y="408" text-anchor="middle" class="edge-label">category_id</text>
+
+      <!-- ============ LAYER 3: REGIMENS ============ -->
+      <text x="40" y="540" class="group-label">Layer 3 · User regimens</text>
+
+      <!-- user_regimens (centered) -->
+      <g>
+        <rect x="470" y="564" width="360" height="214" rx="8" class="tbl-bg"/>
+        <rect x="470" y="564" width="360" height="34" rx="8" class="tbl-header"/>
+        <rect x="470" y="584" width="360" height="14" class="tbl-header"/>
+        <text x="488" y="586" class="tbl-title">user_regimens</text>
+        <text x="488" y="620" class="tbl-field tbl-field-pk">id</text>
+        <text x="812" y="620" text-anchor="end" class="tbl-type">uuid PK</text>
+        <text x="488" y="638" class="tbl-field tbl-field-fk">user_id</text>
+        <text x="812" y="638" text-anchor="end" class="tbl-type">uuid FK</text>
+        <text x="488" y="656" class="tbl-field tbl-field-fk">drug_id</text>
+        <text x="812" y="656" text-anchor="end" class="tbl-type">int FK</text>
+        <text x="488" y="674" class="tbl-field">dose</text>
+        <text x="812" y="674" text-anchor="end" class="tbl-type">text</text>
+        <text x="488" y="692" class="tbl-field">frequency</text>
+        <text x="812" y="692" text-anchor="end" class="tbl-type">enum</text>
+        <text x="488" y="710" class="tbl-field">started_at</text>
+        <text x="812" y="710" text-anchor="end" class="tbl-type">date</text>
+        <text x="488" y="728" class="tbl-field">ended_at</text>
+        <text x="812" y="728" text-anchor="end" class="tbl-type">date?</text>
+        <text x="488" y="746" class="tbl-field">switch_reasons</text>
+        <text x="812" y="746" text-anchor="end" class="tbl-type">text[]?</text>
+        <text x="488" y="764" class="tbl-field">decision_maker</text>
+        <text x="812" y="764" text-anchor="end" class="tbl-type">enum?</text>
+      </g>
+
+      <!-- FK: drugs → user_regimens (vertical, straight down from drugs center) -->
+      <path d="M 650 482 L 650 564" class="edge-fk" marker-end="url(#fk-arrow)"/>
+      <text x="660" y="528" class="edge-label">drug_id</text>
+
+      <!-- ============ LAYER 4: REGIMEN EVENTS ============ -->
+      <text x="40" y="838" class="group-label">Layer 4 · Regimen events — FK regimen_id → user_regimens.id</text>
+
+      <!-- dose_logs -->
+      <g>
+        <rect x="40" y="866" width="340" height="178" rx="8" class="tbl-bg"/>
+        <rect x="40" y="866" width="340" height="34" rx="8" class="tbl-header"/>
+        <rect x="40" y="886" width="340" height="14" class="tbl-header"/>
+        <text x="58" y="888" class="tbl-title">dose_logs</text>
+        <text x="58" y="922" class="tbl-field tbl-field-pk">id</text>
+        <text x="362" y="922" text-anchor="end" class="tbl-type">uuid PK</text>
+        <text x="58" y="940" class="tbl-field tbl-field-fk">user_id</text>
+        <text x="362" y="940" text-anchor="end" class="tbl-type">uuid FK</text>
+        <text x="58" y="958" class="tbl-field tbl-field-fk">regimen_id</text>
+        <text x="362" y="958" text-anchor="end" class="tbl-type">uuid FK</text>
+        <text x="58" y="976" class="tbl-field">taken_at</text>
+        <text x="362" y="976" text-anchor="end" class="tbl-type">timestamp</text>
+        <text x="58" y="994" class="tbl-field">site</text>
+        <text x="362" y="994" text-anchor="end" class="tbl-type">enum</text>
+        <text x="58" y="1012" class="tbl-field">dose_override</text>
+        <text x="362" y="1012" text-anchor="end" class="tbl-type">text?</text>
+        <text x="58" y="1030" class="tbl-field">notes</text>
+        <text x="362" y="1030" text-anchor="end" class="tbl-type">text?</text>
+      </g>
+
+      <!-- side_effect_logs -->
+      <g>
+        <rect x="470" y="866" width="340" height="196" rx="8" class="tbl-bg"/>
+        <rect x="470" y="866" width="340" height="34" rx="8" class="tbl-header"/>
+        <rect x="470" y="886" width="340" height="14" class="tbl-header"/>
+        <text x="488" y="888" class="tbl-title">side_effect_logs</text>
+        <text x="488" y="922" class="tbl-field tbl-field-pk">id</text>
+        <text x="792" y="922" text-anchor="end" class="tbl-type">uuid PK</text>
+        <text x="488" y="940" class="tbl-field tbl-field-fk">user_id</text>
+        <text x="792" y="940" text-anchor="end" class="tbl-type">uuid FK</text>
+        <text x="488" y="958" class="tbl-field tbl-field-fk">regimen_id</text>
+        <text x="792" y="958" text-anchor="end" class="tbl-type">uuid FK</text>
+        <text x="488" y="976" class="tbl-field">category</text>
+        <text x="792" y="976" text-anchor="end" class="tbl-type">enum</text>
+        <text x="488" y="994" class="tbl-field">severity</text>
+        <text x="792" y="994" text-anchor="end" class="tbl-type">int 1-5</text>
+        <text x="488" y="1012" class="tbl-field">duration_bucket</text>
+        <text x="792" y="1012" text-anchor="end" class="tbl-type">enum</text>
+        <text x="488" y="1030" class="tbl-field">impact_bucket</text>
+        <text x="792" y="1030" text-anchor="end" class="tbl-type">enum</text>
+        <text x="488" y="1048" class="tbl-field">occurred_at</text>
+        <text x="792" y="1048" text-anchor="end" class="tbl-type">timestamp</text>
+      </g>
+
+      <!-- cost_logs -->
+      <g>
+        <rect x="900" y="866" width="340" height="214" rx="8" class="tbl-bg"/>
+        <rect x="900" y="866" width="340" height="34" rx="8" class="tbl-header"/>
+        <rect x="900" y="886" width="340" height="14" class="tbl-header"/>
+        <text x="918" y="888" class="tbl-title">cost_logs</text>
+        <text x="918" y="922" class="tbl-field tbl-field-pk">id</text>
+        <text x="1222" y="922" text-anchor="end" class="tbl-type">uuid PK</text>
+        <text x="918" y="940" class="tbl-field tbl-field-fk">user_id</text>
+        <text x="1222" y="940" text-anchor="end" class="tbl-type">uuid FK</text>
+        <text x="918" y="958" class="tbl-field tbl-field-fk">regimen_id</text>
+        <text x="1222" y="958" text-anchor="end" class="tbl-type">uuid FK</text>
+        <text x="918" y="976" class="tbl-field">amount_cents</text>
+        <text x="1222" y="976" text-anchor="end" class="tbl-type">int</text>
+        <text x="918" y="994" class="tbl-field">cost_type</text>
+        <text x="1222" y="994" text-anchor="end" class="tbl-type">enum</text>
+        <text x="918" y="1012" class="tbl-field">pharmacy</text>
+        <text x="1222" y="1012" text-anchor="end" class="tbl-type">text?</text>
+        <text x="918" y="1030" class="tbl-field">insurance_applied</text>
+        <text x="1222" y="1030" text-anchor="end" class="tbl-type">bool</text>
+        <text x="918" y="1048" class="tbl-field">supply_days</text>
+        <text x="1222" y="1048" text-anchor="end" class="tbl-type">int</text>
+        <text x="918" y="1066" class="tbl-field">fill_date</text>
+        <text x="1222" y="1066" text-anchor="end" class="tbl-type">date</text>
+      </g>
+
+      <!-- FK bus: all three event logs → user_regimens (merged vertical routing at y=820) -->
+      <!-- dose_logs → user_regimens (L-shape: up, right, up) -->
+      <path d="M 210 866 L 210 820 L 540 820 L 540 778" class="edge-fk" marker-end="url(#fk-arrow)"/>
+      <!-- side_effect_logs → user_regimens (straight vertical) -->
+      <path d="M 640 866 L 640 778" class="edge-fk" marker-end="url(#fk-arrow)"/>
+      <!-- cost_logs → user_regimens (L-shape: up, left, up) -->
+      <path d="M 1070 866 L 1070 820 L 760 820 L 760 778" class="edge-fk" marker-end="url(#fk-arrow)"/>
+      <!-- shared label -->
+      <text x="380" y="812" class="edge-label">regimen_id</text>
+      <text x="900" y="812" class="edge-label">regimen_id</text>
+
+      <!-- ============ LAYER 5: RATINGS ============ -->
+      <text x="40" y="1124" class="group-label">Layer 5 · Ratings (baseline + ongoing check-ins)</text>
+
+      <!-- baseline_ratings -->
+      <g>
+        <rect x="40" y="1152" width="340" height="142" rx="8" class="tbl-bg"/>
+        <rect x="40" y="1152" width="340" height="34" rx="8" class="tbl-header"/>
+        <rect x="40" y="1172" width="340" height="14" class="tbl-header"/>
+        <text x="58" y="1174" class="tbl-title">baseline_ratings</text>
+        <text x="58" y="1208" class="tbl-field tbl-field-pk">id</text>
+        <text x="362" y="1208" text-anchor="end" class="tbl-type">uuid PK</text>
+        <text x="58" y="1226" class="tbl-field tbl-field-fk">user_id</text>
+        <text x="362" y="1226" text-anchor="end" class="tbl-type">uuid FK</text>
+        <text x="58" y="1244" class="tbl-field">factor</text>
+        <text x="362" y="1244" text-anchor="end" class="tbl-type">enum</text>
+        <text x="58" y="1262" class="tbl-field">value</text>
+        <text x="362" y="1262" text-anchor="end" class="tbl-type">int 1-5</text>
+        <text x="58" y="1280" class="tbl-field">recorded_at</text>
+        <text x="362" y="1280" text-anchor="end" class="tbl-type">timestamp</text>
+      </g>
+
+      <!-- checkin_ratings -->
+      <g>
+        <rect x="470" y="1152" width="360" height="160" rx="8" class="tbl-bg"/>
+        <rect x="470" y="1152" width="360" height="34" rx="8" class="tbl-header"/>
+        <rect x="470" y="1172" width="360" height="14" class="tbl-header"/>
+        <text x="488" y="1174" class="tbl-title">checkin_ratings</text>
+        <text x="488" y="1208" class="tbl-field tbl-field-pk">id</text>
+        <text x="812" y="1208" text-anchor="end" class="tbl-type">uuid PK</text>
+        <text x="488" y="1226" class="tbl-field tbl-field-fk">user_id</text>
+        <text x="812" y="1226" text-anchor="end" class="tbl-type">uuid FK</text>
+        <text x="488" y="1244" class="tbl-field tbl-field-fk">dose_log_id</text>
+        <text x="812" y="1244" text-anchor="end" class="tbl-type">uuid FK?</text>
+        <text x="488" y="1262" class="tbl-field">factor</text>
+        <text x="812" y="1262" text-anchor="end" class="tbl-type">enum</text>
+        <text x="488" y="1280" class="tbl-field">value</text>
+        <text x="812" y="1280" text-anchor="end" class="tbl-type">int 1-5</text>
+        <text x="488" y="1298" class="tbl-field">recorded_at</text>
+        <text x="812" y="1298" text-anchor="end" class="tbl-type">timestamp</text>
+      </g>
+
+      <!-- FK: checkin_ratings.dose_log_id → dose_logs.id (L-shape up-left-up) -->
+      <path d="M 650 1152 L 650 1110 L 210 1110 L 210 1044" class="edge-fk" marker-end="url(#fk-arrow)"/>
+      <text x="430" y="1102" text-anchor="middle" class="edge-label">dose_log_id</text>
+
+      <!-- ============ LAYER 6: OUTPUT ============ -->
+      <text x="40" y="1374" class="group-label">Layer 6 · Output queue</text>
+
+      <!-- notifications -->
+      <g>
+        <rect x="40" y="1402" width="340" height="178" rx="8" class="tbl-bg"/>
+        <rect x="40" y="1402" width="340" height="34" rx="8" class="tbl-header"/>
+        <rect x="40" y="1422" width="340" height="14" class="tbl-header"/>
+        <text x="58" y="1424" class="tbl-title">notifications</text>
+        <text x="58" y="1458" class="tbl-field tbl-field-pk">id</text>
+        <text x="362" y="1458" text-anchor="end" class="tbl-type">uuid PK</text>
+        <text x="58" y="1476" class="tbl-field tbl-field-fk">user_id</text>
+        <text x="362" y="1476" text-anchor="end" class="tbl-type">uuid FK</text>
+        <text x="58" y="1494" class="tbl-field">type</text>
+        <text x="362" y="1494" text-anchor="end" class="tbl-type">enum</text>
+        <text x="58" y="1512" class="tbl-field">title</text>
+        <text x="362" y="1512" text-anchor="end" class="tbl-type">text</text>
+        <text x="58" y="1530" class="tbl-field">body</text>
+        <text x="362" y="1530" text-anchor="end" class="tbl-type">text</text>
+        <text x="58" y="1548" class="tbl-field">sent_at</text>
+        <text x="362" y="1548" text-anchor="end" class="tbl-type">timestamp</text>
+        <text x="58" y="1566" class="tbl-field">read_at</text>
+        <text x="362" y="1566" text-anchor="end" class="tbl-type">timestamp?</text>
+      </g>
+
+      <!-- ============ CONVENTION NOTE ============ -->
+      <text x="40" y="1650" class="group-label">Convention · user_id FK (not drawn)</text>
+      <rect x="40" y="1670" width="1200" height="100" rx="8" fill="#FEF3C7" stroke="#FBBF24" stroke-width="1"/>
+      <text x="58" y="1698" style="font-size:12px; fill:#92400E; font-family:ui-sans-serif,sans-serif; font-weight:600;">Every user-owned table below has an implicit  user_id uuid FK → users.user_id  (omitted from the diagram to reduce noise).</text>
+      <text x="58" y="1720" style="font-size:11px; fill:#92400E; font-family:ui-sans-serif,sans-serif;">Applies to: demographic_profile, cohort_definitions, user_regimens, baseline_ratings, checkin_ratings,</text>
+      <text x="58" y="1738" style="font-size:11px; fill:#92400E; font-family:ui-sans-serif,sans-serif;">dose_logs, side_effect_logs, cost_logs, notifications.</text>
+      <text x="58" y="1758" style="font-size:11px; fill:#92400E; font-family:ui-sans-serif,sans-serif; font-style:italic;">Deleting a user cascades through every row via ON DELETE CASCADE.</text>
+    </svg>
+  </div>
+
+  <!-- ===== PER-TABLE DETAIL CARDS ===== -->
+  <section class="details">
+    <div class="eyebrow">Per-table</div>
+    <h2>Why each table exists</h2>
+    <p class="details-intro">For each table: the fields, <em>why</em> we collect this data (mapped to the product's jobs — e.g., cohort matching, adherence calculation, cost comparison), and the screens it powers.</p>
+
+    <div class="details-grid">
+
+      <!-- users -->
+      <div class="card">
+        <div class="eyebrow">Identity</div>
+        <h3>users</h3>
+        <p class="purpose">The one identity row per person. Everything else hangs off of <code>user_id</code>.</p>
+        <h4>Fields</h4>
+        <table class="field-table">
+          <tr><td class="col-name pk">user_id</td><td class="col-type">uuid PK</td></tr>
+          <tr><td class="col-name">created_at</td><td class="col-type">timestamp</td></tr>
+          <tr><td class="col-name">display_name</td><td class="col-type">text</td></tr>
+        </table>
+        <h4>Why</h4>
+        <div class="why">We need a stable, anonymizable identifier that survives renames and device changes. <strong>We don't store email or login creds here</strong> — auth lives in a separate identity provider so this table stays HIPAA-aligned.</div>
+        <h4>Used by</h4>
+        <div class="used-by">
+          <span class="pill">every screen</span>
+        </div>
+      </div>
+
+      <!-- demographic_profile -->
+      <div class="card highlight">
+        <div class="eyebrow">Identity · cohort foundation</div>
+        <h3>demographic_profile</h3>
+        <p class="purpose">The fields captured on the Demographics onboarding screen. This is the <strong>single most important table in the app</strong> — every cohort comparison starts here.</p>
+        <h4>Fields</h4>
+        <table class="field-table">
+          <tr><td class="col-name fk">user_id</td><td class="col-type">uuid PK/FK</td><td class="col-note">1:1 with users</td></tr>
+          <tr><td class="col-name">age</td><td class="col-type">int</td><td class="col-note">→ cohort age window</td></tr>
+          <tr><td class="col-name">sex</td><td class="col-type">enum</td><td class="col-note">F/M/NB/PNTS</td></tr>
+          <tr><td class="col-name">race_ethnicity</td><td class="col-type">text[]</td><td class="col-note">multi-select; optional</td></tr>
+          <tr><td class="col-name">location_city</td><td class="col-type">text</td></tr>
+          <tr><td class="col-name">location_state</td><td class="col-type">char(2)</td></tr>
+          <tr><td class="col-name">height_inches</td><td class="col-type">int</td><td class="col-note">→ BMI input</td></tr>
+          <tr><td class="col-name">starting_weight_lb</td><td class="col-type">int</td><td class="col-note">→ BMI + weight Δ baseline</td></tr>
+        </table>
+        <h4>Why</h4>
+        <div class="why">
+          <strong>Age + weight + height</strong> → matched-cohort age and BMI windows (the client's core ask: "how do my results compare to people like me?").
+          <strong>Sex</strong> → cohort sex filter and GLP-1 response differs by sex.
+          <strong>Race/ethnicity</strong> → optional demographic lens for insights (never used as a treatment gate).
+          <strong>Location</strong> → regional pricing variance on cost comparisons.
+        </div>
+        <h4>Used by</h4>
+        <div class="used-by">
+          <span class="pill teal">/demographics</span>
+          <span class="pill">/profile</span>
+          <span class="pill">CohortBadge</span>
+          <span class="pill">/comparison</span>
+          <span class="pill">/insights</span>
+          <span class="pill">/adherence</span>
+        </div>
+      </div>
+
+      <!-- cohort_definitions -->
+      <div class="card">
+        <div class="eyebrow">Cohort</div>
+        <h3>cohort_definitions</h3>
+        <p class="purpose">The <em>editable</em> cohort filter the user sees on the CohortBadge. Defaults are derived from <code>demographic_profile</code>, but the user can tune them from Profile.</p>
+        <h4>Fields</h4>
+        <table class="field-table">
+          <tr><td class="col-name fk">user_id</td><td class="col-type">uuid PK/FK</td></tr>
+          <tr><td class="col-name">age_range</td><td class="col-type">int4range</td><td class="col-note">default [age−5, age+5]</td></tr>
+          <tr><td class="col-name">sex_filter</td><td class="col-type">enum[]</td></tr>
+          <tr><td class="col-name">bmi_range</td><td class="col-type">numrange</td><td class="col-note">default [BMI−2, BMI+2]</td></tr>
+          <tr><td class="col-name">category_filter</td><td class="col-type">int[]</td><td class="col-note">e.g., [1] for GLP-1s</td></tr>
+          <tr><td class="col-name">weeks_on_treatment</td><td class="col-type">int</td></tr>
+        </table>
+        <h4>Why</h4>
+        <div class="why">Decouples the <strong>cohort lens</strong> from raw demographic facts. A user can broaden their cohort to see more people, or tighten it to get tighter matches — without changing their profile.</div>
+        <h4>Used by</h4>
+        <div class="used-by">
+          <span class="pill">/profile (edit)</span>
+          <span class="pill teal">CohortBadge</span>
+          <span class="pill">/comparison</span>
+          <span class="pill">/insights</span>
+        </div>
+      </div>
+
+      <!-- medication_categories -->
+      <div class="card">
+        <div class="eyebrow">Reference · static</div>
+        <h3>medication_categories</h3>
+        <p class="purpose">The category tree shown on the Medication onboarding screen (GLP-1s active; Blood pressure / Birth control / Mental health coming soon).</p>
+        <h4>Fields</h4>
+        <table class="field-table">
+          <tr><td class="col-name pk">id</td><td class="col-type">int PK</td></tr>
+          <tr><td class="col-name">name</td><td class="col-type">text</td><td class="col-note">"GLP-1s"</td></tr>
+          <tr><td class="col-name">slug</td><td class="col-type">text</td><td class="col-note">"glp-1"</td></tr>
+          <tr><td class="col-name">is_active</td><td class="col-type">bool</td><td class="col-note">controls "coming soon" state</td></tr>
+        </table>
+        <h4>Why</h4>
+        <div class="why">Adding a new category (e.g., Blood pressure) is a data change — flip <code>is_active=true</code>, add its drugs, ship the matching dashboard variant. <strong>No schema change.</strong></div>
+        <h4>Used by</h4>
+        <div class="used-by">
+          <span class="pill teal">/medication</span>
+          <span class="pill">/dashboard eyebrow</span>
+        </div>
+      </div>
+
+      <!-- drugs -->
+      <div class="card">
+        <div class="eyebrow">Reference · static</div>
+        <h3>drugs</h3>
+        <p class="purpose">The catalog of medications within each category, with the valid dose strengths for each.</p>
+        <h4>Fields</h4>
+        <table class="field-table">
+          <tr><td class="col-name pk">id</td><td class="col-type">int PK</td></tr>
+          <tr><td class="col-name fk">category_id</td><td class="col-type">int FK</td></tr>
+          <tr><td class="col-name">brand</td><td class="col-type">text</td><td class="col-note">"Mounjaro"</td></tr>
+          <tr><td class="col-name">generic</td><td class="col-type">text</td><td class="col-note">"tirzepatide"</td></tr>
+          <tr><td class="col-name">valid_doses</td><td class="col-type">text[]</td><td class="col-note">["2.5 mg","5 mg",…]</td></tr>
+        </table>
+        <h4>Why</h4>
+        <div class="why">Dose options differ per drug (Ozempic doesn't have 15 mg; Mounjaro does). Storing <code>valid_doses</code> on the drug row drives the dose dropdown and prevents nonsensical entries.</div>
+        <h4>Used by</h4>
+        <div class="used-by">
+          <span class="pill teal">/medication</span>
+          <span class="pill">/switch-medication</span>
+          <span class="pill">/comparison rankings</span>
+        </div>
+      </div>
+
+      <!-- user_regimens -->
+      <div class="card highlight">
+        <div class="eyebrow">User state · history</div>
+        <h3>user_regimens</h3>
+        <p class="purpose">One row per regimen the user has ever been on. The row with <code>ended_at IS NULL</code> is the current one. Past rows preserve the drug timeline visible on Profile and drive historical side-effect / cost comparisons.</p>
+        <h4>Fields</h4>
+        <table class="field-table">
+          <tr><td class="col-name pk">id</td><td class="col-type">uuid PK</td></tr>
+          <tr><td class="col-name fk">user_id</td><td class="col-type">uuid FK</td></tr>
+          <tr><td class="col-name fk">drug_id</td><td class="col-type">int FK</td></tr>
+          <tr><td class="col-name">dose</td><td class="col-type">text</td><td class="col-note">e.g., "5 mg"</td></tr>
+          <tr><td class="col-name">frequency</td><td class="col-type">enum</td><td class="col-note">weekly / daily / twice_weekly / other</td></tr>
+          <tr><td class="col-name">started_at</td><td class="col-type">date</td></tr>
+          <tr><td class="col-name">ended_at</td><td class="col-type">date?</td><td class="col-note">null = current</td></tr>
+          <tr><td class="col-name">switch_reasons</td><td class="col-type">text[]?</td><td class="col-note">set on end</td></tr>
+          <tr><td class="col-name">decision_maker</td><td class="col-type">enum?</td><td class="col-note">self / doctor</td></tr>
+        </table>
+        <h4>Why</h4>
+        <div class="why">The medication timeline is a <strong>product feature</strong> (client: "what did I try before, why did I switch?"). By having event logs FK to <code>regimen_id</code>, a dose/side-effect/cost event stays tied to the exact drug + dose in use at the time — even after the user switches.</div>
+        <h4>Used by</h4>
+        <div class="used-by">
+          <span class="pill">/dashboard regimen card</span>
+          <span class="pill">/profile history</span>
+          <span class="pill">/switch-medication</span>
+          <span class="pill">all log screens</span>
+        </div>
+      </div>
+
+      <!-- baseline_ratings -->
+      <div class="card">
+        <div class="eyebrow">Ratings · reference line</div>
+        <h3>baseline_ratings</h3>
+        <p class="purpose">The 6 one-time ratings captured on the Baselines onboarding screen — the reference line every "Baseline → now" comparison is anchored to.</p>
+        <h4>Fields</h4>
+        <table class="field-table">
+          <tr><td class="col-name pk">id</td><td class="col-type">uuid PK</td></tr>
+          <tr><td class="col-name fk">user_id</td><td class="col-type">uuid FK</td></tr>
+          <tr><td class="col-name">factor</td><td class="col-type">enum</td><td class="col-note">energy / appetite / mood / sleep / activity / digestion</td></tr>
+          <tr><td class="col-name">value</td><td class="col-type">int 1–5</td></tr>
+          <tr><td class="col-name">recorded_at</td><td class="col-type">timestamp</td></tr>
+        </table>
+        <h4>Why</h4>
+        <div class="why">Without a baseline, "You're improving" is meaningless. This table is the anchor for the Dashboard "Baseline → now" grid and Insights' "Your shifts since baseline" card.</div>
+        <h4>Used by</h4>
+        <div class="used-by">
+          <span class="pill teal">/baselines</span>
+          <span class="pill">/dashboard shifts grid</span>
+          <span class="pill">/insights shifts card</span>
+        </div>
+      </div>
+
+      <!-- checkin_ratings -->
+      <div class="card">
+        <div class="eyebrow">Ratings · ongoing</div>
+        <h3>checkin_ratings</h3>
+        <p class="purpose">Ongoing 1–5 ratings the user submits via the Log Dose optional check-in. Same 6 factors as baseline; timestamped per event.</p>
+        <h4>Fields</h4>
+        <table class="field-table">
+          <tr><td class="col-name pk">id</td><td class="col-type">uuid PK</td></tr>
+          <tr><td class="col-name fk">user_id</td><td class="col-type">uuid FK</td></tr>
+          <tr><td class="col-name fk">dose_log_id</td><td class="col-type">uuid FK?</td><td class="col-note">tied to dose if submitted with one</td></tr>
+          <tr><td class="col-name">factor</td><td class="col-type">enum</td></tr>
+          <tr><td class="col-name">value</td><td class="col-type">int 1–5</td></tr>
+          <tr><td class="col-name">recorded_at</td><td class="col-type">timestamp</td></tr>
+        </table>
+        <h4>Why</h4>
+        <div class="why">Lets the "Baseline → now" view actually move over time. Tying check-ins to a specific dose helps us correlate subjective shifts with dose timing (e.g., "mood dips 2 days after the weekly Mounjaro injection").</div>
+        <h4>Used by</h4>
+        <div class="used-by">
+          <span class="pill teal">/log-dose (optional check-in)</span>
+          <span class="pill">/dashboard shifts grid</span>
+          <span class="pill">/insights shifts card</span>
+        </div>
+      </div>
+
+      <!-- dose_logs -->
+      <div class="card">
+        <div class="eyebrow">Event · adherence</div>
+        <h3>dose_logs</h3>
+        <p class="purpose">One row per dose taken. This is the source of truth for everything adherence-related.</p>
+        <h4>Fields</h4>
+        <table class="field-table">
+          <tr><td class="col-name pk">id</td><td class="col-type">uuid PK</td></tr>
+          <tr><td class="col-name fk">user_id</td><td class="col-type">uuid FK</td></tr>
+          <tr><td class="col-name fk">regimen_id</td><td class="col-type">uuid FK</td></tr>
+          <tr><td class="col-name">taken_at</td><td class="col-type">timestamp</td></tr>
+          <tr><td class="col-name">site</td><td class="col-type">enum</td><td class="col-note">abdomen / thigh / upper_arm</td></tr>
+          <tr><td class="col-name">dose_override</td><td class="col-type">text?</td><td class="col-note">if dose changed this time</td></tr>
+          <tr><td class="col-name">notes</td><td class="col-type">text?</td></tr>
+        </table>
+        <h4>Why</h4>
+        <div class="why">Adherence % (Dashboard ring, Adherence calendar, Comparison outcome row) is computed as <code>count(dose_logs) / expected_doses_for_regimen</code>. Site rotation data is useful for future clinician-facing reports.</div>
+        <h4>Used by</h4>
+        <div class="used-by">
+          <span class="pill teal">/log-dose</span>
+          <span class="pill">/adherence</span>
+          <span class="pill">/dashboard ring</span>
+          <span class="pill">/comparison outcomes</span>
+        </div>
+      </div>
+
+      <!-- side_effect_logs -->
+      <div class="card">
+        <div class="eyebrow">Event · tolerability</div>
+        <h3>side_effect_logs</h3>
+        <p class="purpose">Per-event capture of a side effect with severity and impact. Feeds the "Side effects by drug" card on Insights and the side-effect-days outcome on Comparison.</p>
+        <h4>Fields</h4>
+        <table class="field-table">
+          <tr><td class="col-name pk">id</td><td class="col-type">uuid PK</td></tr>
+          <tr><td class="col-name fk">user_id</td><td class="col-type">uuid FK</td></tr>
+          <tr><td class="col-name fk">regimen_id</td><td class="col-type">uuid FK</td><td class="col-note">anchors to drug in use</td></tr>
+          <tr><td class="col-name">category</td><td class="col-type">enum</td><td class="col-note">nausea / fatigue / diarrhea / …</td></tr>
+          <tr><td class="col-name">severity</td><td class="col-type">int 1–5</td></tr>
+          <tr><td class="col-name">duration_bucket</td><td class="col-type">enum</td></tr>
+          <tr><td class="col-name">impact_bucket</td><td class="col-type">enum</td></tr>
+          <tr><td class="col-name">occurred_at</td><td class="col-type">timestamp</td></tr>
+        </table>
+        <h4>Why</h4>
+        <div class="why">Aggregated across a cohort, this table answers "how common is nausea on Mounjaro for women age 30–39 in their first 90 days?" — the core data for Insights' "Side effects by drug" card.</div>
+        <h4>Used by</h4>
+        <div class="used-by">
+          <span class="pill teal">/log-side-effect</span>
+          <span class="pill">/insights side-effects-by-drug</span>
+          <span class="pill">/insights trends</span>
+          <span class="pill">/comparison side-effect-days</span>
+        </div>
+      </div>
+
+      <!-- cost_logs -->
+      <div class="card">
+        <div class="eyebrow">Event · cost</div>
+        <h3>cost_logs</h3>
+        <p class="purpose">Per-fill cost record. Feeds personal cost trends and the cohort median used in the Insights "Monthly cost by drug" card.</p>
+        <h4>Fields</h4>
+        <table class="field-table">
+          <tr><td class="col-name pk">id</td><td class="col-type">uuid PK</td></tr>
+          <tr><td class="col-name fk">user_id</td><td class="col-type">uuid FK</td></tr>
+          <tr><td class="col-name fk">regimen_id</td><td class="col-type">uuid FK</td></tr>
+          <tr><td class="col-name">amount_cents</td><td class="col-type">int</td><td class="col-note">integer cents, never float</td></tr>
+          <tr><td class="col-name">cost_type</td><td class="col-type">enum</td><td class="col-note">copay / oop / coupon / retail</td></tr>
+          <tr><td class="col-name">pharmacy</td><td class="col-type">text?</td></tr>
+          <tr><td class="col-name">insurance_applied</td><td class="col-type">bool</td></tr>
+          <tr><td class="col-name">supply_days</td><td class="col-type">int</td><td class="col-note">normalizes to /month</td></tr>
+          <tr><td class="col-name">fill_date</td><td class="col-type">date</td></tr>
+        </table>
+        <h4>Why</h4>
+        <div class="why">Monthly cost is computed as <code>amount_cents × (30 / supply_days)</code> so 90-day fills get normalized. Splitting by <code>cost_type</code> lets us surface "with insurance" vs "retail" bands on cohort comparisons.</div>
+        <h4>Used by</h4>
+        <div class="used-by">
+          <span class="pill teal">/log-cost</span>
+          <span class="pill">/insights cost-by-drug</span>
+          <span class="pill">/comparison cost row</span>
+          <span class="pill">/dashboard cost summary</span>
+        </div>
+      </div>
+
+      <!-- notifications -->
+      <div class="card">
+        <div class="eyebrow">Output</div>
+        <h3>notifications</h3>
+        <p class="purpose">Outbound messages shown on the Notifications screen and as dashboard bell badges.</p>
+        <h4>Fields</h4>
+        <table class="field-table">
+          <tr><td class="col-name pk">id</td><td class="col-type">uuid PK</td></tr>
+          <tr><td class="col-name fk">user_id</td><td class="col-type">uuid FK</td></tr>
+          <tr><td class="col-name">type</td><td class="col-type">enum</td><td class="col-note">reminder / cohort_insight / weekly_summary / confirmation</td></tr>
+          <tr><td class="col-name">title</td><td class="col-type">text</td></tr>
+          <tr><td class="col-name">body</td><td class="col-type">text</td></tr>
+          <tr><td class="col-name">sent_at</td><td class="col-type">timestamp</td></tr>
+          <tr><td class="col-name">read_at</td><td class="col-type">timestamp?</td><td class="col-note">null = unread dot</td></tr>
+        </table>
+        <h4>Why</h4>
+        <div class="why">Separating the message from the data generating it (e.g., a cohort insight is derived from other tables) lets the notification feed be rebuilt without losing history of what the user actually saw.</div>
+        <h4>Used by</h4>
+        <div class="used-by">
+          <span class="pill teal">/notifications</span>
+          <span class="pill">/dashboard bell badge</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== Cohort query worked example ===== -->
+    <div class="cohort-example">
+      <div class="eyebrow">Worked example</div>
+      <h2 style="font-size:18px;">How a cohort query uses these tables</h2>
+      <p style="font-size:13px; color:var(--ink); line-height:1.55;">
+        To compute the "people like you" figures on Comparison and Insights, the backend joins a user's
+        <code>cohort_definitions</code> row against every other user's <code>demographic_profile</code>,
+        then aggregates that peer set's <code>dose_logs</code>, <code>side_effect_logs</code>, and
+        <code>cost_logs</code> for the current category.
+      </p>
+      <pre><span class="cmt">-- For user U, find matched peers + their median 12-week weight change on Mounjaro</span>
+<span class="kw">WITH</span> my_cohort <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> dp.user_id
+  <span class="kw">FROM</span> demographic_profile dp
+  <span class="kw">JOIN</span> cohort_definitions cd <span class="kw">ON</span> cd.user_id = :me
+  <span class="kw">WHERE</span> dp.age <span class="kw">BETWEEN</span> lower(cd.age_range) <span class="kw">AND</span> upper(cd.age_range)
+    <span class="kw">AND</span> dp.sex = <span class="kw">ANY</span>(cd.sex_filter)
+    <span class="kw">AND</span> bmi(dp.height_inches, dp.starting_weight_lb) <span class="kw">&lt;@</span> cd.bmi_range
+)
+<span class="kw">SELECT</span> percentile_cont(0.5) <span class="kw">WITHIN GROUP</span> (<span class="kw">ORDER BY</span> weight_change_pct)
+<span class="kw">FROM</span> weight_change_12wk_mv
+<span class="kw">WHERE</span> user_id <span class="kw">IN</span> (<span class="kw">SELECT</span> user_id <span class="kw">FROM</span> my_cohort)
+  <span class="kw">AND</span> drug_id = :mounjaro_id;</pre>
+      <p style="font-size:12px; color:var(--muted); line-height:1.55;">
+        In practice, heavy cohort aggregates (12-week weight change, side-effect incidence by drug,
+        cost medians) live in materialized views refreshed nightly so the app itself only reads cheap
+        summaries. The tables above are the raw sources of truth those views compute from.
+      </p>
+    </div>
+
+    <!-- ===== DATA DICTIONARY ===== -->
+    <div class="dict-section">
+      <div class="eyebrow">Data dictionary</div>
+      <h2>Every variable — type, storage, use, sensitivity</h2>
+      <p class="details-intro">
+        Cross-reference for every field. <strong>Storage</strong> is either
+        Supabase (primary DB, RLS-gated per user), a public-read reference
+        catalog in Supabase, or PreVeil (end-to-end encrypted transport for
+        clinician-facing exports). <strong>Sensitivity</strong> maps to HIPAA
+        PHI where applicable; PII covers locational / financial data.
+      </p>
+
+      <div class="dict-legend">
+        <span class="dict-chip storage-rls">Supabase RLS</span>
+        <span class="dict-chip storage-public">Supabase · public read</span>
+        <span class="dict-chip storage-preveil">PreVeil · E2E encrypted</span>
+        <span class="dict-chip sens-phi">PHI</span>
+        <span class="dict-chip sens-pii">PII / financial</span>
+        <span class="dict-chip sens-low">Non-sensitive</span>
+      </div>
+
+      <!-- users -->
+      <div class="dict-block">
+        <h3>public.users</h3>
+        <div class="dict-sub">Identity wrapper. FK to auth.users. 1 row per person.</div>
+        <table class="dict-table">
+          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <tbody>
+            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid PK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Auth linkage; FK target for every user-owned row.</td><td><span class="dict-chip sens-phi">PHI identifier</span></td></tr>
+            <tr><td class="dict-var">created_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Audit / cohort longevity.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">updated_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Cache invalidation, optimistic concurrency.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">display_name</td><td class="dict-type">text</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">UI greeting ("Good morning, Alex").</td><td><span class="dict-chip sens-pii">PII</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- demographic_profile -->
+      <div class="dict-block">
+        <h3>public.demographic_profile</h3>
+        <div class="dict-sub">Cohort foundation. Set once on /demographics onboarding.</div>
+        <table class="dict-table">
+          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <tbody>
+            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid PK/FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">1:1 with users.</td><td><span class="dict-chip sens-phi">PHI identifier</span></td></tr>
+            <tr><td class="dict-var">age</td><td class="dict-type">smallint</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Cohort matching window (±5y default).</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">sex</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Cohort filter; GLP-1 response differs by sex.</td><td><span class="dict-chip sens-phi">PHI · protected class</span></td></tr>
+            <tr><td class="dict-var">race_ethnicity</td><td class="dict-type">text[]</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Optional cohort lens on Insights. Never a treatment gate.</td><td><span class="dict-chip sens-phi">PHI · protected class</span></td></tr>
+            <tr><td class="dict-var">location_city</td><td class="dict-type">text</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Regional pricing variance on cost comparisons.</td><td><span class="dict-chip sens-pii">PII</span></td></tr>
+            <tr><td class="dict-var">location_state</td><td class="dict-type">char(2)</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">State-level cohort filter, pricing.</td><td><span class="dict-chip sens-pii">PII</span></td></tr>
+            <tr><td class="dict-var">height_inches</td><td class="dict-type">smallint</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">BMI input → cohort BMI window.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">starting_weight_lb</td><td class="dict-type">smallint</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">BMI input; baseline for weight Δ trend.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">created_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Audit.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">updated_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Cache invalidation.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- cohort_definitions -->
+      <div class="dict-block">
+        <h3>public.cohort_definitions</h3>
+        <div class="dict-sub">Editable cohort lens. Auto-seeded from demographic_profile.</div>
+        <table class="dict-table">
+          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <tbody>
+            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid PK/FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">1:1 with users.</td><td><span class="dict-chip sens-phi">PHI identifier</span></td></tr>
+            <tr><td class="dict-var">age_min · age_max</td><td class="dict-type">smallint</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Cohort age window (default age ±5).</td><td><span class="dict-chip sens-pii">PHI-adjacent</span></td></tr>
+            <tr><td class="dict-var">sex_filter</td><td class="dict-type">enum[]</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Which sex(es) to include in cohort.</td><td><span class="dict-chip sens-low">Derived filter</span></td></tr>
+            <tr><td class="dict-var">bmi_min · bmi_max</td><td class="dict-type">numeric(4,1)</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Cohort BMI window (default BMI ±2).</td><td><span class="dict-chip sens-pii">PHI-adjacent</span></td></tr>
+            <tr><td class="dict-var">category_filter</td><td class="dict-type">int[]</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Which medication_categories to include.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">weeks_on_treatment</td><td class="dict-type">smallint</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Matched-cohort treatment window (default 12).</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- medication_categories -->
+      <div class="dict-block">
+        <h3>public.medication_categories</h3>
+        <div class="dict-sub">Static reference catalog. World-readable.</div>
+        <table class="dict-table">
+          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <tbody>
+            <tr><td class="dict-var">id</td><td class="dict-type">int PK</td><td><span class="dict-chip storage-public">Supabase · public</span></td><td class="dict-use">Category lookup.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">name</td><td class="dict-type">text</td><td><span class="dict-chip storage-public">Supabase · public</span></td><td class="dict-use">"GLP-1s" etc — UI display.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">slug</td><td class="dict-type">text</td><td><span class="dict-chip storage-public">Supabase · public</span></td><td class="dict-use">Stable URL key.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">is_active</td><td class="dict-type">bool</td><td><span class="dict-chip storage-public">Supabase · public</span></td><td class="dict-use">Gates "Coming soon" vs active category cards.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- drugs -->
+      <div class="dict-block">
+        <h3>public.drugs</h3>
+        <div class="dict-sub">Static reference catalog. World-readable.</div>
+        <table class="dict-table">
+          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <tbody>
+            <tr><td class="dict-var">id</td><td class="dict-type">int PK</td><td><span class="dict-chip storage-public">Supabase · public</span></td><td class="dict-use">Drug lookup.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">category_id</td><td class="dict-type">int FK</td><td><span class="dict-chip storage-public">Supabase · public</span></td><td class="dict-use">Taxonomy link.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">brand</td><td class="dict-type">text</td><td><span class="dict-chip storage-public">Supabase · public</span></td><td class="dict-use">"Mounjaro", "Ozempic".</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">generic</td><td class="dict-type">text</td><td><span class="dict-chip storage-public">Supabase · public</span></td><td class="dict-use">"tirzepatide", "semaglutide".</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">valid_doses</td><td class="dict-type">text[]</td><td><span class="dict-chip storage-public">Supabase · public</span></td><td class="dict-use">Drives dose dropdown on /medication + /switch.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- user_regimens -->
+      <div class="dict-block">
+        <h3>public.user_regimens</h3>
+        <div class="dict-sub">Current + historical regimens. One active row per user (ended_at IS NULL).</div>
+        <table class="dict-table">
+          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <tbody>
+            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Regimen identity; FK target for event logs.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Ownership.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">drug_id</td><td class="dict-type">int FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Which drug.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">dose</td><td class="dict-type">text</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Strength, e.g., "5 mg".</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">frequency</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Weekly / daily / etc.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">started_at</td><td class="dict-type">date</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Regimen start for duration calc.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">ended_at</td><td class="dict-type">date?</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Null = active. Set on switch.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">switch_reasons</td><td class="dict-type">text[]?</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Why the user switched. Cohort insight input.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">decision_maker</td><td class="dict-type">enum?</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Self vs doctor.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">created_at · updated_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Audit, cache.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- baseline_ratings -->
+      <div class="dict-block">
+        <h3>public.baseline_ratings</h3>
+        <div class="dict-sub">6 one-time ratings set on /baselines onboarding.</div>
+        <table class="dict-table">
+          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <tbody>
+            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Row identity.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Ownership.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">factor</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">energy / appetite / mood / sleep / activity / digestion.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">value</td><td class="dict-type">int 1–5</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Baseline rating. Anchor for all shift deltas.</td><td><span class="dict-chip sens-phi">PHI · PRO</span></td></tr>
+            <tr><td class="dict-var">recorded_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">When baseline was captured.</td><td><span class="dict-chip sens-pii">PHI-adjacent</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- checkin_ratings -->
+      <div class="dict-block">
+        <h3>public.checkin_ratings</h3>
+        <div class="dict-sub">Ongoing 1–5 ratings from Log Dose optional check-in.</div>
+        <table class="dict-table">
+          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <tbody>
+            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Row identity.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Ownership.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">dose_log_id</td><td class="dict-type">uuid FK?</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Correlates check-in to a specific dose.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">factor</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Which baseline factor.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">value</td><td class="dict-type">int 1–5</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Current rating. Drives "Baseline → now" grid.</td><td><span class="dict-chip sens-phi">PHI · PRO</span></td></tr>
+            <tr><td class="dict-var">recorded_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">When rating was taken.</td><td><span class="dict-chip sens-pii">PHI-adjacent</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- dose_logs -->
+      <div class="dict-block">
+        <h3>public.dose_logs</h3>
+        <div class="dict-sub">One row per dose taken. Source of truth for adherence.</div>
+        <table class="dict-table">
+          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <tbody>
+            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Event identity.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">user_id · regimen_id</td><td class="dict-type">uuid FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Composite FK ties event to correct regimen.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">taken_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Adherence % computation.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">site</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Injection site rotation for clinician reports.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">dose_override</td><td class="dict-type">text?</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">If dose changed this time.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">notes</td><td class="dict-type">text?</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Free-text observations. <strong>Candidate for PreVeil at v2</strong> — clinical free text has the highest re-identification risk.</td><td><span class="dict-chip sens-phi">PHI · free text</span></td></tr>
+            <tr><td class="dict-var">created_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Audit (when logged, vs taken_at = when event happened).</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- side_effect_logs -->
+      <div class="dict-block">
+        <h3>public.side_effect_logs</h3>
+        <div class="dict-sub">Per-event tolerability capture. Feeds Insights "Side effects by drug".</div>
+        <table class="dict-table">
+          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <tbody>
+            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Event identity.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">user_id · regimen_id</td><td class="dict-type">uuid FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Composite FK anchors side effect to drug in use.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">category</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">nausea / fatigue / diarrhea / …</td><td><span class="dict-chip sens-phi">PHI · medical</span></td></tr>
+            <tr><td class="dict-var">severity</td><td class="dict-type">int 1–5</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Severity scale.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">duration_bucket</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">&lt;1h / 1–4h / 4–12h / 12–24h / ongoing.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">impact_bucket</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Daily-activity impact.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">occurred_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Correlates to dose timing.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">created_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Audit.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- cost_logs -->
+      <div class="dict-block">
+        <h3>public.cost_logs</h3>
+        <div class="dict-sub">Per-fill cost. Normalizes to /month; powers Insights "Monthly cost by drug".</div>
+        <table class="dict-table">
+          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <tbody>
+            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Event identity.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">user_id · regimen_id</td><td class="dict-type">uuid FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Composite FK.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">amount_cents</td><td class="dict-type">int</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">What the user paid (integer cents).</td><td><span class="dict-chip sens-pii">Financial</span></td></tr>
+            <tr><td class="dict-var">cost_type</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">copay / out_of_pocket / coupon / retail.</td><td><span class="dict-chip sens-pii">Financial</span></td></tr>
+            <tr><td class="dict-var">pharmacy</td><td class="dict-type">text?</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Optional. Where filled.</td><td><span class="dict-chip sens-pii">PII</span></td></tr>
+            <tr><td class="dict-var">insurance_applied</td><td class="dict-type">bool</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Split with-insurance vs retail bands.</td><td><span class="dict-chip sens-pii">Financial</span></td></tr>
+            <tr><td class="dict-var">supply_days</td><td class="dict-type">smallint</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">30 / 60 / 90 — normalizes to monthly.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">fill_date</td><td class="dict-type">date</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">When the fill happened.</td><td><span class="dict-chip sens-pii">PHI-adjacent</span></td></tr>
+            <tr><td class="dict-var">created_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Audit.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- notifications -->
+      <div class="dict-block">
+        <h3>public.notifications</h3>
+        <div class="dict-sub">Outbound messages on /notifications. Backend-written only.</div>
+        <table class="dict-table">
+          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <tbody>
+            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Message identity.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Who receives it.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">type</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">reminder / cohort_insight / weekly_summary / confirmation.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">title · body</td><td class="dict-type">text</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">May reference cohort %, adherence, drug names.</td><td><span class="dict-chip sens-phi">PHI (possible)</span></td></tr>
+            <tr><td class="dict-var">sent_at · read_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Unread badge, engagement telemetry.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Derived / PreVeil -->
+      <div class="dict-block">
+        <h3>Derived outputs · not schema rows</h3>
+        <div class="dict-sub">Assembled on-demand from the tables above. These are the PreVeil touchpoints.</div>
+        <table class="dict-table">
+          <thead><tr><th>Output</th><th>Format</th><th>Storage / transport</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <tbody>
+            <tr><td class="dict-var">Clinician PDF report</td><td class="dict-type">PDF</td><td><span class="dict-chip storage-preveil">PreVeil · E2E encrypted</span></td><td class="dict-use">Summary of regimen, adherence, side-effect timeline, cost for provider review. Triggered from Insights → Export → PDF Report.</td><td><span class="dict-chip sens-phi">PHI · full dossier</span></td></tr>
+            <tr><td class="dict-var">CSV data export</td><td class="dict-type">CSV</td><td><span class="dict-chip storage-preveil">PreVeil · E2E encrypted</span></td><td class="dict-use">Raw event logs for clinician / researcher. Triggered from Insights → Export → CSV.</td><td><span class="dict-chip sens-phi">PHI · full dossier</span></td></tr>
+            <tr><td class="dict-var">Cohort aggregates (mat. views)</td><td class="dict-type">numeric</td><td><span class="dict-chip storage-public">Supabase · public read</span></td><td class="dict-use">Nightly-refreshed materialized views (weight Δ median, side-effect incidence, cost median by drug). No user_id — safe for public read.</td><td><span class="dict-chip sens-low">Aggregate only</span></td></tr>
+            <tr><td class="dict-var">Cohort insights shown in-app</td><td class="dict-type">numeric</td><td><span class="dict-chip storage-public">Supabase · public read</span></td><td class="dict-use">Numbers on Comparison / Insights (e.g., "n=412 matched users"). Read directly from the materialized views.</td><td><span class="dict-chip sens-low">Aggregate only</span></td></tr>
+            <tr><td class="dict-var">Clinician messaging (future)</td><td class="dict-type">thread</td><td><span class="dict-chip storage-preveil">PreVeil · E2E encrypted</span></td><td class="dict-use">If we add patient↔provider messaging, route through PreVeil — not Supabase.</td><td><span class="dict-chip sens-phi">PHI · clinical detail</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Rules of thumb -->
+      <div class="dict-block">
+        <h3>Rules of thumb</h3>
+        <table class="dict-table">
+          <thead><tr><th>Question</th><th>Rule</th></tr></thead>
+          <tbody>
+            <tr><td class="dict-use"><strong>Does this field belong in Supabase or PreVeil?</strong></td><td class="dict-use">Structured data (enums, numerics, timestamps, FKs) → <strong>Supabase</strong> with RLS. Free-text clinical notes or whole-dossier exports → <strong>PreVeil</strong>.</td></tr>
+            <tr><td class="dict-use"><strong>Is this PHI?</strong></td><td class="dict-use">If it's a 1:1 fact about the patient's body or treatment (age, weight, drug, dose, adherence, side effect), yes. If it's a shared catalog (drug brand, category), no.</td></tr>
+            <tr><td class="dict-use"><strong>Should this be shown cross-user?</strong></td><td class="dict-use">Only through aggregate materialized views that contain <em>no</em> <code>user_id</code>. RLS + `SECURITY DEFINER` functions enforce this.</td></tr>
+            <tr><td class="dict-use"><strong>What about deletions?</strong></td><td class="dict-use">ON DELETE CASCADE from <code>users</code> removes every dependent row. PreVeil-stored exports need a separate deletion policy — PreVeil's admin console handles that.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

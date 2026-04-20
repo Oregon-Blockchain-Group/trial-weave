@@ -1,143 +1,211 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
-import { ArrowLeft, TrendingUp } from 'lucide-react';
+import { Calendar } from 'lucide-react';
+import { SectionHeader } from '../components/SectionHeader';
+import { CohortBadge } from '../components/CohortBadge';
+
+const MISS_REASONS = [
+  { reason: 'Travel', count: 2 },
+  { reason: 'Forgot', count: 1 },
+  { reason: 'Out of supply', count: 0 },
+  { reason: 'Side effects', count: 0 },
+];
 
 export function Adherence() {
-  const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState('Month');
 
   const daysInMonth = Array.from({ length: 30 }, (_, i) => {
-    const status = i % 7 === 6 ? 'missed' : i % 14 === 0 ? 'none' : 'taken';
+    const status = i % 14 === 13 ? 'missed' : i % 7 === 0 && i !== 0 ? 'none' : 'taken';
     return { day: i + 1, status };
   });
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="p-4 bg-white border-b border-[#E5E7EB]">
+      <div className="p-4 bg-white border-b border-[#E5E7EB] flex items-baseline justify-between">
         <h1 className="text-xl font-bold text-[#1C1C1C]">Adherence</h1>
+        <span className="text-[11px] text-[#6B7280] tabular-nums">
+          Updated today
+        </span>
       </div>
 
-      {/* Large Adherence Ring */}
-      <div className="p-6 bg-white border-b border-[#E5E7EB]">
-        <div className="flex items-center gap-6">
-          <div className="relative">
-            <svg className="w-32 h-32 -rotate-90">
-              <circle cx="64" cy="64" r="56" stroke="#E5E7EB" strokeWidth="12" fill="none" />
-              <circle
-                cx="64"
-                cy="64"
-                r="56"
-                stroke="#16A34A"
-                strokeWidth="12"
-                fill="none"
-                strokeDasharray={`${2 * Math.PI * 56 * 0.92} ${2 * Math.PI * 56}`}
-                strokeLinecap="round"
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center flex-col">
-              <div className="text-4xl font-bold text-[#1C1C1C]">92%</div>
-              <div className="text-xs text-[#6B7280]">this month</div>
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#FAFAFA]">
+        {/* Key stats */}
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+          <div className="grid grid-cols-3 gap-3 divide-x divide-[#E5E7EB]">
+            <div className="text-center">
+              <div className="text-[10px] text-[#6B7280] uppercase tracking-wide mb-1">
+                This month
+              </div>
+              <div className="text-2xl font-bold text-[#1C1C1C] tabular-nums">
+                92%
+              </div>
             </div>
-          </div>
-          <div className="flex-1">
-            <div className="text-sm text-[#6B7280] mb-2">Current streak</div>
-            <div className="text-2xl font-bold text-[#1C1C1C] mb-1">14 days</div>
-            <div className="flex items-center gap-1 text-sm text-[#16A34A]">
-              <TrendingUp className="w-4 h-4" />
-              <span>Longest: 21 days</span>
+            <div className="text-center">
+              <div className="text-[10px] text-[#6B7280] uppercase tracking-wide mb-1">
+                Streak
+              </div>
+              <div className="text-2xl font-bold text-[#1C1C1C] tabular-nums">
+                14d
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-[10px] text-[#6B7280] uppercase tracking-wide mb-1">
+                Longest
+              </div>
+              <div className="text-2xl font-bold text-[#1C1C1C] tabular-nums">
+                21d
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Time Range Tabs */}
-      <div className="p-4 bg-white border-b border-[#E5E7EB]">
-        <div className="flex gap-2">
-          {['Week', 'Month', '3 Months', 'All Time'].map((range) => (
-            <button
-              key={range}
-              onClick={() => setTimeRange(range)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                timeRange === range
-                  ? 'bg-[#234a67] text-white'
-                  : 'bg-[#FAFAFA] text-[#6B7280]'
-              }`}
-            >
-              {range}
-            </button>
-          ))}
+        {/* Cohort benchmark */}
+        <CohortBadge compact />
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+          <SectionHeader
+            eyebrow="Cohort benchmark"
+            title="You vs. matched users"
+          />
+          <div className="space-y-3">
+            <BenchRow label="You" value={92} color="#234a67" />
+            <BenchRow label="Cohort median" value={84} color="#9CA3AF" />
+            <BenchRow label="Top quartile" value={97} color="#9CA3AF" dashed />
+          </div>
+          <div className="mt-3 pt-3 border-t border-[#E5E7EB] text-xs text-[#6B7280] leading-relaxed">
+            Users with ≥90% adherence in your cohort see{' '}
+            <strong className="text-[#1C1C1C]">32% more weight loss</strong> at
+            12 weeks.
+          </div>
         </div>
-      </div>
 
-      {/* Calendar Heatmap */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        <div>
-          <h3 className="font-semibold text-[#1C1C1C] mb-4">April 2026</h3>
-          <div className="grid grid-cols-7 gap-2">
+        {/* Time range */}
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+          <div className="flex items-baseline justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-3.5 h-3.5 text-[#6B7280]" />
+              <span className="text-sm font-semibold text-[#1C1C1C]">
+                April 2026
+              </span>
+            </div>
+            <div className="flex gap-1">
+              {['Week', 'Month', '3 Mo'].map((range) => (
+                <button
+                  key={range}
+                  onClick={() => setTimeRange(range)}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors ${
+                    timeRange === range
+                      ? 'bg-[#234a67] text-white'
+                      : 'text-[#6B7280]'
+                  }`}
+                >
+                  {range}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="grid grid-cols-7 gap-1.5">
             {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-              <div key={i} className="text-center text-xs text-[#6B7280] font-medium">
+              <div
+                key={i}
+                className="text-center text-[10px] text-[#6B7280] font-semibold uppercase"
+              >
                 {day}
               </div>
             ))}
             {daysInMonth.map((day) => {
               const bgColor =
                 day.status === 'taken'
-                  ? 'bg-[#16A34A]'
+                  ? 'bg-[#234a67] text-white'
                   : day.status === 'missed'
-                  ? 'bg-[#DC2626]'
-                  : 'bg-[#E5E7EB]';
+                  ? 'bg-white border-2 border-[#DC2626] text-[#DC2626]'
+                  : 'bg-[#F3F4F6] text-[#9CA3AF]';
               return (
-                <button
+                <div
                   key={day.day}
-                  className={`aspect-square ${bgColor} rounded-lg flex items-center justify-center text-white text-xs font-medium hover:opacity-80 transition-opacity`}
+                  className={`aspect-square ${bgColor} rounded-md flex items-center justify-center text-[11px] font-medium tabular-nums`}
                 >
                   {day.day}
-                </button>
+                </div>
               );
             })}
           </div>
-          <div className="flex items-center gap-4 mt-4 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-[#16A34A] rounded" />
-              <span className="text-[#6B7280]">Dose taken</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-[#DC2626] rounded" />
-              <span className="text-[#6B7280]">Missed</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-[#E5E7EB] rounded" />
-              <span className="text-[#6B7280]">No dose scheduled</span>
-            </div>
+          <div className="flex items-center gap-4 mt-3 pt-3 border-t border-[#E5E7EB] text-[11px]">
+            <Legend color="bg-[#234a67]" label="Taken" />
+            <Legend color="bg-white border border-[#DC2626]" label="Missed" />
+            <Legend color="bg-[#F3F4F6]" label="No dose" />
           </div>
         </div>
 
-        {/* Missed Doses */}
-        <div className="bg-white rounded-2xl p-6 border border-[#E5E7EB]">
-          <h3 className="font-semibold text-[#1C1C1C] mb-4">Missed Doses</h3>
-          <div className="space-y-3">
-            {[
-              { date: 'April 6, 2026', day: 'Sunday' },
-              { date: 'March 30, 2026', day: 'Sunday' },
-              { date: 'March 23, 2026', day: 'Sunday' },
-            ].map((missed, i) => (
-              <div key={i} className="flex items-center justify-between p-3 bg-[#FAFAFA] rounded-lg">
-                <div>
-                  <div className="text-sm font-medium text-[#1C1C1C]">{missed.date}</div>
-                  <div className="text-xs text-[#6B7280]">{missed.day}</div>
+        {/* Miss reasons */}
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+          <SectionHeader eyebrow="Miss reasons · 90 days" title="Why you missed" />
+          <div className="space-y-2">
+            {MISS_REASONS.map((r) => (
+              <div key={r.reason} className="flex items-center gap-3">
+                <span className="text-sm text-[#1C1C1C] flex-1">
+                  {r.reason}
+                </span>
+                <div className="flex-1 h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[#234a67] rounded-full"
+                    style={{ width: `${(r.count / 3) * 100}%` }}
+                  />
                 </div>
-                <div className="w-2 h-2 bg-[#DC2626] rounded-full" />
+                <span className="text-xs font-semibold text-[#1C1C1C] tabular-nums w-5 text-right">
+                  {r.count}
+                </span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Set Reminder Button */}
-        <button className="w-full h-12 border-2 border-[#234a67] text-[#234a67] rounded-xl font-semibold hover:bg-[#e8f4f8] transition-colors">
-          Set Reminder
+        <button className="w-full h-12 bg-white border-2 border-[#234a67] text-[#234a67] rounded-xl font-semibold text-sm hover:bg-[#e8f4f8] transition-colors">
+          Set a dose reminder
         </button>
       </div>
+    </div>
+  );
+}
+
+function BenchRow({
+  label,
+  value,
+  color,
+  dashed,
+}: {
+  label: string;
+  value: number;
+  color: string;
+  dashed?: boolean;
+}) {
+  return (
+    <div>
+      <div className="flex items-baseline justify-between mb-1">
+        <span className="text-sm text-[#1C1C1C]">{label}</span>
+        <span className="text-sm font-semibold text-[#1C1C1C] tabular-nums">
+          {value}%
+        </span>
+      </div>
+      <div className="h-2 bg-[#F3F4F6] rounded-full overflow-hidden">
+        <div
+          className="h-full rounded-full"
+          style={{
+            width: `${value}%`,
+            backgroundColor: color,
+            backgroundImage: dashed
+              ? `repeating-linear-gradient(90deg, ${color} 0 4px, transparent 4px 8px)`
+              : undefined,
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function Legend({ color, label }: { color: string; label: string }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className={`w-3 h-3 rounded ${color}`} />
+      <span className="text-[#6B7280]">{label}</span>
     </div>
   );
 }

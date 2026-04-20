@@ -4,11 +4,16 @@ node_modules/
 # Build output
 dist/
 build/
+*.local
 
 # Environment variables
 .env
 .env.local
 .env.*.local
+
+# Supabase CLI (if used later)
+supabase/.branches
+supabase/.temp
 
 # Logs
 *.log
@@ -17,8 +22,12 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Editor
+# Editor / IDE
 .vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 .idea/
 *.suo
 *.ntvs*
@@ -29,6 +38,22 @@ pnpm-debug.log*
 # OS
 .DS_Store
 Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Cache
+.cache/
+.parcel-cache/
+.turbo
+.eslintcache
+
+# Test / coverage
+coverage/
+.nyc_output
+
+# Deployment
+.vercel
+.netlify
 
 # Vite
 vite.config.*.timestamp-*

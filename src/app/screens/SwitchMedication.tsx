@@ -1,17 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft, Check, Info } from 'lucide-react';
+import { GLP1_DRUGS, SWITCH_REASONS } from '../../data/drugs';
+import { MOCK_USER } from '../../data/mockUser';
 
-const medications = ['Ozempic', 'Wegovy', 'Mounjaro', 'Zepbound', 'Trulicity', 'Saxenda', 'Rybelsus'];
-const reasons = [
-  'Side effects',
-  'Cost',
-  'Lack of effectiveness',
-  'Insurance/formulary change',
-  'Doctor recommendation',
-  'Supply issues',
-  'Personal preference',
-];
+const MEDICATIONS = GLP1_DRUGS.map(({ brand, generic }) => ({ brand, generic }));
+const REASONS = SWITCH_REASONS;
 
 export function SwitchMedication() {
   const navigate = useNavigate();
@@ -24,28 +18,34 @@ export function SwitchMedication() {
   });
 
   const toggleReason = (reason: string) => {
-    if (formData.reasons.includes(reason)) {
-      setFormData({ ...formData, reasons: formData.reasons.filter(r => r !== reason) });
-    } else {
-      setFormData({ ...formData, reasons: [...formData.reasons, reason] });
-    }
+    setFormData((f) => ({
+      ...f,
+      reasons: f.reasons.includes(reason)
+        ? f.reasons.filter((r) => r !== reason)
+        : [...f.reasons, reason],
+    }));
   };
 
   const handleSubmit = () => {
     setSuccess(true);
-    setTimeout(() => navigate('/dashboard'), 2000);
+    setTimeout(() => navigate('/dashboard'), 1500);
   };
 
   if (success) {
     return (
-      <div className="h-full flex items-center justify-center bg-white px-8">
+      <div className="h-full flex items-center justify-center bg-[#FAFAFA] px-6">
         <div className="text-center">
-          <div className="w-20 h-20 bg-[#16A34A] rounded-full flex items-center justify-center mx-auto mb-4">
-            <Check className="w-10 h-10 text-white" />
+          <div className="w-14 h-14 bg-[#e8f4f8] border-2 border-[#234a67] rounded-full flex items-center justify-center mx-auto mb-3">
+            <Check className="w-6 h-6 text-[#234a67]" strokeWidth={3} />
           </div>
-          <h2 className="text-xl font-bold text-[#1C1C1C] mb-2">Medication Updated!</h2>
-          <p className="text-sm text-[#6B7280]">
-            Your previous data for Ozempic is saved for comparison.
+          <div className="text-[10px] font-semibold tracking-[0.12em] text-[#6B7280] uppercase mb-1">
+            Updated
+          </div>
+          <h2 className="text-lg font-bold text-[#1C1C1C] mb-1">
+            Regimen switched
+          </h2>
+          <p className="text-xs text-[#6B7280]">
+            Previous data retained for comparison.
           </p>
         </div>
       </div>
@@ -53,63 +53,77 @@ export function SwitchMedication() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-white">
-      {/* Header */}
-      <div className="p-4 border-b border-[#E5E7EB] flex items-center gap-3">
+    <div className="h-full flex flex-col bg-[#FAFAFA]">
+      <div className="p-4 bg-white border-b border-[#E5E7EB] flex items-center gap-3">
         <button
           onClick={() => navigate('/dashboard')}
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#e8f4f8]"
+          className="w-9 h-9 flex items-center justify-center rounded-full border border-[#E5E7EB] hover:bg-[#FAFAFA]"
         >
-          <ArrowLeft className="w-5 h-5 text-[#1C1C1C]" />
+          <ArrowLeft className="w-4 h-4 text-[#1C1C1C]" />
         </button>
-        <h1 className="text-xl font-bold text-[#1C1C1C]">Switch Medication</h1>
+        <div>
+          <div className="text-[10px] font-semibold tracking-[0.12em] text-[#6B7280] uppercase">
+            Medication change
+          </div>
+          <h1 className="text-lg font-bold text-[#1C1C1C]">Switch</h1>
+        </div>
       </div>
 
-      {/* Form */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        {/* Current Med */}
-        <div>
-          <div className="text-sm text-[#6B7280] mb-2">Switching from</div>
-          <div className="p-4 bg-[#FAFAFA] border border-[#E5E7EB] rounded-xl">
-            <div className="font-semibold text-[#1C1C1C]">Ozempic 0.5mg</div>
-            <div className="text-sm text-[#6B7280] mt-1">Started Jan 15, 2026 • 42 days</div>
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-3">
+          <div className="text-[10px] font-semibold tracking-[0.12em] text-[#6B7280] uppercase mb-1">
+            Switching from
+          </div>
+          <div className="font-semibold text-[#1C1C1C] text-sm">
+            {MOCK_USER.currentRegimen.brand} {MOCK_USER.currentRegimen.dose}
+          </div>
+          <div className="text-xs text-[#6B7280]">
+            Started {MOCK_USER.currentRegimen.startedAt} · {MOCK_USER.currentRegimen.daysActive} days
           </div>
         </div>
 
-        {/* New Med */}
-        <div>
-          <label className="block text-sm font-medium text-[#1C1C1C] mb-3">Switching to</label>
-          <div className="space-y-2">
-            {medications.map((med) => (
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+          <label className="block text-xs font-semibold text-[#1C1C1C] mb-2">
+            Switching to
+          </label>
+          <div className="space-y-1.5 max-h-64 overflow-y-auto">
+            {MEDICATIONS.map((med) => (
               <button
-                key={med}
-                onClick={() => setFormData({ ...formData, newMed: med })}
-                className={`w-full p-4 border-2 rounded-xl text-left transition-colors ${
-                  formData.newMed === med
+                key={med.brand}
+                onClick={() =>
+                  setFormData({ ...formData, newMed: med.brand })
+                }
+                className={`w-full p-3 border-2 rounded-lg text-left transition-colors ${
+                  formData.newMed === med.brand
                     ? 'border-[#234a67] bg-[#e8f4f8]'
                     : 'border-[#E5E7EB] bg-white'
                 }`}
               >
-                <div className="font-medium text-[#1C1C1C]">{med}</div>
+                <div className="font-medium text-[#1C1C1C] text-sm">
+                  {med.brand}
+                </div>
+                <div className="text-xs text-[#6B7280]">{med.generic}</div>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Reasons */}
-        <div>
-          <label className="block text-sm font-medium text-[#1C1C1C] mb-3">
-            Reason for switch (select all that apply)
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+          <label className="block text-xs font-semibold text-[#1C1C1C] mb-2">
+            Reason{' '}
+            <span className="text-[#6B7280] font-normal">
+              (select all that apply)
+            </span>
           </label>
-          <div className="space-y-2">
-            {reasons.map((reason) => (
+          <div className="flex flex-wrap gap-1.5">
+            {REASONS.map((reason) => (
               <button
                 key={reason}
                 onClick={() => toggleReason(reason)}
-                className={`w-full p-3 border-2 rounded-xl text-left text-sm transition-colors ${
+                className={`px-3 h-8 border-2 rounded-full text-xs font-medium transition-colors ${
                   formData.reasons.includes(reason)
-                    ? 'border-[#234a67] bg-[#e8f4f8]'
-                    : 'border-[#E5E7EB] bg-white'
+                    ? 'border-[#234a67] bg-[#234a67] text-white'
+                    : 'border-[#E5E7EB] bg-white text-[#1C1C1C]'
                 }`}
               >
                 {reason}
@@ -118,17 +132,18 @@ export function SwitchMedication() {
           </div>
         </div>
 
-        {/* Decision Maker */}
-        <div>
-          <label className="block text-sm font-medium text-[#1C1C1C] mb-3">
-            Was this your decision or your doctor's?
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+          <label className="block text-xs font-semibold text-[#1C1C1C] mb-2">
+            Who decided?
           </label>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             {['My decision', "Doctor's decision"].map((option, i) => (
               <button
                 key={option}
-                onClick={() => setFormData({ ...formData, doctorDecision: i === 1 })}
-                className={`p-4 border-2 rounded-xl text-sm font-medium transition-colors ${
+                onClick={() =>
+                  setFormData({ ...formData, doctorDecision: i === 1 })
+                }
+                className={`h-11 border-2 rounded-lg text-xs font-medium transition-colors ${
                   formData.doctorDecision === (i === 1)
                     ? 'border-[#234a67] bg-[#e8f4f8] text-[#234a67]'
                     : 'border-[#E5E7EB] bg-white text-[#1C1C1C]'
@@ -140,26 +155,36 @@ export function SwitchMedication() {
           </div>
         </div>
 
-        {/* Switch Date */}
-        <div>
-          <label className="block text-sm font-medium text-[#1C1C1C] mb-2">Switch Date</label>
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+          <label className="block text-xs font-semibold text-[#1C1C1C] mb-1.5">
+            Switch date
+          </label>
           <input
             type="date"
             value={formData.date}
-            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-            className="w-full h-12 px-4 border border-[#E5E7EB] rounded-xl"
+            onChange={(e) =>
+              setFormData({ ...formData, date: e.target.value })
+            }
+            className="w-full h-11 px-3 border border-[#E5E7EB] rounded-lg text-sm"
           />
+        </div>
+
+        <div className="flex items-start gap-2 p-3 bg-white border border-[#E5E7EB] rounded-xl">
+          <Info className="w-3.5 h-3.5 text-[#6B7280] shrink-0 mt-0.5" />
+          <p className="text-[11px] text-[#6B7280] leading-relaxed">
+            Informational only. Medication changes should be discussed with
+            your prescriber.
+          </p>
         </div>
       </div>
 
-      {/* Submit Button */}
-      <div className="p-6 border-t border-[#E5E7EB]">
+      <div className="p-4 bg-white border-t border-[#E5E7EB]">
         <button
           onClick={handleSubmit}
           disabled={!formData.newMed || formData.reasons.length === 0}
-          className="w-full h-14 bg-[#234a67] text-white rounded-xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#1c425b] transition-colors"
+          className="w-full h-12 bg-[#234a67] text-white rounded-xl font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#1c425b] transition-colors"
         >
-          Confirm Switch
+          Confirm switch
         </button>
       </div>
     </div>
