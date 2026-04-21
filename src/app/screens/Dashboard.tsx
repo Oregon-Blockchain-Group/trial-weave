@@ -8,6 +8,7 @@ import {
   RefreshCw,
   ArrowUpRight,
   Users,
+  Scale,
 } from 'lucide-react';
 import { SectionHeader } from '../components/SectionHeader';
 import { MOCK_USER } from '../../data/mockUser';
@@ -171,6 +172,11 @@ export function Dashboard() {
               onClick={() => navigate('/log-cost')}
               icon={DollarSign}
               label="Cost"
+            />
+            <QuickAction
+              onClick={() => navigate('/log-weight')}
+              icon={Scale}
+              label="Weight"
             />
             <QuickAction
               onClick={() => navigate('/switch-medication')}

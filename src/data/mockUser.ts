@@ -36,6 +36,13 @@ export const MOCK_USER = {
 
   weightDeltaLb: -14.2,
 
+  weightEntries: [
+    { date: '2026-04-14', weightLb: 172.1 },
+    { date: '2026-04-07', weightLb: 173.0 },
+    { date: '2026-03-31', weightLb: 174.4 },
+    { date: '2026-03-24', weightLb: 175.2 },
+  ],
+
   adherencePct: 92,
   adherenceStreakDays: 14,
   adherenceLongestStreakDays: 21,

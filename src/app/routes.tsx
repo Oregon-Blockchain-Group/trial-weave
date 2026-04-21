@@ -9,6 +9,7 @@ import { Dashboard } from './screens/Dashboard';
 import { LogDose } from './screens/LogDose';
 import { LogSideEffect } from './screens/LogSideEffect';
 import { LogCost } from './screens/LogCost';
+import { LogWeight } from './screens/LogWeight';
 import { SwitchMedication } from './screens/SwitchMedication';
 import { Comparison } from './screens/Comparison';
 import { Adherence } from './screens/Adherence';
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
       { path: 'log-dose', Component: LogDose },
       { path: 'log-side-effect', Component: LogSideEffect },
       { path: 'log-cost', Component: LogCost },
+      { path: 'log-weight', Component: LogWeight },
       { path: 'switch-medication', Component: SwitchMedication },
       { path: 'comparison', Component: Comparison },
       { path: 'adherence', Component: Adherence },
