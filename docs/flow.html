@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Trial Weave — User Flow</title>
+<style>
+  :root {
+    --ink: #1C1C1C;
+    --muted: #6B7280;
+    --border: #E5E7EB;
+    --bg: #FAFAFA;
+    --teal: #234a67;
+    --teal-dim: #1c425b;
+    --accent: #e8f4f8;
+    --soft: #F3F4F6;
+    --warn: #B45309;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 32px 24px 96px; }
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  header h1 { font-size: 28px; margin: 6px 0 4px; font-weight: 700; }
+  .sub {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 24px;
+    max-width: 820px;
+    line-height: 1.55;
+  }
+  .doc-nav {
+    display: inline-flex;
+    gap: 8px;
+    padding: 6px;
+    border: 1px solid var(--border);
+    background: white;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  .doc-nav a {
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--muted);
+  }
+  .doc-nav a.active { background: var(--teal); color: white; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: white;
+    margin-bottom: 20px;
+    font-size: 12px;
+  }
+  .legend-item { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); }
+  .legend-swatch { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--border); }
+  .legend-line { width: 28px; height: 0; border-top: 2px solid var(--teal); }
+  .legend-line.dashed { border-top: 2px dashed var(--muted); }
+  .legend-line.thin { border-top: 1.5px solid var(--muted); }
+
+  .diagram {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 12px;
+    overflow-x: auto;
+  }
+  svg { display: block; width: 100%; height: auto; }
+
+  .node-rect { fill: white; stroke: var(--border); stroke-width: 1.5; }
+  .node-rect-onb { fill: white; stroke: var(--teal); stroke-width: 2; }
+  .node-rect-hub { fill: var(--teal); stroke: var(--teal); }
+  .node-rect-sub { fill: var(--accent); stroke: var(--teal); stroke-width: 1.5; }
+  .node-rect-new { fill: #FFF7ED; stroke: var(--warn); stroke-width: 2; }
+  .tt { font-size: 15px; font-weight: 700; fill: var(--ink); font-family: ui-sans-serif, system-ui, sans-serif; }
+  .tt-hub { fill: white; font-size: 18px; }
+  .ts { font-size: 12px; fill: var(--muted); font-family: ui-sans-serif, system-ui, sans-serif; }
+  .ts-hub { fill: rgba(255,255,255,0.88); }
+  .tb { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; fill: var(--teal); font-family: ui-monospace, monospace; }
+  .tb-hub { fill: rgba(255,255,255,0.85); }
+  .tb-new { fill: var(--warn); }
+  .section { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; fill: var(--muted); font-weight: 700; font-family: ui-sans-serif, system-ui, sans-serif; }
+
+  .edge { stroke: var(--teal); stroke-width: 2; fill: none; }
+  .edge-thin { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+  .edge-dashed { stroke: var(--muted); stroke-width: 1.5; fill: none; stroke-dasharray: 5 4; }
+
+  .details { margin-top: 48px; }
+  .details h2 { font-size: 22px; margin: 6px 0 4px; font-weight: 700; }
+  .details-intro { color: var(--muted); font-size: 14px; margin-bottom: 20px; max-width: 820px; line-height: 1.55; }
+  .details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 14px;
+  }
+  .card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .card.onb { border-color: var(--teal); }
+  .card.hub { background: var(--teal); color: white; }
+  .card.hub .eyebrow, .card.hub dt { color: rgba(255,255,255,0.75); }
+  .card.hub .purpose, .card.hub dd { color: white; }
+  .card.hub .pill { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.25); color: white; }
+  .card .eyebrow { font-size: 10px; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 6px; }
+  .card h3 { font-size: 15px; margin: 0 0 8px; font-weight: 700; }
+  .card .purpose { font-size: 13px; color: var(--ink); margin-bottom: 12px; line-height: 1.55; }
+  .card dl { margin: 0; font-size: 12px; }
+  .card dt { color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-size: 10px; margin-top: 10px; }
+  .card dd { margin: 3px 0 0; color: var(--ink); line-height: 1.55; }
+  .pill {
+    display: inline-block; padding: 2px 8px; background: var(--accent);
+    border: 1px solid rgba(35,74,103,0.2); color: var(--teal);
+    border-radius: 999px; font-size: 11px; font-weight: 600;
+    margin-right: 4px; margin-bottom: 3px;
+  }
+  .pill.ghost { background: white; border-color: var(--border); color: var(--muted); }
+  .pill.warn { background: #FFF7ED; border-color: #FDBA74; color: var(--warn); }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 16px 12px 64px; }
+    header h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Trial Weave · Wireframe</div>
+    <h1>User Flow — Full App</h1>
+    <p class="sub">Top-to-bottom walkthrough of the product. Onboarding is a 5-step linear spine (Consent is now the final gate before Complete). The main app branches out from the Dashboard hub. Six peers live under the bottom-nav lane.</p>
+    <nav class="doc-nav">
+      <a class="active" href="flow.html">User flow</a>
+      <a href="data.html">Data schema</a>
+    </nav>
+  </header>
+
+  <div class="legend">
+    <span class="legend-item"><span class="legend-swatch" style="background:white; border-color:#234a67; border-width:2px;"></span>Onboarding</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#234a67; border-color:#234a67;"></span>Hub</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:white;"></span>Main app</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#e8f4f8; border-color:#234a67;"></span>Sub-tab</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:#FFF7ED; border-color:#B45309; border-width:2px;"></span>Added this pass</span>
+    <span class="legend-item"><span class="legend-line"></span>Primary flow</span>
+    <span class="legend-item"><span class="legend-line thin"></span>Return-to-hub</span>
+    <span class="legend-item"><span class="legend-line dashed"></span>Bottom-nav peer link</span>
+  </div>
+
+  <div class="diagram">
+    <svg viewBox="0 0 1000 2620" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Trial Weave vertical user flow">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#234a67"/>
+        </marker>
+        <marker id="arrow-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#6B7280"/>
+        </marker>
+      </defs>
+
+      <!-- ===== 1. ONBOARDING (vertical spine, 5 screens + welcome) ===== -->
+      <text x="40" y="42" class="section">1 · Onboarding — Welcome + 5 linear steps</text>
+
+      <!-- Welcome -->
+      <g>
+        <rect x="280" y="70" width="440" height="100" rx="14" class="node-rect-onb"/>
+        <text x="500" y="100" text-anchor="middle" class="tb">/</text>
+        <text x="500" y="128" text-anchor="middle" class="tt">Welcome</text>
+        <text x="500" y="152" text-anchor="middle" class="ts">Lōkahi logo · "Welcome to Trial Weave" · trust microcopy</text>
+      </g>
+      <path d="M 500 170 L 500 215" class="edge" marker-end="url(#arrow)"/>
+
+      <!-- Demographics (1/5) -->
+      <g>
+        <rect x="280" y="220" width="440" height="120" rx="14" class="node-rect-onb"/>
+        <text x="500" y="248" text-anchor="middle" class="tb">/demographics · step 1/5</text>
+        <text x="500" y="274" text-anchor="middle" class="tt">Demographics</text>
+        <text x="500" y="296" text-anchor="middle" class="ts">display name (opt) · age · sex · race/ethnicity</text>
+        <text x="500" y="314" text-anchor="middle" class="ts">city · state · height · starting weight · comorbidities</text>
+      </g>
+      <path d="M 500 340 L 500 385" class="edge" marker-end="url(#arrow)"/>
+
+      <!-- Medication (2/5) -->
+      <g>
+        <rect x="280" y="390" width="440" height="130" rx="14" class="node-rect-onb"/>
+        <text x="500" y="418" text-anchor="middle" class="tb">/medication · step 2/5</text>
+        <text x="500" y="444" text-anchor="middle" class="tt">Medication</text>
+        <text x="500" y="466" text-anchor="middle" class="ts">category · form (injection / pill) · supply (branded / compounded)</text>
+        <text x="500" y="484" text-anchor="middle" class="ts">drug · dose · frequency · start · indication · prior GLP-1</text>
+        <text x="500" y="502" text-anchor="middle" class="ts" style="fill:#B45309;">Safety check: pregnancy · MTC / MEN 2 history</text>
+      </g>
+      <path d="M 500 520 L 500 565" class="edge" marker-end="url(#arrow)"/>
+
+      <!-- Baselines (3/5) -->
+      <g>
+        <rect x="280" y="570" width="440" height="100" rx="14" class="node-rect-onb"/>
+        <text x="500" y="598" text-anchor="middle" class="tb">/baselines · step 3/5</text>
+        <text x="500" y="624" text-anchor="middle" class="tt">Baselines</text>
+        <text x="500" y="648" text-anchor="middle" class="ts">6 factors × 1–5 · energy · appetite · mood · sleep · activity · stomach</text>
+      </g>
+      <path d="M 500 670 L 500 715" class="edge" marker-end="url(#arrow)"/>
+
+      <!-- Consent (4/5) — NEW -->
+      <g>
+        <rect x="280" y="720" width="440" height="130" rx="14" class="node-rect-new"/>
+        <text x="500" y="748" text-anchor="middle" class="tb tb-new">/consent · step 4/5</text>
+        <text x="500" y="774" text-anchor="middle" class="tt">Consent</text>
+        <text x="500" y="796" text-anchor="middle" class="ts">Required: Terms · Privacy · HIPAA authorization</text>
+        <text x="500" y="814" text-anchor="middle" class="ts">Optional: de-identified research · sale of data (off) · marketing</text>
+        <text x="500" y="834" text-anchor="middle" class="ts" style="fill:#B45309;">Editable later in Profile → Privacy</text>
+      </g>
+      <path d="M 500 850 L 500 895" class="edge" marker-end="url(#arrow)"/>
+
+      <!-- Complete (5/5) -->
+      <g>
+        <rect x="280" y="900" width="440" height="110" rx="14" class="node-rect-onb"/>
+        <text x="500" y="928" text-anchor="middle" class="tb">/complete · step 5/5</text>
+        <text x="500" y="954" text-anchor="middle" class="tt">Complete</text>
+        <text x="500" y="978" text-anchor="middle" class="ts">Check badge · cohort preview (n=1,247) · value cards</text>
+        <text x="500" y="996" text-anchor="middle" class="ts">"Go to my dashboard"</text>
+      </g>
+
+      <!-- arrow to Dashboard -->
+      <path d="M 500 1010 L 500 1090" class="edge" marker-end="url(#arrow)"/>
+      <text x="520" y="1050" class="ts" style="font-style:italic;">→ on completion · bottom nav activates</text>
+
+      <!-- ===== 2. MAIN APP ===== -->
+      <text x="40" y="1072" class="section">2 · Main app — Dashboard as hub, branches below</text>
+
+      <!-- Dashboard (hub) -->
+      <g>
+        <rect x="160" y="1100" width="680" height="200" rx="16" class="node-rect-hub"/>
+        <text x="500" y="1136" text-anchor="middle" class="tb tb-hub">/dashboard</text>
+        <text x="500" y="1168" text-anchor="middle" class="tt tt-hub">Dashboard (hub)</text>
+        <text x="500" y="1196" text-anchor="middle" class="ts ts-hub">Current regimen (Days · Weight Δ · Next dose)</text>
+        <text x="500" y="1216" text-anchor="middle" class="ts ts-hub">1-tap "Taken" widget · Cohort CTA ("top 28%…")</text>
+        <text x="500" y="1236" text-anchor="middle" class="ts ts-hub">Adherence ring + 🔥 streak chip · Quick actions × 5</text>
+        <text x="500" y="1256" text-anchor="middle" class="ts ts-hub">Baseline → now grid · Weight-trend area chart</text>
+      </g>
+
+      <!-- Branch arrows down -->
+      <path d="M 260 1300 L 230 1380" class="edge" marker-end="url(#arrow)"/>
+      <path d="M 740 1300 L 770 1380" class="edge" marker-end="url(#arrow)"/>
+      <path d="M 500 1300 L 500 1380" class="edge" marker-end="url(#arrow)"/>
+
+      <!-- Branch headers -->
+      <text x="40" y="1370" class="section">Logging (quick actions + Switch peer)</text>
+      <text x="560" y="1370" class="section">Bottom-nav destinations</text>
+
+      <!-- ===== LEFT COLUMN: Logging screens ===== -->
+
+      <!-- Log Dose -->
+      <g>
+        <rect x="40" y="1390" width="440" height="130" rx="12" class="node-rect"/>
+        <text x="60" y="1418" class="tb">/log-dose</text>
+        <text x="60" y="1444" class="tt">Log Dose (or Pill)</text>
+        <text x="60" y="1464" class="ts">date · time · site OR "taken with" (form-aware)</text>
+        <text x="60" y="1482" class="ts">titration step · dose event (on time / late / skipped reason)</text>
+        <rect x="60" y="1490" width="180" height="22" rx="11" fill="#e8f4f8" stroke="#234a67" stroke-opacity="0.3"/>
+        <text x="150" y="1505" text-anchor="middle" style="font-size:10px; font-weight:700; fill:#234a67; letter-spacing:0.08em; font-family:ui-sans-serif,sans-serif;">OPTIONAL CHECK-IN</text>
+        <text x="250" y="1505" class="ts" style="font-size:11px;">10 factors × 1–5 (6 baseline + 4 GLP-1 extras)</text>
+      </g>
+
+      <!-- Log Side Effect -->
+      <g>
+        <rect x="40" y="1550" width="440" height="100" rx="12" class="node-rect"/>
+        <text x="60" y="1578" class="tb">/log-side-effect</text>
+        <text x="60" y="1604" class="tt">Log Side Effect</text>
+        <text x="60" y="1622" class="ts">category · severity · duration · impact</text>
+        <text x="60" y="1640" class="ts" style="fill:#B45309;">severity ≥ 4 + ongoing → 🚩 escalation callout (red-flag symptoms)</text>
+      </g>
+
+      <!-- Log Cost -->
+      <g>
+        <rect x="40" y="1680" width="440" height="80" rx="12" class="node-rect"/>
+        <text x="60" y="1708" class="tb">/log-cost</text>
+        <text x="60" y="1734" class="tt">Log Cost</text>
+        <text x="60" y="1752" class="ts">amount · type · pharmacy · supply days · post-insurance copay</text>
+      </g>
+
+      <!-- Log Weight (NEW) -->
+      <g>
+        <rect x="40" y="1790" width="440" height="100" rx="12" class="node-rect-new"/>
+        <text x="60" y="1818" class="tb tb-new">/log-weight</text>
+        <text x="60" y="1844" class="tt">Log Weight</text>
+        <text x="60" y="1862" class="ts">weight (lb / kg) · date · time · fasted? · notes</text>
+        <text x="60" y="1880" class="ts">Feeds Dashboard + Insights weight-trend charts</text>
+      </g>
+
+      <!-- Return-on-submit arrow -->
+      <path d="M 480 1890 C 620 1950, 620 1300, 560 1260" class="edge-thin" marker-end="url(#arrow-muted)"/>
+      <text x="490" y="1920" class="ts" style="font-style:italic;">on submit → /dashboard</text>
+
+      <!-- ===== CENTER: Notifications ===== -->
+      <g>
+        <rect x="310" y="1390" width="180" height="70" rx="12" class="node-rect"/>
+        <text x="330" y="1416" class="tb">/notifications</text>
+        <text x="330" y="1440" class="tt" style="font-size:13px;">Notifications</text>
+        <text x="330" y="1454" class="ts" style="font-size:10px;">(bell tap)</text>
+      </g>
+
+      <!-- ===== RIGHT COLUMN: Bottom-nav destinations ===== -->
+
+      <!-- Comparison -->
+      <g>
+        <rect x="540" y="1390" width="420" height="100" rx="12" class="node-rect"/>
+        <text x="560" y="1418" class="tb">/comparison</text>
+        <text x="560" y="1444" class="tt">Comparison</text>
+        <text x="560" y="1466" class="ts">Cohort hub · 2 sub-tabs</text>
+        <text x="560" y="1482" class="ts">CohortBadge + filter chips + "Illustrative demo data" tag</text>
+      </g>
+
+      <!-- Comparison sub-tabs (renamed) -->
+      <path d="M 620 1490 L 620 1520" class="edge" marker-end="url(#arrow)"/>
+      <path d="M 880 1490 L 880 1520" class="edge" marker-end="url(#arrow)"/>
+
+      <g>
+        <rect x="540" y="1520" width="200" height="88" rx="12" class="node-rect-sub"/>
+        <text x="560" y="1546" class="tb">tab · you-vs-cohort</text>
+        <text x="560" y="1570" class="tt" style="font-size:13px;">You vs. cohort</text>
+        <text x="560" y="1588" class="ts" style="font-size:10px;">6 outcomes · post-insurance copay row</text>
+        <text x="560" y="1602" class="ts" style="font-size:10px;">percentile bar + midline</text>
+      </g>
+      <g>
+        <rect x="760" y="1520" width="200" height="88" rx="12" class="node-rect-sub"/>
+        <text x="780" y="1546" class="tb">tab · other-options</text>
+        <text x="780" y="1570" class="tt" style="font-size:13px;">Other options</text>
+        <text x="780" y="1588" class="ts" style="font-size:10px;">cohort-observed outcomes</text>
+        <text x="780" y="1602" class="ts" style="font-size:10px;">no rankings or "best" badges</text>
+      </g>
+
+      <!-- Switch Medication (NEW as peer destination) -->
+      <g>
+        <rect x="540" y="1640" width="420" height="110" rx="12" class="node-rect-new"/>
+        <text x="560" y="1668" class="tb tb-new">/switch-medication · bottom-nav peer</text>
+        <text x="560" y="1694" class="tt">Switch Medication</text>
+        <text x="560" y="1714" class="ts">new drug · reasons · decision-maker · date</text>
+        <text x="560" y="1732" class="ts" style="fill:#B45309;">Amber guardrail: titration resets · washout · form-change warning</text>
+      </g>
+
+      <!-- Insights -->
+      <g>
+        <rect x="540" y="1780" width="420" height="130" rx="12" class="node-rect"/>
+        <text x="560" y="1808" class="tb">/insights</text>
+        <text x="560" y="1834" class="tt">Insights</text>
+        <text x="560" y="1854" class="ts">My view · Clinician view toggle</text>
+        <text x="560" y="1872" class="ts">Weight trend · cohort bar chart · side effects by drug</text>
+        <text x="560" y="1890" class="ts">Cost by drug · baseline shifts · Clinician PDF · MyChart stub</text>
+      </g>
+
+      <!-- Adherence -->
+      <g>
+        <rect x="540" y="1940" width="420" height="80" rx="12" class="node-rect"/>
+        <text x="560" y="1968" class="tb">/adherence</text>
+        <text x="560" y="1994" class="tt">Adherence</text>
+        <text x="560" y="2012" class="ts">ring stats · cohort benchmark · calendar · miss reasons</text>
+      </g>
+
+      <!-- Profile -->
+      <g>
+        <rect x="540" y="2050" width="420" height="110" rx="12" class="node-rect"/>
+        <text x="560" y="2078" class="tb">/profile</text>
+        <text x="560" y="2104" class="tt">Profile</text>
+        <text x="560" y="2124" class="ts">identity (first name only) · matched cohort · demographics</text>
+        <text x="560" y="2142" class="ts">medication history · Connections (Apple Health / scale / CGM) · settings</text>
+      </g>
+
+      <!-- ===== 3. BOTTOM NAV LANE (6 tabs) ===== -->
+      <text x="40" y="2240" class="section">3 · Bottom-nav lane — 6 peer destinations (any-to-any)</text>
+      <line x1="40" y1="2290" x2="960" y2="2290" class="edge-dashed"/>
+
+      <g>
+        <circle cx="110" cy="2290" r="8" fill="#234a67"/>
+        <text x="110" y="2320" text-anchor="middle" class="tb">HOME</text>
+        <text x="110" y="2340" text-anchor="middle" class="ts">/dashboard</text>
+      </g>
+      <g>
+        <circle cx="270" cy="2290" r="8" fill="#234a67"/>
+        <text x="270" y="2320" text-anchor="middle" class="tb">LOG</text>
+        <text x="270" y="2340" text-anchor="middle" class="ts">/log-dose (default)</text>
+      </g>
+      <g>
+        <circle cx="430" cy="2290" r="8" fill="#234a67"/>
+        <text x="430" y="2320" text-anchor="middle" class="tb">COMPARE</text>
+        <text x="430" y="2340" text-anchor="middle" class="ts">/comparison</text>
+      </g>
+      <g>
+        <circle cx="570" cy="2290" r="8" fill="#B45309"/>
+        <text x="570" y="2320" text-anchor="middle" class="tb tb-new">SWITCH</text>
+        <text x="570" y="2340" text-anchor="middle" class="ts">/switch-medication</text>
+      </g>
+      <g>
+        <circle cx="730" cy="2290" r="8" fill="#234a67"/>
+        <text x="730" y="2320" text-anchor="middle" class="tb">INSIGHTS</text>
+        <text x="730" y="2340" text-anchor="middle" class="ts">/insights</text>
+      </g>
+      <g>
+        <circle cx="890" cy="2290" r="8" fill="#234a67"/>
+        <text x="890" y="2320" text-anchor="middle" class="tb">PROFILE</text>
+        <text x="890" y="2340" text-anchor="middle" class="ts">/profile</text>
+      </g>
+      <text x="40" y="2390" class="ts" style="font-size:12px;">Bottom nav is hidden through all 5 onboarding steps (Welcome · Demographics · Medication · Baselines · Consent) and every log screen. "Log" goes to /log-dose by default; Dashboard quick actions pivot to the other loggers.</text>
+
+      <!-- ===== 4. NOTES ===== -->
+      <text x="40" y="2460" class="section">Notes</text>
+      <text x="60" y="2490" class="ts" style="font-size:12px;">• Dashboard is category-aware. Today's eyebrow reads "TRIAL WEAVE · GLP-1"; future categories swap the body while keeping the chrome.</text>
+      <text x="60" y="2514" class="ts" style="font-size:12px;">• Cohort filters are set during onboarding and editable from /profile → "Edit cohort filters" — they drive every cohort comparison downstream.</text>
+      <text x="60" y="2538" class="ts" style="font-size:12px;">• Log-dose's optional check-in re-rates 6 baseline + 4 GLP-1-specific factors; updates the "Baseline → now" surfaces on Dashboard and Insights.</text>
+      <text x="60" y="2562" class="ts" style="font-size:12px;">• Every cohort stat renders under an "Illustrative demo data" disclaimer until the real cohort <tspan style="font-family:ui-monospace,monospace;">n</tspan> is wired up.</text>
+      <text x="60" y="2586" class="ts" style="font-size:12px;">• Switch was promoted from a Dashboard quick-action to a first-class bottom-nav peer — it is Trial Weave's defensible wedge vs. pharma-owned companion apps.</text>
+    </svg>
+  </div>
+
+  <!-- ============ DETAILED EXPLANATIONS ============ -->
+  <section class="details">
+    <div class="eyebrow">Screen-by-screen</div>
+    <h2>Detailed flow</h2>
+    <p class="details-intro">Each card describes one screen's purpose, the inputs/state it owns, and the transitions in and out of it. Consent is now the final onboarding step; Switch is a first-class bottom-nav peer; LogWeight has its own screen.</p>
+
+    <div class="details-grid">
+
+      <div class="card onb">
+        <div class="eyebrow">Onboarding · /</div>
+        <h3>1 · Welcome</h3>
+        <p class="purpose">Landing screen for first-time users. Sets product identity (Lōkahi logo + Trial Weave name) and seeds trust before any data is collected.</p>
+        <dl>
+          <dt>Shows</dt>
+          <dd>Lōkahi logo · "Welcome to Trial Weave" · one-line pitch · "HIPAA-aligned · you control what's shared" microcopy.</dd>
+          <dt>CTAs</dt>
+          <dd><span class="pill">Get Started → /demographics</span><span class="pill ghost">I already have an account</span></dd>
+          <dt>Chrome</dt>
+          <dd>No progress bar. No bottom nav.</dd>
+        </dl>
+      </div>
+
+      <div class="card onb">
+        <div class="eyebrow">Onboarding · /demographics · step 1/5</div>
+        <h3>2 · Demographics</h3>
+        <p class="purpose">The most important onboarding page per client. Everything downstream (cohort filters, percentile math, drug rankings, price comparisons) pivots on these fields.</p>
+        <dl>
+          <dt>Required</dt>
+          <dd>Age · Sex · City + State · Height (ft+in) · Starting weight · Health history (multi-select chips incl. T2D, PCOS, pancreatitis, thyroid, None).</dd>
+          <dt>Optional</dt>
+          <dd>Display name (no legal first/last stored) · Race / Ethnicity.</dd>
+          <dt>In / Out</dt>
+          <dd>In: Welcome · Back → /. Out: Continue → /medication.</dd>
+        </dl>
+      </div>
+
+      <div class="card onb">
+        <div class="eyebrow">Onboarding · /medication · step 2/5</div>
+        <h3>3 · Medication</h3>
+        <p class="purpose">Establishes the user's current regimen and the context fields cohort matching depends on (form, supply, indication, prior-GLP-1).</p>
+        <dl>
+          <dt>Category</dt>
+          <dd><span class="pill">GLP-1s (active)</span><span class="pill ghost">Blood pressure</span><span class="pill ghost">Birth control</span><span class="pill ghost">Mental health</span></dd>
+          <dt>Form &amp; supply</dt>
+          <dd><span class="pill">Injection</span><span class="pill">Pill</span> · <span class="pill">Branded</span><span class="pill">Compounded</span></dd>
+          <dt>When drug selected</dt>
+          <dd>Dose (keyed per drug) · Frequency · Start date · Indication (Weight / T2D / Both) · Prior GLP-1 (First time / Switched / Restarted) · Safety check (pregnancy · MTC/MEN 2 → amber warning if any yes).</dd>
+        </dl>
+      </div>
+
+      <div class="card onb">
+        <div class="eyebrow">Onboarding · /baselines · step 3/5</div>
+        <h3>4 · Baselines</h3>
+        <p class="purpose">Captures the 1–5 starting point the app tracks against over time. Enables "Baseline → now" shifts on Dashboard and Insights.</p>
+        <dl>
+          <dt>Factors (all required)</dt>
+          <dd>Energy · Appetite · Mood · Sleep · Activity · Stomach discomfort — each with descriptive single-word endpoints under the 1 and 5 buttons (e.g. Drained ↔ Energized).</dd>
+          <dt>Updated later via</dt>
+          <dd>Log Dose → optional check-in (extends to 10 factors).</dd>
+        </dl>
+      </div>
+
+      <div class="card onb">
+        <div class="eyebrow">Onboarding · /consent · step 4/5 (new)</div>
+        <h3>5 · Consent</h3>
+        <p class="purpose">Legal gate before the dashboard unlocks. Captures three required agreements plus three granular data-handling opt-ins — each one independently toggleable.</p>
+        <dl>
+          <dt>Required</dt>
+          <dd><span class="pill">Terms of Service</span><span class="pill">Privacy Policy</span><span class="pill">HIPAA authorization</span> — native checkboxes with associated labels and separate "View" links.</dd>
+          <dt>Optional toggles</dt>
+          <dd><span class="pill">Research (on)</span><span class="pill warn">Sale of data (off, opt-in only)</span><span class="pill">Marketing (off)</span></dd>
+          <dt>Editable later</dt>
+          <dd>Profile → Privacy &amp; sharing. Account / data deletion via <code>privacy@lokahi.health</code>.</dd>
+        </dl>
+      </div>
+
+      <div class="card onb">
+        <div class="eyebrow">Onboarding · /complete · step 5/5</div>
+        <h3>6 · Complete</h3>
+        <p class="purpose">Confirmation + cohort preview. Primes the user with a real-looking cohort number before they hit the dashboard.</p>
+        <dl>
+          <dt>Shows</dt>
+          <dd>Check badge · "We found 1,247 people like you" · cohort preview card ("median −11.8 lb at 12 wk, range −4 to −21") · 3 value cards. Labeled as illustrative demo data.</dd>
+          <dt>Exit point</dt>
+          <dd>Bottom nav activates from this point forward.</dd>
+        </dl>
+      </div>
+
+      <div class="card hub">
+        <div class="eyebrow">Main app · /dashboard (hub)</div>
+        <h3>7 · Dashboard</h3>
+        <p class="purpose">The landing hub after onboarding. Every path either starts here or returns here.</p>
+        <dl>
+          <dt>Header band</dt>
+          <dd>Lōkahi logo · bell (→ /notifications) · avatar (→ /profile) · "TRIAL WEAVE · GLP-1" eyebrow + greeting.</dd>
+          <dt>Blocks</dt>
+          <dd>Current regimen (Days / Weight Δ / Next dose) · <strong>1-tap "Taken" widget</strong> (form-aware: Dose/Pill icon, green confirm state) · Cohort CTA ("top 28%") · Adherence ring + <strong>🔥 streak chip</strong> · Quick actions × 5 (Log dose · Side effect · Cost · Weight · Switch med) · Baseline → now grid · <strong>Weight trend area chart</strong>.</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">Main app · /comparison</div>
+        <h3>8 · Comparison (cohort hub)</h3>
+        <p class="purpose">The client's favorite surface. Answers the two product questions: <em>"How do I compare to people like me?"</em> and <em>"What drug works best for people like me?"</em></p>
+        <dl>
+          <dt>Structure</dt>
+          <dd>Two sub-tabs directly beneath the header. CohortBadge with filter chips + <code>n=</code> + illustrative-demo-data footer sits below.</dd>
+          <dt>Sub-tabs (renamed)</dt>
+          <dd><span class="pill">You vs. cohort</span> (default) · <span class="pill">Other options</span></dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">Sub-tab · /comparison (you-vs-cohort)</div>
+        <h3>8a · You vs. cohort</h3>
+        <p class="purpose">Head-to-head comparison of the user against matched cohort medians.</p>
+        <dl>
+          <dt>Outcomes (6)</dt>
+          <dd>Weight change (12 wk) · Adherence rate · Side-effect days / mo · Energy · Mood · <strong>Avg monthly copay (post-insurance)</strong>.</dd>
+          <dt>Per row</dt>
+          <dd>You vs Cohort median · Better / Below · percentile bar with midline tick.</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">Sub-tab · /comparison (other-options)</div>
+        <h3>8b · Other options</h3>
+        <p class="purpose">Observational cohort outcomes per GLP-1 drug — not a recommendation. Rankings, "best efficacy/tolerability/balance" badges, and "data-driven recommendation" language are all removed to stay clear of medical-advice territory.</p>
+        <dl>
+          <dt>Hero</dt>
+          <dd>"What others in your cohort experienced" — "Individual results vary — this is not a recommendation. Your prescriber decides what's right for you."</dd>
+          <dt>Drug cards</dt>
+          <dd>No rank circle. Brand + generic + CURRENT tag if applicable · 3 stats (Weight Δ · Side fx · Rating). 52-week window.</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">Main app · /insights</div>
+        <h3>9 · Insights</h3>
+        <p class="purpose">Cohort-first analytics. "People like you" framing leads every block. Switchable to a clinician-oriented view for visits.</p>
+        <dl>
+          <dt>View toggle</dt>
+          <dd><span class="pill">My view</span> (default) · <span class="pill">Clinician view</span> — hides cohort sections, shows an EHR-ready summary grid (regimen · days · weight Δ · adherence · streak · side-fx count).</dd>
+          <dt>Blocks (My view)</dt>
+          <dd>Cohort hero (softened — "people like you reported… at 52 weeks, individual results vary") · Weight trend area chart · GLP-1 outcomes BarChart (brand blue top performer, grey others) · Side effects by drug · Cost by drug · Baseline shifts · Side-effect trends.</dd>
+          <dt>Export</dt>
+          <dd><span class="pill">Clinician PDF</span> · <span class="pill">CSV</span> · <span class="pill ghost">Share to Epic MyChart (coming soon)</span></dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">Main app · /adherence</div>
+        <h3>10 · Adherence</h3>
+        <p class="purpose">Key stats + cohort benchmark + miss-reason diagnostics.</p>
+        <dl>
+          <dt>Blocks</dt>
+          <dd>Key stats (this month % / streak / longest) · Cohort benchmark (You · Median · Top quartile) · Calendar heatmap · Miss reasons.</dd>
+          <dt>Entry points</dt>
+          <dd>Dashboard ring tap. (No dedicated bottom-nav tab.)</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">Main app · /profile</div>
+        <h3>11 · Profile</h3>
+        <p class="purpose">Identity + cohort + medication history + integrations + settings.</p>
+        <dl>
+          <dt>Blocks</dt>
+          <dd>Identity header (first name only — schema stores no legal last name) · Matched cohort card · Demographics rows · Medications (Current / Past) · <strong>Connections</strong> (Apple Health / Google Fit, Smart scale, CGM — stubs) · Settings · Export · Delete.</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">Logging · /log-dose</div>
+        <h3>12 · Log Dose (or Pill)</h3>
+        <p class="purpose">Fast data capture for a taken dose. Injection-site vs pill "taken with" swap happens automatically based on the current regimen's form.</p>
+        <dl>
+          <dt>Core fields</dt>
+          <dd>Date · Time · <strong>Injection site</strong> (abdomen / thigh / upper arm) <em>or</em> <strong>Taken with</strong> (empty stomach / with food / after food) · <strong>Titration step</strong> (steady / stepped up / stepped down) · <strong>Dose event</strong> (on time / took late / skipped side fx / skipped other) · Notes.</dd>
+          <dt>Optional check-in</dt>
+          <dd>10 compact factor rows (6 baseline + 4 GLP-1 extras — food tolerance, hydration, muscle / strength, cycle regularity).</dd>
+          <dt>Submit</dt>
+          <dd>"Record dose" or "Record pill" (form-aware) → success → auto-return to /dashboard.</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">Logging · /log-side-effect</div>
+        <h3>13 · Log Side Effect</h3>
+        <p class="purpose">Single-event capture with enough granularity to feed Insights trend cards. Includes an escalation callout for severe ongoing symptoms.</p>
+        <dl>
+          <dt>Required</dt>
+          <dd>Category · Severity 1–5.</dd>
+          <dt>Optional</dt>
+          <dd>Duration · Impact · Date · Time.</dd>
+          <dt>Escalation</dt>
+          <dd>When severity ≥ 4 AND duration = Ongoing, a red-bordered callout lists pancreatitis / gallbladder / thyroid / dehydration red-flag symptoms and references 911.</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">Logging · /log-cost</div>
+        <h3>14 · Log Cost</h3>
+        <p class="purpose">Tracks actual spend. 30-day average card up top labeled "post-insurance copay" so nobody confuses the $45 figure with list price.</p>
+        <dl>
+          <dt>Fields</dt>
+          <dd>Amount · Cost type (Copay / OOP / Coupon / Retail) · Pharmacy · Insurance applied · Supply duration · Fill date.</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">Logging · /log-weight (now documented)</div>
+        <h3>15 · Log Weight</h3>
+        <p class="purpose">Per-weigh-in capture. Feeds both Dashboard and Insights weight-trend area charts and the Comparison weight-change outcome row.</p>
+        <dl>
+          <dt>Fields</dt>
+          <dd>Weight (lb / kg toggle) · Date · Time · Fasted? · Notes. Header shows current weight, Δ from start, Δ from previous entry.</dd>
+          <dt>Schema</dt>
+          <dd><code>weight_entries</code> table stores <code>weight_lb</code> · <code>recorded_at</code> (timestamptz) · <code>fasted</code> · <code>notes</code> · <code>source</code> (manual / apple_health / google_fit / smart_scale).</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">Main app · /switch-medication · bottom-nav peer</div>
+        <h3>16 · Switch Medication</h3>
+        <p class="purpose">Promoted from Dashboard quick-action to a first-class bottom-nav tab — the cross-drug switching flow is Trial Weave's defensible wedge vs. pharma-owned companion apps.</p>
+        <dl>
+          <dt>Fields</dt>
+          <dd>New drug (filtered to non-coming-soon with form badge) · Reason chips (multi-select) · Decision-maker · Switch date.</dd>
+          <dt>Guardrail card (amber)</dt>
+          <dd>Titration resets · Washout window · Form-change warning (appears when new drug's form differs from current — e.g. injection → pill) · "Your prescriber decides timing and dose."</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="eyebrow">Main app · /notifications</div>
+        <h3>17 · Notifications</h3>
+        <p class="purpose">Passive surface for reminders, cohort insights, and confirmations.</p>
+        <dl>
+          <dt>Entry types</dt>
+          <dd>Reminder · Cohort insight · Weekly summary · Confirmation.</dd>
+          <dt>Entry point</dt>
+          <dd>Dashboard bell (not in bottom nav).</dd>
+        </dl>
+      </div>
+
+    </div>
+
+    <div style="margin-top: 28px;">
+      <div class="eyebrow">Cross-cutting</div>
+      <h2 style="font-size: 18px;">Patterns used across screens</h2>
+      <div class="details-grid">
+        <div class="card">
+          <h3>CohortBadge</h3>
+          <p class="purpose">Reusable "YOUR MATCHED COHORT · n=1,247" strip with filter chips and an amber "Illustrative demo data · not clinical evidence" footer. Appears at the top of Comparison and (when clinician view is off) Insights.</p>
+        </div>
+        <div class="card">
+          <h3>SectionHeader</h3>
+          <p class="purpose">Uppercase eyebrow + title + optional right-aligned meta (e.g., <code>52-wk window</code>, <code>de-identified</code>). Clinical tone marker across every main-app card.</p>
+        </div>
+        <div class="card">
+          <h3>1–5 rating pattern</h3>
+          <p class="purpose">Every factor rating (baselines, check-ins, side-effect severity) renders as 5 equal flex-1 buttons with descriptive single-word endpoints (Drained / Energized, Mild / Severe, etc.) centered under the 1 and 5 buttons in bold brand blue. Convention: 5 = more of the named factor.</p>
+        </div>
+        <div class="card">
+          <h3>Return-to-dashboard on submit</h3>
+          <p class="purpose">All five log screens render a brief success confirmation and auto-navigate back to /dashboard so the user never has to back-button out of a log entry.</p>
+        </div>
+        <div class="card">
+          <h3>Category-aware dashboard</h3>
+          <p class="purpose">Today's eyebrow reads "TRIAL WEAVE · GLP-1". When new categories ship, the eyebrow and the current-regimen card swap; the rest of the chrome is unchanged.</p>
+        </div>
+        <div class="card">
+          <h3>Illustrative-demo-data disclaimer</h3>
+          <p class="purpose">Until the real cohort <code>n</code> is wired up, every cohort stat renders under an amber "Illustrative demo data · not clinical evidence" footer on CohortBadge and a softened "Individual results vary — not a prediction of your outcome" line on Insights.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

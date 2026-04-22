@@ -1,0 +1,188 @@
+
+
+
+
+
+
+
+
+%% Trial Weave — Schema v2 (post-Group-3 updates)
+%% Renders in GitHub, GitLab, Notion, VS Code, or https://mermaid.live
+%% Mirrors schema.sql and data.html.
+
+erDiagram
+    users ||--|| demographic_profile       : has
+    users ||--|| cohort_definitions        : has
+    users ||--|| user_health_flags         : has
+    users ||--|| user_consents             : has
+    users ||--o{ user_regimens             : owns
+    users ||--o{ baseline_ratings          : records
+    users ||--o{ checkin_ratings           : records
+    users ||--o{ weight_entries            : logs
+    users ||--o{ notifications             : receives
+
+    medication_categories ||--o{ drugs     : contains
+    drugs ||--o{ user_regimens             : prescribed_as
+
+    user_regimens ||--o{ dose_logs         : tracked_by
+    user_regimens ||--o{ side_effect_logs  : tracked_by
+    user_regimens ||--o{ cost_logs         : tracked_by
+
+    dose_logs ||--o{ checkin_ratings       : tagged_by
+
+    side_effect_categories ||--o{ side_effect_logs : categorizes
+
+    users {
+        uuid user_id PK
+        text display_name "optional, no legal name"
+        timestamp created_at
+    }
+
+    demographic_profile {
+        uuid user_id PK_FK
+        int age
+        enum sex
+        text_array race_ethnicity
+        text location_city
+        char2 location_state
+        int height_inches
+        int starting_weight_lb
+        text_array comorbidities "NEW"
+    }
+
+    cohort_definitions {
+        uuid user_id PK_FK
+        int4range age_range
+        enum_array sex_filter
+        numrange bmi_range
+        int_array category_filter
+        int weeks_on_treatment
+    }
+
+    user_health_flags {
+        uuid user_id PK_FK
+        enum pregnancy_status "NEW"
+        enum mtc_men2_history "NEW"
+        timestamp updated_at
+    }
+
+    user_consents {
+        uuid user_id PK_FK
+        text terms_version "NEW"
+        timestamp terms_accepted_at
+        text privacy_version
+        timestamp privacy_accepted_at
+        timestamp hipaa_authorization_at
+        bool research_opt_in "default TRUE"
+        bool sell_opt_in "default FALSE"
+        bool marketing_opt_in
+    }
+
+    medication_categories {
+        int id PK
+        text name
+        text slug UK
+        bool is_active
+    }
+
+    drugs {
+        int id PK
+        int category_id FK
+        text brand UK
+        text generic
+        text_array valid_doses
+        enum form "injection or pill"
+        text status
+    }
+
+    user_regimens {
+        uuid id PK
+        uuid user_id FK
+        int drug_id FK
+        text dose
+        enum form "NEW"
+        enum supply "branded or compounded NEW"
+        enum indication "weight t2d or both NEW"
+        enum prior_glp1 "naive switched restarted NEW"
+        enum frequency
+        date started_at
+        date ended_at "null equals current"
+        text_array switch_reasons
+        enum decision_maker
+    }
+
+    baseline_ratings {
+        uuid id PK
+        uuid user_id FK
+        enum factor "6 baseline only"
+        int value "1 to 5"
+        timestamp recorded_at
+    }
+
+    checkin_ratings {
+        uuid id PK
+        uuid user_id FK
+        uuid dose_log_id FK "nullable"
+        enum factor "6 baseline plus 4 GLP1 extras NEW"
+        int value "1 to 5"
+        timestamp recorded_at
+    }
+
+    dose_logs {
+        uuid id PK
+        uuid user_id FK
+        uuid regimen_id FK
+        timestamp taken_at "null if skipped"
+        enum dose_event "NEW"
+        enum titration_step "NEW"
+        enum site "injection only"
+        enum context "pill only NEW"
+        text dose_override
+        text notes
+    }
+
+    side_effect_categories {
+        text slug PK
+        text name
+    }
+
+    side_effect_logs {
+        uuid id PK
+        uuid user_id FK
+        uuid regimen_id FK
+        text category FK
+        int severity "1 to 5"
+        enum duration_bucket
+        enum impact_bucket
+        timestamp occurred_at
+    }
+
+    cost_logs {
+        uuid id PK
+        uuid user_id FK
+        uuid regimen_id FK
+        int amount_cents
+        enum cost_type
+        text pharmacy
+        bool insurance_applied
+        int supply_days
+        date fill_date
+    }
+
+    weight_entries {
+        uuid id PK
+        uuid user_id FK
+        numeric weight_lb
+        date recorded_at
+        text source "manual apple google scale"
+    }
+
+    notifications {
+        uuid id PK
+        uuid user_id FK
+        enum type
+        text title
+        text body
+        timestamp sent_at
+        timestamp read_at
+    }

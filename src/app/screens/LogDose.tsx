@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { ArrowLeft, Check, ChevronDown } from 'lucide-react';
-import { BASELINE_FACTORS_COMPACT, type FactorKey } from '../../data/factors';
+import {
+  BASELINE_FACTORS_COMPACT,
+  GLP1_EXTRA_FACTORS_COMPACT,
+  type FactorKey,
+} from '../../data/factors';
 import { MOCK_USER } from '../../data/mockUser';
 
-const FACTORS = BASELINE_FACTORS_COMPACT;
+const FACTORS = [...BASELINE_FACTORS_COMPACT, ...GLP1_EXTRA_FACTORS_COMPACT];
 
 export function LogDose() {
   const navigate = useNavigate();
@@ -17,7 +21,8 @@ export function LogDose() {
     date: new Date().toISOString().split('T')[0],
     time: new Date().toTimeString().slice(0, 5),
     site: '',
-    doseChanged: false,
+    titrationStep: 'on-current-dose',
+    doseEvent: 'taken-as-scheduled',
     newDose: '',
     notes: '',
   });
@@ -58,7 +63,9 @@ export function LogDose() {
           <div className="text-[10px] font-semibold tracking-[0.12em] text-[#6B7280] uppercase">
             Log entry
           </div>
-          <h1 className="text-lg font-bold text-[#1C1C1C]">Dose</h1>
+          <h1 className="text-lg font-bold text-[#1C1C1C]">
+            {MOCK_USER.currentRegimen.form === 'pill' ? 'Pill' : 'Dose'}
+          </h1>
         </div>
       </div>
 
@@ -105,45 +112,111 @@ export function LogDose() {
             </div>
           </div>
 
+          {MOCK_USER.currentRegimen.form === 'injection' ? (
+            <div>
+              <label className="block text-xs font-semibold text-[#1C1C1C] mb-2">
+                Injection site
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {['Abdomen', 'Thigh', 'Upper arm'].map((site) => (
+                  <button
+                    key={site}
+                    onClick={() => setFormData({ ...formData, site })}
+                    className={`h-10 border-2 rounded-lg text-xs font-medium transition-colors ${
+                      formData.site === site
+                        ? 'border-[#234a67] bg-[#e8f4f8] text-[#234a67]'
+                        : 'border-[#E5E7EB] bg-white text-[#1C1C1C]'
+                    }`}
+                  >
+                    {site}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <label className="block text-xs font-semibold text-[#1C1C1C] mb-2">
+                Taken with
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {['Empty stomach', 'With food', 'After food'].map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => setFormData({ ...formData, site: opt })}
+                    className={`h-10 border-2 rounded-lg text-[11px] font-medium transition-colors ${
+                      formData.site === opt
+                        ? 'border-[#234a67] bg-[#e8f4f8] text-[#234a67]'
+                        : 'border-[#E5E7EB] bg-white text-[#1C1C1C]'
+                    }`}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div>
             <label className="block text-xs font-semibold text-[#1C1C1C] mb-2">
-              Injection site
+              Titration step
             </label>
             <div className="grid grid-cols-3 gap-2">
-              {['Abdomen', 'Thigh', 'Upper arm'].map((site) => (
+              {(
+                [
+                  { id: 'on-current-dose', name: 'Steady' },
+                  { id: 'stepped-up', name: 'Stepped up' },
+                  { id: 'stepped-down', name: 'Stepped down' },
+                ]
+              ).map((opt) => (
                 <button
-                  key={site}
-                  onClick={() => setFormData({ ...formData, site })}
+                  key={opt.id}
+                  onClick={() =>
+                    setFormData({ ...formData, titrationStep: opt.id })
+                  }
                   className={`h-10 border-2 rounded-lg text-xs font-medium transition-colors ${
-                    formData.site === site
+                    formData.titrationStep === opt.id
                       ? 'border-[#234a67] bg-[#e8f4f8] text-[#234a67]'
                       : 'border-[#E5E7EB] bg-white text-[#1C1C1C]'
                   }`}
                 >
-                  {site}
+                  {opt.name}
                 </button>
               ))}
             </div>
           </div>
 
           <div>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.doseChanged}
-                onChange={(e) =>
-                  setFormData({ ...formData, doseChanged: e.target.checked })
-                }
-                className="w-4 h-4 rounded border-[#E5E7EB] text-[#234a67]"
-              />
-              <span className="text-xs font-medium text-[#1C1C1C]">
-                Dose changed this time
-              </span>
+            <label className="block text-xs font-semibold text-[#1C1C1C] mb-2">
+              How did this dose go?
             </label>
-            {formData.doseChanged && (
+            <div className="grid grid-cols-2 gap-2">
+              {(
+                [
+                  { id: 'taken-as-scheduled', name: 'On time' },
+                  { id: 'taken-late', name: 'Took late' },
+                  { id: 'skipped-side-effects', name: 'Skipped · side fx' },
+                  { id: 'skipped-other', name: 'Skipped · other' },
+                ]
+              ).map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() =>
+                    setFormData({ ...formData, doseEvent: opt.id })
+                  }
+                  className={`h-10 border-2 rounded-lg text-xs font-medium transition-colors ${
+                    formData.doseEvent === opt.id
+                      ? 'border-[#234a67] bg-[#e8f4f8] text-[#234a67]'
+                      : 'border-[#E5E7EB] bg-white text-[#1C1C1C]'
+                  }`}
+                >
+                  {opt.name}
+                </button>
+              ))}
+            </div>
+            {formData.titrationStep !== 'on-current-dose' && (
               <input
                 type="text"
-                placeholder="e.g., 7.5 mg"
+                placeholder="New dose, e.g., 7.5 mg"
                 value={formData.newDose}
                 onChange={(e) =>
                   setFormData({ ...formData, newDose: e.target.value })
@@ -185,7 +258,7 @@ export function LogDose() {
               </div>
               <div className="text-[11px] text-[#6B7280] mt-0.5">
                 {ratedCount > 0
-                  ? `${ratedCount} of 6 rated · updates your baseline shifts`
+                  ? `${ratedCount} of ${FACTORS.length} rated · updates your baseline shifts`
                   : 'Rate 1–5 · updates your baseline shifts'}
               </div>
             </div>
@@ -199,12 +272,9 @@ export function LogDose() {
             <div className="px-4 pb-4 pt-2 border-t border-[#E5E7EB] space-y-3">
               {FACTORS.map((f) => (
                 <div key={f.key}>
-                  <div className="flex items-baseline justify-between mb-1.5">
+                  <div className="mb-1.5">
                     <span className="text-xs font-semibold text-[#1C1C1C]">
                       {f.label}
-                    </span>
-                    <span className="text-[10px] text-[#6B7280]">
-                      {f.low} → {f.high}
                     </span>
                   </div>
                   <div className="flex gap-1.5">
@@ -228,6 +298,16 @@ export function LogDose() {
                       );
                     })}
                   </div>
+                  <div className="flex gap-1.5 mt-1">
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <div
+                        key={i}
+                        className="flex-1 text-[11px] font-bold uppercase tracking-wide text-[#234a67] text-center"
+                      >
+                        {i === 0 ? f.low : i === 4 ? f.high : ''}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
               {ratedCount > 0 && (
@@ -249,7 +329,7 @@ export function LogDose() {
           onClick={handleSubmit}
           className="w-full h-12 bg-[#234a67] text-white rounded-xl font-semibold text-sm hover:bg-[#1c425b] transition-colors"
         >
-          Record dose
+          Record {MOCK_USER.currentRegimen.form === 'pill' ? 'pill' : 'dose'}
         </button>
       </div>
     </div>

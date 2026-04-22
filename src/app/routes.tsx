@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router';
 import { MobileFrame } from './components/MobileFrame';
 import { Welcome } from './screens/Welcome';
+import { Consent } from './screens/Consent';
 import { Demographics } from './screens/Demographics';
 import { Medication } from './screens/Medication';
 import { Baselines } from './screens/Baselines';
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
     Component: MobileFrame,
     children: [
       { index: true, Component: Welcome },
+      { path: 'consent', Component: Consent },
       { path: 'demographics', Component: Demographics },
       { path: 'medication', Component: Medication },
       { path: 'baselines', Component: Baselines },

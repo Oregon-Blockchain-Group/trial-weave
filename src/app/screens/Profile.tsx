@@ -9,6 +9,9 @@ import {
   Download,
   Trash2,
   Pencil,
+  Heart,
+  Scale,
+  Activity,
 } from 'lucide-react';
 import { SectionHeader } from '../components/SectionHeader';
 import { MOCK_USER } from '../../data/mockUser';
@@ -48,7 +51,7 @@ export function Profile() {
           </div>
           <div>
             <div className="text-lg font-bold text-[#1C1C1C]">
-              {MOCK_USER.firstName} {MOCK_USER.lastName}
+              {MOCK_USER.firstName}
             </div>
             <div className="text-xs text-[#6B7280]">Member since {MOCK_USER.memberSince}</div>
           </div>
@@ -136,6 +139,39 @@ export function Profile() {
                 </span>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Integrations */}
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+          <SectionHeader
+            eyebrow="Connections"
+            title="Sync from your health apps"
+          />
+          <div className="space-y-2">
+            {[
+              { icon: Heart, label: 'Apple Health / Google Fit', sub: 'Weight, activity, heart rate' },
+              { icon: Scale, label: 'Smart scale', sub: 'Withings, Renpho, Garmin' },
+              { icon: Activity, label: 'Continuous glucose monitor', sub: 'Dexcom, Abbott Libre' },
+            ].map((c) => (
+              <button
+                key={c.label}
+                className="w-full p-3 border border-[#E5E7EB] rounded-lg flex items-center gap-3 hover:border-[#234a67] transition-colors"
+              >
+                <div className="w-9 h-9 bg-[#e8f4f8] rounded-lg flex items-center justify-center shrink-0">
+                  <c.icon className="w-4 h-4 text-[#234a67]" />
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="text-sm font-semibold text-[#1C1C1C]">
+                    {c.label}
+                  </div>
+                  <div className="text-[11px] text-[#6B7280]">{c.sub}</div>
+                </div>
+                <span className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wide">
+                  Connect
+                </span>
+              </button>
+            ))}
           </div>
         </div>
 

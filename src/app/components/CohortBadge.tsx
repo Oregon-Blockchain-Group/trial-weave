@@ -35,6 +35,9 @@ export function CohortBadge({
           ))}
         </div>
       )}
+      <div className="mt-2 pt-2 border-t border-[#E5E7EB] text-[10px] font-semibold tracking-wide text-[#B45309] uppercase">
+        Illustrative demo data · not clinical evidence
+      </div>
     </div>
   );
 }

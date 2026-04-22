@@ -55,14 +55,14 @@ export function LogCost() {
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         <div className="bg-white border border-[#234a67] rounded-xl p-3">
           <div className="text-[10px] font-semibold tracking-[0.12em] text-[#234a67] uppercase mb-1">
-            30-day average
+            30-day average · post-insurance copay
           </div>
           <div className="flex items-baseline justify-between">
             <div className="text-2xl font-bold text-[#1C1C1C] tabular-nums">
               $45.00
             </div>
             <span className="text-xs text-[#6B7280] tabular-nums">
-              Cohort: $62
+              Cohort median: $62
             </span>
           </div>
         </div>

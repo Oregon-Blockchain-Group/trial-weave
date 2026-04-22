@@ -1,17 +1,26 @@
+export type DrugForm = 'injection' | 'pill';
+export type Supply = 'branded' | 'compounded';
+export type Indication = 'weight' | 't2d' | 'both';
+export type PriorGlp1 = 'naive' | 'switched' | 'restarted';
+
 export type Drug = {
   brand: string;
   generic: string;
   doses: string[];
+  form: DrugForm;
+  status?: 'active' | 'coming-soon';
 };
 
 export const GLP1_DRUGS: Drug[] = [
-  { brand: 'Ozempic', generic: 'semaglutide', doses: ['0.25 mg', '0.5 mg', '1.0 mg', '2.0 mg'] },
-  { brand: 'Wegovy', generic: 'semaglutide', doses: ['0.25 mg', '0.5 mg', '1.0 mg', '1.7 mg', '2.4 mg'] },
-  { brand: 'Mounjaro', generic: 'tirzepatide', doses: ['2.5 mg', '5 mg', '7.5 mg', '10 mg', '12.5 mg', '15 mg'] },
-  { brand: 'Zepbound', generic: 'tirzepatide', doses: ['2.5 mg', '5 mg', '7.5 mg', '10 mg', '12.5 mg', '15 mg'] },
-  { brand: 'Trulicity', generic: 'dulaglutide', doses: ['0.75 mg', '1.5 mg', '3 mg', '4.5 mg'] },
-  { brand: 'Saxenda', generic: 'liraglutide', doses: ['0.6 mg', '1.2 mg', '1.8 mg', '2.4 mg', '3.0 mg'] },
-  { brand: 'Rybelsus', generic: 'oral semaglutide', doses: ['3 mg', '7 mg', '14 mg'] },
+  { brand: 'Ozempic', generic: 'semaglutide', doses: ['0.25 mg', '0.5 mg', '1.0 mg', '2.0 mg'], form: 'injection' },
+  { brand: 'Wegovy', generic: 'semaglutide', doses: ['0.25 mg', '0.5 mg', '1.0 mg', '1.7 mg', '2.4 mg'], form: 'injection' },
+  { brand: 'Mounjaro', generic: 'tirzepatide', doses: ['2.5 mg', '5 mg', '7.5 mg', '10 mg', '12.5 mg', '15 mg'], form: 'injection' },
+  { brand: 'Zepbound', generic: 'tirzepatide', doses: ['2.5 mg', '5 mg', '7.5 mg', '10 mg', '12.5 mg', '15 mg'], form: 'injection' },
+  { brand: 'Trulicity', generic: 'dulaglutide', doses: ['0.75 mg', '1.5 mg', '3 mg', '4.5 mg'], form: 'injection' },
+  { brand: 'Saxenda', generic: 'liraglutide', doses: ['0.6 mg', '1.2 mg', '1.8 mg', '2.4 mg', '3.0 mg'], form: 'injection' },
+  { brand: 'Rybelsus', generic: 'semaglutide', doses: ['3 mg', '7 mg', '14 mg', '25 mg'], form: 'pill' },
+  { brand: 'Retatrutide', generic: 'retatrutide', doses: ['Coming 2026'], form: 'injection', status: 'coming-soon' },
+  { brand: 'Orforglipron', generic: 'orforglipron', doses: ['Coming 2026'], form: 'pill', status: 'coming-soon' },
 ];
 
 export type Category = {

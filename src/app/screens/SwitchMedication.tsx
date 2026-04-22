@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { ArrowLeft, Check, Info } from 'lucide-react';
+import { ArrowLeft, Check, Info, AlertTriangle } from 'lucide-react';
 import { GLP1_DRUGS, SWITCH_REASONS } from '../../data/drugs';
 import { MOCK_USER } from '../../data/mockUser';
 
-const MEDICATIONS = GLP1_DRUGS.map(({ brand, generic }) => ({ brand, generic }));
+const MEDICATIONS = GLP1_DRUGS.filter((d) => d.status !== 'coming-soon').map(
+  ({ brand, generic, form }) => ({ brand, generic, form })
+);
 const REASONS = SWITCH_REASONS;
 
 export function SwitchMedication() {
@@ -99,14 +101,63 @@ export function SwitchMedication() {
                     : 'border-[#E5E7EB] bg-white'
                 }`}
               >
-                <div className="font-medium text-[#1C1C1C] text-sm">
-                  {med.brand}
+                <div className="flex items-center gap-2">
+                  <div className="font-medium text-[#1C1C1C] text-sm">
+                    {med.brand}
+                  </div>
+                  <span className="text-[10px] font-semibold uppercase tracking-wide text-[#6B7280]">
+                    {med.form}
+                  </span>
                 </div>
                 <div className="text-xs text-[#6B7280]">{med.generic}</div>
               </button>
             ))}
           </div>
         </div>
+
+        {(() => {
+          const newDrug = GLP1_DRUGS.find((d) => d.brand === formData.newMed);
+          if (!newDrug) return null;
+          const formChanged = newDrug.form !== MOCK_USER.currentRegimen.form;
+          return (
+            <div className="bg-[#FEF3C7] border-2 border-[#B45309] rounded-xl p-4">
+              <div className="flex items-start gap-2.5">
+                <AlertTriangle
+                  className="w-5 h-5 text-[#B45309] shrink-0 mt-0.5"
+                  strokeWidth={2.25}
+                />
+                <div className="flex-1">
+                  <div className="text-sm font-bold text-[#92400E] mb-1">
+                    Before you switch
+                  </div>
+                  <ul className="text-xs text-[#92400E] leading-relaxed list-disc pl-4 space-y-1">
+                    <li>
+                      <strong>Titration resets.</strong> Most prescribers restart
+                      at the lowest dose and step up over weeks.
+                    </li>
+                    <li>
+                      <strong>Washout window.</strong> Discuss timing between
+                      last dose of{' '}
+                      {MOCK_USER.currentRegimen.brand} and first dose of{' '}
+                      {newDrug.brand}.
+                    </li>
+                    {formChanged && (
+                      <li>
+                        <strong>Form change ({MOCK_USER.currentRegimen.form} → {newDrug.form}).</strong>{' '}
+                        Dosing, timing, and side-effect profile differ — confirm
+                        the new schedule with your prescriber.
+                      </li>
+                    )}
+                    <li>
+                      Your prescriber decides timing and dose. This app only
+                      logs the change.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
           <label className="block text-xs font-semibold text-[#1C1C1C] mb-2">

@@ -17,6 +17,17 @@ const RACE_OPTIONS = [
   'Prefer not to say',
 ];
 
+const COMORBIDITIES = [
+  'Type 2 diabetes',
+  'PCOS',
+  'Hypertension',
+  'Cardiovascular disease',
+  'GI / IBS history',
+  'Pancreatitis history',
+  'Thyroid disease',
+  'None',
+];
+
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
   'KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ',
@@ -26,6 +37,7 @@ const US_STATES = [
 
 export function Demographics() {
   const navigate = useNavigate();
+  const [firstName, setFirstName] = useState('');
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
   const [races, setRaces] = useState<string[]>([]);
@@ -34,9 +46,21 @@ export function Demographics() {
   const [heightFt, setHeightFt] = useState('');
   const [heightIn, setHeightIn] = useState('');
   const [weight, setWeight] = useState('');
+  const [comorbidities, setComorbidities] = useState<string[]>([]);
+
+  const toggleComorbidity = (option: string) => {
+    if (option === 'None') {
+      setComorbidities(comorbidities.includes(option) ? [] : [option]);
+      return;
+    }
+    const next = comorbidities.filter((c) => c !== 'None');
+    setComorbidities(
+      next.includes(option) ? next.filter((c) => c !== option) : [...next, option]
+    );
+  };
 
   const canContinue =
-    age && gender && city && state && heightFt && heightIn && weight;
+    age && gender && city && state && heightFt && heightIn && weight && comorbidities.length > 0;
 
   const toggleRace = (option: string) => {
     if (option === 'Prefer not to say') {
@@ -63,6 +87,23 @@ export function Demographics() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 bg-[#FAFAFA]">
+        <div>
+          <div className="flex items-baseline justify-between mb-2">
+            <label className="block text-sm font-medium text-[#1C1C1C]">
+              Display name
+            </label>
+            <span className="text-xs text-[#6B7280]">Optional</span>
+          </div>
+          <input
+            type="text"
+            autoComplete="nickname"
+            placeholder="e.g., Alex — used in greetings only"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            className="w-full h-12 px-4 border border-[#E5E7EB] rounded-xl bg-white text-[#1C1C1C] placeholder:text-[#6B7280]"
+          />
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-[#1C1C1C] mb-2">
             Age
@@ -132,6 +173,7 @@ export function Demographics() {
           <div className="flex gap-2">
             <input
               type="text"
+              aria-label="City"
               placeholder="City"
               value={city}
               onChange={(e) => setCity(e.target.value)}
@@ -139,6 +181,7 @@ export function Demographics() {
             />
             <div className="relative w-24">
               <select
+                aria-label="State"
                 value={state}
                 onChange={(e) => setState(e.target.value)}
                 className="w-full h-12 pl-3 pr-8 border border-[#E5E7EB] rounded-xl bg-white text-[#1C1C1C] appearance-none"
@@ -205,6 +248,33 @@ export function Demographics() {
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#6B7280]">
               lbs
             </span>
+          </div>
+        </div>
+
+        <div>
+          <div className="flex items-baseline justify-between mb-2">
+            <label className="block text-sm font-medium text-[#1C1C1C]">
+              Health history
+            </label>
+            <span className="text-xs text-[#6B7280]">Select all that apply</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {COMORBIDITIES.map((option) => {
+              const selected = comorbidities.includes(option);
+              return (
+                <button
+                  key={option}
+                  onClick={() => toggleComorbidity(option)}
+                  className={`px-3 h-9 border-2 rounded-full text-xs font-medium transition-colors ${
+                    selected
+                      ? 'border-[#234a67] bg-[#e8f4f8] text-[#234a67]'
+                      : 'border-[#E5E7EB] bg-white text-[#1C1C1C]'
+                  }`}
+                >
+                  {option}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>

@@ -25,7 +25,7 @@ export function Complete() {
 
   return (
     <div className="h-full flex flex-col">
-      <OnboardingProgress step={4} />
+      <OnboardingProgress step={5} />
 
       <div className="flex-1 overflow-y-auto px-6 pt-6 pb-4 bg-[#FAFAFA]">
         <div className="flex flex-col items-center text-center mb-6">
@@ -36,9 +36,23 @@ export function Complete() {
             You're all set!
           </h1>
           <p className="text-sm text-[#6B7280] leading-relaxed max-w-[300px]">
-            Thank you for completing this onboarding. Your experience has been
-            customized. The more you use Trial Weave, the smarter the insights
-            become.
+            We found <strong className="text-[#234a67]">1,247</strong> people
+            like you on Trial Weave — your cohort is ready.
+          </p>
+        </div>
+
+        <div className="mb-4 p-4 bg-[#e8f4f8] border border-[#234a67]/30 rounded-xl">
+          <div className="text-[10px] font-semibold tracking-[0.12em] text-[#234a67] uppercase mb-1">
+            Your cohort preview
+          </div>
+          <p className="text-sm text-[#1C1C1C] leading-relaxed">
+            At <strong>12 weeks</strong>, people matched to you reported a
+            median weight change of{' '}
+            <strong className="text-[#234a67]">−11.8 lb</strong> (range −4 to
+            −21 lb). You'll see your own number here once you start logging.
+          </p>
+          <p className="text-[11px] text-[#B45309] font-semibold uppercase tracking-wide mt-2">
+            Illustrative demo data
           </p>
         </div>
 

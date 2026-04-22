@@ -38,7 +38,7 @@ export function Welcome() {
         <p className="text-[11px] text-[#6B7280] text-center leading-relaxed pt-2">
           Your data is encrypted and de-identified for cohort analysis.
           <br />
-          HIPAA-aligned · never sold.
+          HIPAA-aligned · you control what's shared.
         </p>
       </div>
     </div>
