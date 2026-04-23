@@ -11,7 +11,6 @@
 #     "Codegen" section below and uncomment.
 # ==============================================================================
 
-
 # ------------------------------------------------------------------------------
 # OS / filesystem junk
 # ------------------------------------------------------------------------------
@@ -26,7 +25,6 @@ Desktop.ini
 $RECYCLE.BIN/
 *~                     # Linux backup files
 .nfs*                  # NFS temp files
-
 
 # ------------------------------------------------------------------------------
 # Editors / IDEs — user-specific, never commit
@@ -63,7 +61,6 @@ $RECYCLE.BIN/
 # Xcode user-specific (see iOS section for more)
 xcuserdata/
 
-
 # ------------------------------------------------------------------------------
 # Dart / Flutter — core build artifacts
 # ------------------------------------------------------------------------------
@@ -76,23 +73,18 @@ xcuserdata/
 build/                 # All compiled output — never commit
 /build/                # Root-level build dir (some tools write here)
 
-
 # ------------------------------------------------------------------------------
 # FVM (Flutter Version Management) — pin the version, ignore the SDK copy
 # ------------------------------------------------------------------------------
-.fvm/flutter_sdk       # Symlink to the actual SDK — do NOT commit
-.fvm/versions/         # Installed SDK versions cache
 # COMMIT:
 #   .fvmrc             ← your project's pinned Flutter version
 #   .fvm/fvm_config.json (legacy, if present)
-
 
 # ------------------------------------------------------------------------------
 # Coverage output — regenerate per run
 # ------------------------------------------------------------------------------
 coverage/
 *.lcov
-
 
 # ------------------------------------------------------------------------------
 # Codegen — freezed, json_serializable, riverpod_generator, drift, retrofit
@@ -115,7 +107,6 @@ coverage/
 # Always ignore these regardless — they're build-process only:
 .generated/
 
-
 # ------------------------------------------------------------------------------
 # Secrets, env, config — NEVER commit
 # ------------------------------------------------------------------------------
@@ -134,7 +125,6 @@ secrets/
 credentials.json
 service-account*.json
 gha-creds-*.json       # google-auth GHA action
-
 
 # ------------------------------------------------------------------------------
 # iOS
@@ -199,7 +189,6 @@ fastlane/Preview.html
 fastlane/screenshots/
 fastlane/test_output/
 
-
 # ------------------------------------------------------------------------------
 # Android
 # ------------------------------------------------------------------------------
@@ -236,7 +225,6 @@ android/app/release/
 android/app/debug/
 android/app/profile/
 
-
 # ------------------------------------------------------------------------------
 # Web (when you add it)
 # ------------------------------------------------------------------------------
@@ -246,7 +234,6 @@ web/index.html.tmpl    # Generated if you use templated index
 .firebaserc            # OPTIONAL: contains project IDs; some commit, some don't
 firebase-debug.log
 firebase-debug.*.log
-
 
 # ------------------------------------------------------------------------------
 # Desktop targets (macOS / Windows / Linux) — only ignore if you build them
@@ -267,7 +254,6 @@ linux/flutter/generated_plugin_registrant.cc
 linux/flutter/generated_plugin_registrant.h
 linux/flutter/generated_plugins.cmake
 
-
 # ------------------------------------------------------------------------------
 # Release binaries / exports — build output, never source
 # ------------------------------------------------------------------------------
@@ -280,7 +266,6 @@ linux/flutter/generated_plugins.cmake
 *.pkg
 *.exe
 *.msi
-
 
 # ------------------------------------------------------------------------------
 # Logs, tmp, crashes
@@ -298,7 +283,6 @@ yarn-error.log*
 crash-*.log
 hs_err_pid*.log        # JVM crash logs
 
-
 # ------------------------------------------------------------------------------
 # Node (if using any JS tooling — e.g. Firebase Functions, web assets)
 # ------------------------------------------------------------------------------
@@ -306,7 +290,6 @@ node_modules/
 .npm/
 .yarn/
 .pnp.*
-
 
 # ------------------------------------------------------------------------------
 # Python (if tooling or scripts use it)
@@ -316,7 +299,6 @@ __pycache__/
 *.egg-info/
 .venv/
 venv/
-
 
 # ------------------------------------------------------------------------------
 # Misc tooling
@@ -329,7 +311,6 @@ venv/
 .nx/
 melos_*.iml            # Melos (Flutter monorepo tool)
 pubspec_overrides.yaml # Melos override — team decision; often gitignored
-
 
 # ==============================================================================
 # What you SHOULD commit (reminders — NOT patterns):
@@ -352,3 +333,6 @@ pubspec_overrides.yaml # Melos override — team decision; often gitignored
 #   Fastfile, Appfile, Matchfile  ← Fastlane configs; just not screenshots/reports
 #
 # ==============================================================================
+
+# FVM Version Cache
+.fvm/
