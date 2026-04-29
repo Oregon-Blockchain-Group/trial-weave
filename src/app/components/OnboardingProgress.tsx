@@ -1,5 +1,5 @@
 type Props = {
-  step: 1 | 2 | 3 | 4;
+  step: 1 | 2 | 3 | 4 | 5;
   onBack?: () => void;
 };
 
@@ -10,7 +10,7 @@ export function OnboardingProgress({ step, onBack }: Props) {
         {onBack ? (
           <button
             onClick={onBack}
-            className="text-[#6B7280] text-sm font-medium hover:text-[#1C1C1C]"
+            className="-ml-2 px-2 py-2 text-[#6B7280] text-sm font-medium hover:text-[#1C1C1C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#234a67] rounded-md"
           >
             Back
           </button>
@@ -18,11 +18,11 @@ export function OnboardingProgress({ step, onBack }: Props) {
           <span className="w-10" />
         )}
         <span className="ml-auto text-xs text-[#6B7280] font-medium">
-          Step {step} of 4
+          Step {step} of 5
         </span>
       </div>
       <div className="flex gap-1.5">
-        {[1, 2, 3, 4].map((i) => (
+        {[1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
             className={`flex-1 h-1.5 rounded-full ${

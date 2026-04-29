@@ -1,19 +1,45 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { ChevronDown, Plus, Lock } from 'lucide-react';
+import { ChevronDown, Plus, Lock, Syringe, Pill, AlertTriangle } from 'lucide-react';
 import { OnboardingProgress } from '../components/OnboardingProgress';
-import { CATEGORIES, FREQUENCIES, GLP1_DRUGS } from '../../data/drugs';
+import {
+  CATEGORIES,
+  FREQUENCIES,
+  GLP1_DRUGS,
+  type DrugForm,
+  type Supply,
+  type Indication,
+  type PriorGlp1,
+} from '../../data/drugs';
 
 export function Medication() {
   const navigate = useNavigate();
   const [category, setCategory] = useState<string>('glp1');
+  const [form, setForm] = useState<DrugForm>('injection');
+  const [supply, setSupply] = useState<Supply>('branded');
   const [drugBrand, setDrugBrand] = useState('');
   const [dose, setDose] = useState('');
   const [frequency, setFrequency] = useState('');
   const [startDate, setStartDate] = useState('');
+  const [indication, setIndication] = useState<Indication | ''>('');
+  const [priorGlp1, setPriorGlp1] = useState<PriorGlp1 | ''>('');
+  const [pregnancy, setPregnancy] = useState<'yes' | 'no' | ''>('');
+  const [thyroidHistory, setThyroidHistory] = useState<'yes' | 'no' | ''>('');
 
-  const selectedDrug = GLP1_DRUGS.find((d) => d.brand === drugBrand);
-  const canContinue = drugBrand && dose && frequency && startDate;
+  const filteredDrugs = GLP1_DRUGS.filter(
+    (d) => d.form === form && d.status !== 'coming-soon'
+  );
+  const selectedDrug = filteredDrugs.find((d) => d.brand === drugBrand);
+  const hasRedFlag = pregnancy === 'yes' || thyroidHistory === 'yes';
+  const canContinue =
+    drugBrand &&
+    dose &&
+    frequency &&
+    startDate &&
+    indication &&
+    priorGlp1 &&
+    pregnancy &&
+    thyroidHistory;
 
   return (
     <div className="h-full flex flex-col">
@@ -71,6 +97,40 @@ export function Medication() {
 
         <div>
           <label className="block text-sm font-medium text-[#1C1C1C] mb-2">
+            Form
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {([
+              { id: 'injection' as const, name: 'Injection', Icon: Syringe },
+              { id: 'pill' as const, name: 'Pill', Icon: Pill },
+            ]).map((opt) => {
+              const selected = form === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  onClick={() => {
+                    setForm(opt.id);
+                    setDrugBrand('');
+                    setDose('');
+                    setFrequency('');
+                    setStartDate('');
+                  }}
+                  className={`h-14 px-3 border-2 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
+                    selected
+                      ? 'border-[#234a67] bg-[#e8f4f8] text-[#234a67]'
+                      : 'border-[#E5E7EB] bg-white text-[#1C1C1C]'
+                  }`}
+                >
+                  <opt.Icon className="w-4 h-4" />
+                  {opt.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-[#1C1C1C] mb-2">
             Medication
           </label>
           <div className="relative">
@@ -83,7 +143,7 @@ export function Medication() {
               className="w-full h-12 px-4 pr-10 border border-[#E5E7EB] rounded-xl bg-white text-[#1C1C1C] appearance-none"
             >
               <option value="">Select a medication</option>
-              {GLP1_DRUGS.map((d) => (
+              {filteredDrugs.map((d) => (
                 <option key={d.brand} value={d.brand}>
                   {d.brand} ({d.generic})
                 </option>
@@ -148,6 +208,180 @@ export function Medication() {
                 className="w-full h-12 px-4 border border-[#E5E7EB] rounded-xl bg-white text-[#1C1C1C]"
               />
             </div>
+          </div>
+        )}
+
+        {selectedDrug && (
+          <div className="p-4 bg-white border border-[#E5E7EB] rounded-xl space-y-4">
+            <div>
+              <div className="text-[10px] font-semibold tracking-[0.12em] text-[#6B7280] uppercase mb-1">
+                Context
+              </div>
+              <p className="text-xs text-[#6B7280] leading-relaxed">
+                These inputs shape your cohort match.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[#1C1C1C] mb-2">
+                Source
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {(
+                  [
+                    { id: 'branded' as const, name: 'Branded' },
+                    { id: 'compounded' as const, name: 'Compounded' },
+                  ]
+                ).map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => setSupply(opt.id)}
+                    className={`h-11 border-2 rounded-xl text-sm font-medium transition-colors ${
+                      supply === opt.id
+                        ? 'border-[#234a67] bg-[#e8f4f8] text-[#234a67]'
+                        : 'border-[#E5E7EB] bg-white text-[#1C1C1C]'
+                    }`}
+                  >
+                    {opt.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[#1C1C1C] mb-2">
+                Reason for taking
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {(
+                  [
+                    { id: 'weight' as const, name: 'Weight' },
+                    { id: 't2d' as const, name: 'T2D' },
+                    { id: 'both' as const, name: 'Both' },
+                  ]
+                ).map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => setIndication(opt.id)}
+                    className={`h-11 border-2 rounded-xl text-sm font-medium transition-colors ${
+                      indication === opt.id
+                        ? 'border-[#234a67] bg-[#e8f4f8] text-[#234a67]'
+                        : 'border-[#E5E7EB] bg-white text-[#1C1C1C]'
+                    }`}
+                  >
+                    {opt.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[#1C1C1C] mb-2">
+                Prior GLP-1 experience
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {(
+                  [
+                    { id: 'naive' as const, name: 'First time' },
+                    { id: 'switched' as const, name: 'Switched' },
+                    { id: 'restarted' as const, name: 'Restarted' },
+                  ]
+                ).map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => setPriorGlp1(opt.id)}
+                    className={`h-11 border-2 rounded-xl text-xs font-medium transition-colors ${
+                      priorGlp1 === opt.id
+                        ? 'border-[#234a67] bg-[#e8f4f8] text-[#234a67]'
+                        : 'border-[#E5E7EB] bg-white text-[#1C1C1C]'
+                    }`}
+                  >
+                    {opt.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {selectedDrug && (
+          <div className="p-4 bg-white border border-[#E5E7EB] rounded-xl space-y-4">
+            <div>
+              <div className="text-[10px] font-semibold tracking-[0.12em] text-[#6B7280] uppercase mb-1">
+                Safety check
+              </div>
+              <p className="text-xs text-[#6B7280] leading-relaxed">
+                GLP-1s carry a boxed warning for certain conditions. Your answers
+                stay private and help your prescriber flag risks.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[#1C1C1C] mb-2">
+                Are you pregnant, trying to become pregnant, or breastfeeding?
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {(['no', 'yes'] as const).map((v) => (
+                  <button
+                    key={v}
+                    onClick={() => setPregnancy(v)}
+                    className={`h-11 border-2 rounded-xl text-sm font-medium transition-colors capitalize ${
+                      pregnancy === v
+                        ? 'border-[#234a67] bg-[#e8f4f8] text-[#234a67]'
+                        : 'border-[#E5E7EB] bg-white text-[#1C1C1C]'
+                    }`}
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[#1C1C1C] mb-2">
+                Personal or family history of medullary thyroid carcinoma (MTC)
+                or Multiple Endocrine Neoplasia type 2 (MEN 2)?
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {(['no', 'yes'] as const).map((v) => (
+                  <button
+                    key={v}
+                    onClick={() => setThyroidHistory(v)}
+                    className={`h-11 border-2 rounded-xl text-sm font-medium transition-colors capitalize ${
+                      thyroidHistory === v
+                        ? 'border-[#234a67] bg-[#e8f4f8] text-[#234a67]'
+                        : 'border-[#E5E7EB] bg-white text-[#1C1C1C]'
+                    }`}
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {hasRedFlag && (
+              <div className="bg-[#FEF2F2] border-2 border-[#B91C1C] rounded-xl p-3">
+                <div className="flex items-start gap-2.5">
+                  <AlertTriangle
+                    className="w-5 h-5 text-[#B91C1C] shrink-0 mt-0.5"
+                    strokeWidth={2.25}
+                  />
+                  <div className="flex-1">
+                    <div className="text-sm font-bold text-[#991B1B] mb-1">
+                      Talk to your prescriber before starting
+                    </div>
+                    <p className="text-xs text-[#991B1B] leading-relaxed">
+                      {pregnancy === 'yes' &&
+                        'GLP-1s are not recommended during pregnancy or breastfeeding. '}
+                      {thyroidHistory === 'yes' &&
+                        'GLP-1s carry a boxed warning for people with MTC or MEN 2 history. '}
+                      You can still use Trial Weave to track, but please confirm
+                      with your clinician that this medication is right for you.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

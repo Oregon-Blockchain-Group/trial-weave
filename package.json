@@ -67,6 +67,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "4.1.12",
     "@vitejs/plugin-react": "4.7.0",
+    "puppeteer": "^24.42.0",
     "tailwindcss": "4.1.12",
     "vite": "^6.4.2"
   },

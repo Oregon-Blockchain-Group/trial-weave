@@ -10,12 +10,12 @@ export function MobileFrame() {
     '/demographics',
     '/medication',
     '/baselines',
+    '/consent',
     '/complete',
     '/log-dose',
     '/log-side-effect',
     '/log-cost',
     '/log-weight',
-    '/switch-medication',
   ];
   const showBottomNav = !noNavScreens.includes(location.pathname);
 

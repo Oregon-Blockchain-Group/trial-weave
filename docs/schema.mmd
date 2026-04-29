@@ -1,0 +1,160 @@
+%% Trial Weave — Schema v2 (post-Group-3 updates)
+%% Mermaid 10.9.5 compatible. Renders in GitHub, mermaid.live, VS Code.
+%% Mirrors schema.sql (authoritative DDL).
+
+erDiagram
+    users ||--|| demographic_profile : has
+    users ||--|| cohort_definitions : has
+    users ||--|| user_health_flags : has
+    users ||--|| user_consents : has
+    users ||--o{ user_regimens : owns
+    users ||--o{ baseline_ratings : records
+    users ||--o{ checkin_ratings : records
+    users ||--o{ weight_entries : logs
+    users ||--o{ notifications : receives
+    medication_categories ||--o{ drugs : contains
+    drugs ||--o{ user_regimens : prescribed_as
+    user_regimens ||--o{ dose_logs : tracked_by
+    user_regimens ||--o{ side_effect_logs : tracked_by
+    user_regimens ||--o{ cost_logs : tracked_by
+    dose_logs ||--o{ checkin_ratings : tagged_by
+    side_effect_categories ||--o{ side_effect_logs : categorizes
+
+    users {
+        uuid user_id PK
+        text display_name
+        timestamp created_at
+    }
+    demographic_profile {
+        uuid user_id PK
+        int age
+        text sex
+        text race_ethnicity
+        text location_city
+        text location_state
+        int height_inches
+        int starting_weight_lb
+        text comorbidities
+    }
+    cohort_definitions {
+        uuid user_id PK
+        text age_range
+        text sex_filter
+        text bmi_range
+        int weeks_on_treatment
+    }
+    user_health_flags {
+        uuid user_id PK
+        text pregnancy_status
+        text mtc_men2_history
+        timestamp updated_at
+    }
+    user_consents {
+        uuid user_id PK
+        text terms_version
+        timestamp terms_accepted_at
+        timestamp hipaa_authorization_at
+        bool research_opt_in
+        bool sell_opt_in
+        bool marketing_opt_in
+    }
+    medication_categories {
+        int id PK
+        text name
+        text slug UK
+        bool is_active
+    }
+    drugs {
+        int id PK
+        int category_id FK
+        text brand UK
+        text generic
+        text valid_doses
+        text form
+        text status
+    }
+    user_regimens {
+        uuid id PK
+        uuid user_id FK
+        int drug_id FK
+        text dose
+        text form
+        text supply
+        text indication
+        text prior_glp1
+        text frequency
+        date started_at
+        date ended_at
+        text switch_reasons
+        text decision_maker
+    }
+    baseline_ratings {
+        uuid id PK
+        uuid user_id FK
+        text factor
+        int value
+        timestamp recorded_at
+    }
+    checkin_ratings {
+        uuid id PK
+        uuid user_id FK
+        uuid dose_log_id FK
+        text factor
+        int value
+        timestamp recorded_at
+    }
+    dose_logs {
+        uuid id PK
+        uuid user_id FK
+        uuid regimen_id FK
+        timestamp taken_at
+        text dose_event
+        text titration_step
+        text site
+        text context
+        text dose_override
+        text notes
+    }
+    side_effect_categories {
+        text slug PK
+        text name
+    }
+    side_effect_logs {
+        uuid id PK
+        uuid user_id FK
+        uuid regimen_id FK
+        text category FK
+        int severity
+        text duration_bucket
+        text impact_bucket
+        timestamp occurred_at
+    }
+    cost_logs {
+        uuid id PK
+        uuid user_id FK
+        uuid regimen_id FK
+        int amount_cents
+        text cost_type
+        text pharmacy
+        bool insurance_applied
+        int supply_days
+        date fill_date
+    }
+    weight_entries {
+        uuid id PK
+        uuid user_id FK
+        numeric weight_lb
+        timestamp recorded_at
+        bool fasted
+        text notes
+        text source
+    }
+    notifications {
+        uuid id PK
+        uuid user_id FK
+        text type
+        text title
+        text body
+        timestamp sent_at
+        timestamp read_at
+    }

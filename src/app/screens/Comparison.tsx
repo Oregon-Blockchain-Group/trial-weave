@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { ArrowUp, ArrowDown, Sparkles, Info } from 'lucide-react';
+import { ArrowUp, ArrowDown, Info } from 'lucide-react';
 import { SectionHeader } from '../components/SectionHeader';
 import { CohortBadge } from '../components/CohortBadge';
 import { DRUG_RANKINGS, type DrugRanking } from '../../data/drugs';
 import { MOCK_USER } from '../../data/mockUser';
 
-type Tab = 'your-results' | 'better-for-you';
+type Tab = 'you-vs-cohort' | 'other-options';
 
 type Outcome = {
   label: string;
@@ -21,13 +21,13 @@ const OUTCOMES: Outcome[] = [
   { label: 'Side-effect days / mo', you: '3.1', cohort: '5.4', percentile: 82, direction: 'lower-better' },
   { label: 'Energy (1–5)', you: '3.8', cohort: '3.2', percentile: 69, direction: 'higher-better' },
   { label: 'Mood (1–5)', you: '4.0', cohort: '3.5', percentile: 71, direction: 'higher-better' },
-  { label: 'Avg monthly cost', you: '$45', cohort: '$62', percentile: 75, direction: 'lower-better' },
+  { label: 'Avg monthly copay (post-insurance)', you: '$45', cohort: '$62', percentile: 75, direction: 'lower-better' },
 ];
 
 const CURRENT_DRUG = MOCK_USER.currentRegimen.brand;
 
 export function Comparison() {
-  const [tab, setTab] = useState<Tab>('your-results');
+  const [tab, setTab] = useState<Tab>('you-vs-cohort');
 
   return (
     <div className="h-full flex flex-col">
@@ -40,16 +40,16 @@ export function Comparison() {
         </div>
         <div className="flex gap-1">
           <TabButton
-            active={tab === 'your-results'}
-            onClick={() => setTab('your-results')}
+            active={tab === 'you-vs-cohort'}
+            onClick={() => setTab('you-vs-cohort')}
           >
-            Your results
+            You vs. cohort
           </TabButton>
           <TabButton
-            active={tab === 'better-for-you'}
-            onClick={() => setTab('better-for-you')}
+            active={tab === 'other-options'}
+            onClick={() => setTab('other-options')}
           >
-            Better for you?
+            Other options
           </TabButton>
         </div>
       </div>
@@ -57,7 +57,7 @@ export function Comparison() {
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#FAFAFA]">
         <CohortBadge />
 
-        {tab === 'your-results' ? <YourResults /> : <BetterForYou />}
+        {tab === 'you-vs-cohort' ? <YourResults /> : <BetterForYou />}
       </div>
     </div>
   );
@@ -184,33 +184,28 @@ function BetterForYou() {
   return (
     <>
       <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
-        <div className="flex items-start gap-2 mb-3">
-          <Sparkles className="w-4 h-4 text-[#234a67] shrink-0 mt-0.5" />
-          <div>
-            <div className="text-[10px] font-semibold tracking-[0.12em] text-[#234a67] uppercase mb-1">
-              Data-driven recommendation
-            </div>
-            <p className="text-sm text-[#1C1C1C] leading-relaxed">
-              Within your matched cohort, <strong>Mounjaro</strong> shows the
-              highest 12-week weight change (18.2%) but{' '}
-              <strong>Ozempic</strong> has the lowest side-effect burden. You're
-              currently on the top-ranked drug.
-            </p>
-          </div>
+        <div className="text-[10px] font-semibold tracking-[0.12em] text-[#6B7280] uppercase mb-1">
+          What others in your cohort experienced
         </div>
+        <p className="text-sm text-[#1C1C1C] leading-relaxed mb-3">
+          Among people matched to you, those on <strong>Mounjaro</strong>{' '}
+          reported the largest median weight change, while those on{' '}
+          <strong>Ozempic</strong> reported the fewest side effects. Individual
+          results vary — this is not a recommendation.
+        </p>
         <div className="flex items-start gap-2 p-2.5 bg-[#FAFAFA] border border-[#E5E7EB] rounded-lg">
           <Info className="w-3.5 h-3.5 text-[#6B7280] shrink-0 mt-0.5" />
           <p className="text-[11px] text-[#6B7280] leading-relaxed">
-            Informational only. Talk to your prescriber before any change.
+            Informational only. Your prescriber decides what's right for you.
           </p>
         </div>
       </div>
 
       <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
         <SectionHeader
-          eyebrow="Ranked for your cohort"
-          title="GLP-1s by effectiveness"
-          meta="12-wk window"
+          eyebrow="Cohort outcomes by drug"
+          title="What people on each drug reported"
+          meta="52-wk window"
         />
         <div className="space-y-2">
           {DRUG_RANKINGS.map((d) => (
@@ -234,7 +229,7 @@ function BetterForYou() {
             comorbidities.
           </li>
           <li>
-            Weight change = median reported at 12 weeks on therapy.
+            Weight change = median reported at 52 weeks on therapy.
           </li>
           <li>
             Side-effect score = weighted severity × frequency, lower is better.
@@ -247,12 +242,6 @@ function BetterForYou() {
 }
 
 function DrugCard({ drug, current }: { drug: DrugRanking; current: boolean }) {
-  const bestLabel = {
-    efficacy: 'Best efficacy',
-    tolerability: 'Best tolerability',
-    balance: 'Best balance',
-  }[drug.best ?? 'balance'];
-
   return (
     <div
       className={`p-3 border rounded-lg ${
@@ -261,16 +250,7 @@ function DrugCard({ drug, current }: { drug: DrugRanking; current: boolean }) {
           : 'border-[#E5E7EB] bg-white'
       }`}
     >
-      <div className="flex items-start gap-3 mb-2">
-        <div
-          className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold tabular-nums shrink-0 ${
-            current
-              ? 'bg-[#234a67] text-white'
-              : 'bg-[#F3F4F6] text-[#1C1C1C]'
-          }`}
-        >
-          {drug.rank}
-        </div>
+      <div className="flex items-start gap-2 mb-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-[#1C1C1C] text-sm">
@@ -282,15 +262,10 @@ function DrugCard({ drug, current }: { drug: DrugRanking; current: boolean }) {
                 CURRENT
               </span>
             )}
-            {drug.best && !current && (
-              <span className="px-1.5 py-0.5 bg-[#e8f4f8] text-[#234a67] text-[10px] font-semibold rounded border border-[#234a67]/20">
-                {bestLabel}
-              </span>
-            )}
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-2 pl-10">
+      <div className="grid grid-cols-3 gap-2">
         <Stat label="Weight Δ" value={`−${drug.weightLossPct}%`} />
         <Stat label="Side fx" value={drug.sideEffectScore.toFixed(1)} />
         <Stat label="Rating" value={`${drug.cohortRating}/5`} />

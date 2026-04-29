@@ -304,16 +304,21 @@
     <span class="legend-item"><span class="legend-line" style="border-color:#B45309;"></span>FK relationship</span>
   </div>
 
-  <!-- ===== ERD DIAGRAM ===== -->
+  <!-- ===== ERD DIAGRAM (legacy hand-drawn SVG — preserved below as fallback) ===== -->
   <div class="diagram">
     <div class="diagram-head">
       <div>
         <div class="eyebrow">Full schema</div>
         <h2>Tables &amp; relationships</h2>
       </div>
-      <span class="meta">orthogonal FK connectors · layered top-to-bottom</span>
+      <span class="meta">rendered from <code>schema.mmd</code> via mermaid-cli</span>
     </div>
-    <svg viewBox="0 0 1280 1800" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Trial Weave data schema ERD">
+    <img src="schema.png" alt="Trial Weave data schema ERD" style="width:100%; height:auto; display:block; border-radius:12px; background:white;" />
+  </div>
+
+  <!-- ===== LEGACY HAND-DRAWN SVG (hidden — kept for reference) ===== -->
+  <div class="diagram" style="display:none;">
+    <svg viewBox="0 0 1280 1800" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Trial Weave data schema ERD (legacy)">
       <defs>
         <marker id="fk-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M 0 0 L 10 5 L 0 10 z" fill="#B45309"/>
@@ -629,6 +634,7 @@
     </svg>
   </div>
 
+
   <!-- ===== PER-TABLE DETAIL CARDS ===== -->
   <section class="details">
     <div class="eyebrow">Per-table</div>
@@ -644,12 +650,12 @@
         <p class="purpose">The one identity row per person. Everything else hangs off of <code>user_id</code>.</p>
         <h4>Fields</h4>
         <table class="field-table">
-          <tr><td class="col-name pk">user_id</td><td class="col-type">uuid PK</td></tr>
-          <tr><td class="col-name">created_at</td><td class="col-type">timestamp</td></tr>
-          <tr><td class="col-name">display_name</td><td class="col-type">text</td></tr>
+          <tr><td class="col-name pk">user_id</td></tr>
+          <tr><td class="col-name">created_at</td></tr>
+          <tr><td class="col-name">display_name</td><td class="col-note">optional greeting-only</td></tr>
         </table>
         <h4>Why</h4>
-        <div class="why">We need a stable, anonymizable identifier that survives renames and device changes. <strong>We don't store email or login creds here</strong> — auth lives in a separate identity provider so this table stays HIPAA-aligned.</div>
+        <div class="why">We need a stable, anonymizable identifier that survives renames and device changes. <strong>No legal first/last name is stored</strong> — only an optional display name for greetings. Email and auth credentials live in a separate identity provider so this table stays HIPAA-aligned under the minimum-necessary principle.</div>
         <h4>Used by</h4>
         <div class="used-by">
           <span class="pill">every screen</span>
@@ -663,14 +669,15 @@
         <p class="purpose">The fields captured on the Demographics onboarding screen. This is the <strong>single most important table in the app</strong> — every cohort comparison starts here.</p>
         <h4>Fields</h4>
         <table class="field-table">
-          <tr><td class="col-name fk">user_id</td><td class="col-type">uuid PK/FK</td><td class="col-note">1:1 with users</td></tr>
-          <tr><td class="col-name">age</td><td class="col-type">int</td><td class="col-note">→ cohort age window</td></tr>
-          <tr><td class="col-name">sex</td><td class="col-type">enum</td><td class="col-note">F/M/NB/PNTS</td></tr>
-          <tr><td class="col-name">race_ethnicity</td><td class="col-type">text[]</td><td class="col-note">multi-select; optional</td></tr>
-          <tr><td class="col-name">location_city</td><td class="col-type">text</td></tr>
-          <tr><td class="col-name">location_state</td><td class="col-type">char(2)</td></tr>
-          <tr><td class="col-name">height_inches</td><td class="col-type">int</td><td class="col-note">→ BMI input</td></tr>
-          <tr><td class="col-name">starting_weight_lb</td><td class="col-type">int</td><td class="col-note">→ BMI + weight Δ baseline</td></tr>
+          <tr><td class="col-name fk">user_id</td><td class="col-note">1:1 with users</td></tr>
+          <tr><td class="col-name">age</td><td class="col-note">→ cohort age window</td></tr>
+          <tr><td class="col-name">sex</td><td class="col-note">F/M/NB/PNTS</td></tr>
+          <tr><td class="col-name">race_ethnicity</td><td class="col-note">multi-select; optional</td></tr>
+          <tr><td class="col-name">location_city</td></tr>
+          <tr><td class="col-name">location_state</td></tr>
+          <tr><td class="col-name">height_inches</td><td class="col-note">→ BMI input</td></tr>
+          <tr><td class="col-name">starting_weight_lb</td><td class="col-note">→ BMI + weight Δ baseline</td></tr>
+          <tr><td class="col-name">comorbidities</td><td class="col-note">T2D / PCOS / HTN / CVD / GI / Pancreatitis / Thyroid / None</td></tr>
         </table>
         <h4>Why</h4>
         <div class="why">
@@ -697,12 +704,12 @@
         <p class="purpose">The <em>editable</em> cohort filter the user sees on the CohortBadge. Defaults are derived from <code>demographic_profile</code>, but the user can tune them from Profile.</p>
         <h4>Fields</h4>
         <table class="field-table">
-          <tr><td class="col-name fk">user_id</td><td class="col-type">uuid PK/FK</td></tr>
-          <tr><td class="col-name">age_range</td><td class="col-type">int4range</td><td class="col-note">default [age−5, age+5]</td></tr>
-          <tr><td class="col-name">sex_filter</td><td class="col-type">enum[]</td></tr>
-          <tr><td class="col-name">bmi_range</td><td class="col-type">numrange</td><td class="col-note">default [BMI−2, BMI+2]</td></tr>
-          <tr><td class="col-name">category_filter</td><td class="col-type">int[]</td><td class="col-note">e.g., [1] for GLP-1s</td></tr>
-          <tr><td class="col-name">weeks_on_treatment</td><td class="col-type">int</td></tr>
+          <tr><td class="col-name fk">user_id</td></tr>
+          <tr><td class="col-name">age_range</td><td class="col-note">default [age−5, age+5]</td></tr>
+          <tr><td class="col-name">sex_filter</td></tr>
+          <tr><td class="col-name">bmi_range</td><td class="col-note">default [BMI−2, BMI+2]</td></tr>
+          <tr><td class="col-name">category_filter</td><td class="col-note">e.g., [1] for GLP-1s</td></tr>
+          <tr><td class="col-name">weeks_on_treatment</td></tr>
         </table>
         <h4>Why</h4>
         <div class="why">Decouples the <strong>cohort lens</strong> from raw demographic facts. A user can broaden their cohort to see more people, or tighten it to get tighter matches — without changing their profile.</div>
@@ -722,10 +729,10 @@
         <p class="purpose">The category tree shown on the Medication onboarding screen (GLP-1s active; Blood pressure / Birth control / Mental health coming soon).</p>
         <h4>Fields</h4>
         <table class="field-table">
-          <tr><td class="col-name pk">id</td><td class="col-type">int PK</td></tr>
-          <tr><td class="col-name">name</td><td class="col-type">text</td><td class="col-note">"GLP-1s"</td></tr>
-          <tr><td class="col-name">slug</td><td class="col-type">text</td><td class="col-note">"glp-1"</td></tr>
-          <tr><td class="col-name">is_active</td><td class="col-type">bool</td><td class="col-note">controls "coming soon" state</td></tr>
+          <tr><td class="col-name pk">id</td></tr>
+          <tr><td class="col-name">name</td><td class="col-note">"GLP-1s"</td></tr>
+          <tr><td class="col-name">slug</td><td class="col-note">"glp-1"</td></tr>
+          <tr><td class="col-name">is_active</td><td class="col-note">controls "coming soon" state</td></tr>
         </table>
         <h4>Why</h4>
         <div class="why">Adding a new category (e.g., Blood pressure) is a data change — flip <code>is_active=true</code>, add its drugs, ship the matching dashboard variant. <strong>No schema change.</strong></div>
@@ -743,11 +750,11 @@
         <p class="purpose">The catalog of medications within each category, with the valid dose strengths for each.</p>
         <h4>Fields</h4>
         <table class="field-table">
-          <tr><td class="col-name pk">id</td><td class="col-type">int PK</td></tr>
-          <tr><td class="col-name fk">category_id</td><td class="col-type">int FK</td></tr>
-          <tr><td class="col-name">brand</td><td class="col-type">text</td><td class="col-note">"Mounjaro"</td></tr>
-          <tr><td class="col-name">generic</td><td class="col-type">text</td><td class="col-note">"tirzepatide"</td></tr>
-          <tr><td class="col-name">valid_doses</td><td class="col-type">text[]</td><td class="col-note">["2.5 mg","5 mg",…]</td></tr>
+          <tr><td class="col-name pk">id</td></tr>
+          <tr><td class="col-name fk">category_id</td></tr>
+          <tr><td class="col-name">brand</td><td class="col-note">"Mounjaro"</td></tr>
+          <tr><td class="col-name">generic</td><td class="col-note">"tirzepatide"</td></tr>
+          <tr><td class="col-name">valid_doses</td><td class="col-note">["2.5 mg","5 mg",…]</td></tr>
         </table>
         <h4>Why</h4>
         <div class="why">Dose options differ per drug (Ozempic doesn't have 15 mg; Mounjaro does). Storing <code>valid_doses</code> on the drug row drives the dose dropdown and prevents nonsensical entries.</div>
@@ -766,15 +773,19 @@
         <p class="purpose">One row per regimen the user has ever been on. The row with <code>ended_at IS NULL</code> is the current one. Past rows preserve the drug timeline visible on Profile and drive historical side-effect / cost comparisons.</p>
         <h4>Fields</h4>
         <table class="field-table">
-          <tr><td class="col-name pk">id</td><td class="col-type">uuid PK</td></tr>
-          <tr><td class="col-name fk">user_id</td><td class="col-type">uuid FK</td></tr>
-          <tr><td class="col-name fk">drug_id</td><td class="col-type">int FK</td></tr>
-          <tr><td class="col-name">dose</td><td class="col-type">text</td><td class="col-note">e.g., "5 mg"</td></tr>
-          <tr><td class="col-name">frequency</td><td class="col-type">enum</td><td class="col-note">weekly / daily / twice_weekly / other</td></tr>
-          <tr><td class="col-name">started_at</td><td class="col-type">date</td></tr>
-          <tr><td class="col-name">ended_at</td><td class="col-type">date?</td><td class="col-note">null = current</td></tr>
-          <tr><td class="col-name">switch_reasons</td><td class="col-type">text[]?</td><td class="col-note">set on end</td></tr>
-          <tr><td class="col-name">decision_maker</td><td class="col-type">enum?</td><td class="col-note">self / doctor</td></tr>
+          <tr><td class="col-name pk">id</td></tr>
+          <tr><td class="col-name fk">user_id</td></tr>
+          <tr><td class="col-name fk">drug_id</td></tr>
+          <tr><td class="col-name">dose</td><td class="col-note">e.g., "5 mg"</td></tr>
+          <tr><td class="col-name">form</td><td class="col-note">injection / pill</td></tr>
+          <tr><td class="col-name">supply</td><td class="col-note">branded / compounded</td></tr>
+          <tr><td class="col-name">indication</td><td class="col-note">weight / t2d / both — shapes cohort match</td></tr>
+          <tr><td class="col-name">prior_glp1</td><td class="col-note">naive / switched / restarted</td></tr>
+          <tr><td class="col-name">frequency</td><td class="col-note">weekly / daily / twice_weekly / other</td></tr>
+          <tr><td class="col-name">started_at</td></tr>
+          <tr><td class="col-name">ended_at</td><td class="col-note">null = current</td></tr>
+          <tr><td class="col-name">switch_reasons</td><td class="col-note">set on end</td></tr>
+          <tr><td class="col-name">decision_maker</td><td class="col-note">self / doctor</td></tr>
         </table>
         <h4>Why</h4>
         <div class="why">The medication timeline is a <strong>product feature</strong> (client: "what did I try before, why did I switch?"). By having event logs FK to <code>regimen_id</code>, a dose/side-effect/cost event stays tied to the exact drug + dose in use at the time — even after the user switches.</div>
@@ -794,11 +805,11 @@
         <p class="purpose">The 6 one-time ratings captured on the Baselines onboarding screen — the reference line every "Baseline → now" comparison is anchored to.</p>
         <h4>Fields</h4>
         <table class="field-table">
-          <tr><td class="col-name pk">id</td><td class="col-type">uuid PK</td></tr>
-          <tr><td class="col-name fk">user_id</td><td class="col-type">uuid FK</td></tr>
-          <tr><td class="col-name">factor</td><td class="col-type">enum</td><td class="col-note">energy / appetite / mood / sleep / activity / digestion</td></tr>
-          <tr><td class="col-name">value</td><td class="col-type">int 1–5</td></tr>
-          <tr><td class="col-name">recorded_at</td><td class="col-type">timestamp</td></tr>
+          <tr><td class="col-name pk">id</td></tr>
+          <tr><td class="col-name fk">user_id</td></tr>
+          <tr><td class="col-name">factor</td><td class="col-note">energy / appetite / mood / sleep / activity / digestion</td></tr>
+          <tr><td class="col-name">value</td></tr>
+          <tr><td class="col-name">recorded_at</td></tr>
         </table>
         <h4>Why</h4>
         <div class="why">Without a baseline, "You're improving" is meaningless. This table is the anchor for the Dashboard "Baseline → now" grid and Insights' "Your shifts since baseline" card.</div>
@@ -817,15 +828,15 @@
         <p class="purpose">Ongoing 1–5 ratings the user submits via the Log Dose optional check-in. Same 6 factors as baseline; timestamped per event.</p>
         <h4>Fields</h4>
         <table class="field-table">
-          <tr><td class="col-name pk">id</td><td class="col-type">uuid PK</td></tr>
-          <tr><td class="col-name fk">user_id</td><td class="col-type">uuid FK</td></tr>
-          <tr><td class="col-name fk">dose_log_id</td><td class="col-type">uuid FK?</td><td class="col-note">tied to dose if submitted with one</td></tr>
-          <tr><td class="col-name">factor</td><td class="col-type">enum</td></tr>
-          <tr><td class="col-name">value</td><td class="col-type">int 1–5</td></tr>
-          <tr><td class="col-name">recorded_at</td><td class="col-type">timestamp</td></tr>
+          <tr><td class="col-name pk">id</td></tr>
+          <tr><td class="col-name fk">user_id</td></tr>
+          <tr><td class="col-name fk">dose_log_id</td><td class="col-note">tied to dose if submitted with one</td></tr>
+          <tr><td class="col-name">factor</td><td class="col-note">6 baseline + 4 GLP-1 extras (food_tolerance, hydration, muscle_mass, menstrual_changes)</td></tr>
+          <tr><td class="col-name">value</td></tr>
+          <tr><td class="col-name">recorded_at</td></tr>
         </table>
         <h4>Why</h4>
-        <div class="why">Lets the "Baseline → now" view actually move over time. Tying check-ins to a specific dose helps us correlate subjective shifts with dose timing (e.g., "mood dips 2 days after the weekly Mounjaro injection").</div>
+        <div class="why">Lets the "Baseline → now" view actually move over time. Tying check-ins to a specific dose helps us correlate subjective shifts with dose timing (e.g., "mood dips 2 days after the weekly Mounjaro injection"). <strong>Supports a wider factor set than baseline</strong> — GLP-1-specific factors (muscle mass, food tolerance, hydration, cycle regularity) are captured here even if the user skipped them at onboarding.</div>
         <h4>Used by</h4>
         <div class="used-by">
           <span class="pill teal">/log-dose (optional check-in)</span>
@@ -841,16 +852,19 @@
         <p class="purpose">One row per dose taken. This is the source of truth for everything adherence-related.</p>
         <h4>Fields</h4>
         <table class="field-table">
-          <tr><td class="col-name pk">id</td><td class="col-type">uuid PK</td></tr>
-          <tr><td class="col-name fk">user_id</td><td class="col-type">uuid FK</td></tr>
-          <tr><td class="col-name fk">regimen_id</td><td class="col-type">uuid FK</td></tr>
-          <tr><td class="col-name">taken_at</td><td class="col-type">timestamp</td></tr>
-          <tr><td class="col-name">site</td><td class="col-type">enum</td><td class="col-note">abdomen / thigh / upper_arm</td></tr>
-          <tr><td class="col-name">dose_override</td><td class="col-type">text?</td><td class="col-note">if dose changed this time</td></tr>
-          <tr><td class="col-name">notes</td><td class="col-type">text?</td></tr>
+          <tr><td class="col-name pk">id</td></tr>
+          <tr><td class="col-name fk">user_id</td></tr>
+          <tr><td class="col-name fk">regimen_id</td></tr>
+          <tr><td class="col-name">taken_at</td><td class="col-note">null if skipped</td></tr>
+          <tr><td class="col-name">dose_event</td><td class="col-note">on_time / took_late / skipped_side_effects / skipped_other</td></tr>
+          <tr><td class="col-name">titration_step</td><td class="col-note">steady / stepped_up / stepped_down</td></tr>
+          <tr><td class="col-name">site</td><td class="col-note">injection only: abdomen / thigh / upper_arm</td></tr>
+          <tr><td class="col-name">context</td><td class="col-note">pill only: empty_stomach / with_food / after_food</td></tr>
+          <tr><td class="col-name">dose_override</td><td class="col-note">if dose changed this time</td></tr>
+          <tr><td class="col-name">notes</td></tr>
         </table>
         <h4>Why</h4>
-        <div class="why">Adherence % (Dashboard ring, Adherence calendar, Comparison outcome row) is computed as <code>count(dose_logs) / expected_doses_for_regimen</code>. Site rotation data is useful for future clinician-facing reports.</div>
+        <div class="why">Adherence % (Dashboard ring, Adherence calendar, Comparison outcome row) is computed from the <code>dose_event</code> mix — a skip tied to side effects tells a different story than a simple missed dose. <code>titration_step</code> clusters side-effect reports around dose escalations. <code>site</code> and <code>context</code> are form-conditional, so the same table serves injections and oral GLP-1s.</div>
         <h4>Used by</h4>
         <div class="used-by">
           <span class="pill teal">/log-dose</span>
@@ -867,14 +881,14 @@
         <p class="purpose">Per-event capture of a side effect with severity and impact. Feeds the "Side effects by drug" card on Insights and the side-effect-days outcome on Comparison.</p>
         <h4>Fields</h4>
         <table class="field-table">
-          <tr><td class="col-name pk">id</td><td class="col-type">uuid PK</td></tr>
-          <tr><td class="col-name fk">user_id</td><td class="col-type">uuid FK</td></tr>
-          <tr><td class="col-name fk">regimen_id</td><td class="col-type">uuid FK</td><td class="col-note">anchors to drug in use</td></tr>
-          <tr><td class="col-name">category</td><td class="col-type">enum</td><td class="col-note">nausea / fatigue / diarrhea / …</td></tr>
-          <tr><td class="col-name">severity</td><td class="col-type">int 1–5</td></tr>
-          <tr><td class="col-name">duration_bucket</td><td class="col-type">enum</td></tr>
-          <tr><td class="col-name">impact_bucket</td><td class="col-type">enum</td></tr>
-          <tr><td class="col-name">occurred_at</td><td class="col-type">timestamp</td></tr>
+          <tr><td class="col-name pk">id</td></tr>
+          <tr><td class="col-name fk">user_id</td></tr>
+          <tr><td class="col-name fk">regimen_id</td><td class="col-note">anchors to drug in use</td></tr>
+          <tr><td class="col-name">category</td><td class="col-note">nausea / fatigue / diarrhea / …</td></tr>
+          <tr><td class="col-name">severity</td></tr>
+          <tr><td class="col-name">duration_bucket</td></tr>
+          <tr><td class="col-name">impact_bucket</td></tr>
+          <tr><td class="col-name">occurred_at</td></tr>
         </table>
         <h4>Why</h4>
         <div class="why">Aggregated across a cohort, this table answers "how common is nausea on Mounjaro for women age 30–39 in their first 90 days?" — the core data for Insights' "Side effects by drug" card.</div>
@@ -894,15 +908,15 @@
         <p class="purpose">Per-fill cost record. Feeds personal cost trends and the cohort median used in the Insights "Monthly cost by drug" card.</p>
         <h4>Fields</h4>
         <table class="field-table">
-          <tr><td class="col-name pk">id</td><td class="col-type">uuid PK</td></tr>
-          <tr><td class="col-name fk">user_id</td><td class="col-type">uuid FK</td></tr>
-          <tr><td class="col-name fk">regimen_id</td><td class="col-type">uuid FK</td></tr>
-          <tr><td class="col-name">amount_cents</td><td class="col-type">int</td><td class="col-note">integer cents, never float</td></tr>
-          <tr><td class="col-name">cost_type</td><td class="col-type">enum</td><td class="col-note">copay / oop / coupon / retail</td></tr>
-          <tr><td class="col-name">pharmacy</td><td class="col-type">text?</td></tr>
-          <tr><td class="col-name">insurance_applied</td><td class="col-type">bool</td></tr>
-          <tr><td class="col-name">supply_days</td><td class="col-type">int</td><td class="col-note">normalizes to /month</td></tr>
-          <tr><td class="col-name">fill_date</td><td class="col-type">date</td></tr>
+          <tr><td class="col-name pk">id</td></tr>
+          <tr><td class="col-name fk">user_id</td></tr>
+          <tr><td class="col-name fk">regimen_id</td></tr>
+          <tr><td class="col-name">amount_cents</td><td class="col-note">integer cents, never float</td></tr>
+          <tr><td class="col-name">cost_type</td><td class="col-note">copay / oop / coupon / retail</td></tr>
+          <tr><td class="col-name">pharmacy</td></tr>
+          <tr><td class="col-name">insurance_applied</td></tr>
+          <tr><td class="col-name">supply_days</td><td class="col-note">normalizes to /month</td></tr>
+          <tr><td class="col-name">fill_date</td></tr>
         </table>
         <h4>Why</h4>
         <div class="why">Monthly cost is computed as <code>amount_cents × (30 / supply_days)</code> so 90-day fills get normalized. Splitting by <code>cost_type</code> lets us surface "with insurance" vs "retail" bands on cohort comparisons.</div>
@@ -915,6 +929,83 @@
         </div>
       </div>
 
+      <!-- weight_entries -->
+      <div class="card">
+        <div class="eyebrow">Event · outcome</div>
+        <h3>weight_entries</h3>
+        <p class="purpose">One row per weigh-in. The time series that powers the Dashboard and Insights weight-trend charts, the "You vs. cohort" weight-change row on Comparison, and the baseline-to-current Δ shown throughout the app.</p>
+        <h4>Fields</h4>
+        <table class="field-table">
+          <tr><td class="col-name pk">id</td></tr>
+          <tr><td class="col-name fk">user_id</td></tr>
+          <tr><td class="col-name">weight_lb</td><td class="col-note">60–700 range check</td></tr>
+          <tr><td class="col-name">recorded_at</td><td class="col-note">includes time-of-weigh-in</td></tr>
+          <tr><td class="col-name">fasted</td><td class="col-note">captured on Log weight</td></tr>
+          <tr><td class="col-name">notes</td></tr>
+          <tr><td class="col-name">source</td><td class="col-note">manual / apple_health / google_fit / smart_scale</td></tr>
+        </table>
+        <h4>Why</h4>
+        <div class="why">Weight Δ is the single most asked-about metric in the app — the cohort pitch, the Comparison outcome row, and the Dashboard/Insights trend charts all depend on this time series. Keeping <code>source</code> on each row lets us distinguish a manually-entered Monday weigh-in from a Withings auto-sync so we can apply different confidence rules when computing trends. A <code>unique(user_id, recorded_at)</code> index prevents duplicate rows from simultaneous writes (e.g., manual entry racing an Apple Health HealthKit push).</div>
+        <h4>Used by</h4>
+        <div class="used-by">
+          <span class="pill teal">/log-weight</span>
+          <span class="pill">/dashboard weight trend</span>
+          <span class="pill">/insights weight trend</span>
+          <span class="pill">/comparison weight change</span>
+          <span class="pill">clinician PDF export</span>
+        </div>
+      </div>
+
+      <!-- user_health_flags -->
+      <div class="card">
+        <div class="eyebrow">Safety · screening</div>
+        <h3>user_health_flags</h3>
+        <p class="purpose">Boxed-warning screening answers captured on the Medication onboarding safety check. Used to surface red-flag warnings and to exclude users from certain cohort-match comparisons where appropriate.</p>
+        <h4>Fields</h4>
+        <table class="field-table">
+          <tr><td class="col-name fk">user_id</td></tr>
+          <tr><td class="col-name">pregnancy_status</td><td class="col-note">yes / no / prefer_not_to_say</td></tr>
+          <tr><td class="col-name">mtc_men2_history</td><td class="col-note">yes / no / prefer_not_to_say</td></tr>
+          <tr><td class="col-name">updated_at</td></tr>
+        </table>
+        <h4>Why</h4>
+        <div class="why">GLP-1s carry a boxed warning for medullary thyroid carcinoma / MEN 2 history and are not recommended during pregnancy. Storing these as structured flags (not free text) lets the app show a <strong>red-flag callout</strong> on Medication onboarding and gate certain cohort comparisons (e.g., a pregnancy-flagged user shouldn't see a "people like you lost X%" claim that doesn't apply). Separate from <code>demographic_profile</code> so we can RLS-protect these columns more tightly.</div>
+        <h4>Used by</h4>
+        <div class="used-by">
+          <span class="pill teal">/medication safety check</span>
+          <span class="pill">/comparison cohort filter</span>
+          <span class="pill">/profile privacy view</span>
+        </div>
+      </div>
+
+      <!-- user_consents -->
+      <div class="card">
+        <div class="eyebrow">Consent · privacy</div>
+        <h3>user_consents</h3>
+        <p class="purpose">Persistent record of the user's legal agreements and data-sharing preferences, captured at onboarding and editable in Profile.</p>
+        <h4>Fields</h4>
+        <table class="field-table">
+          <tr><td class="col-name fk">user_id</td></tr>
+          <tr><td class="col-name">terms_version</td><td class="col-note">e.g., "2026-04-01"</td></tr>
+          <tr><td class="col-name">terms_accepted_at</td></tr>
+          <tr><td class="col-name">privacy_version</td></tr>
+          <tr><td class="col-name">privacy_accepted_at</td></tr>
+          <tr><td class="col-name">hipaa_authorization_at</td></tr>
+          <tr><td class="col-name">research_opt_in</td><td class="col-note">default TRUE</td></tr>
+          <tr><td class="col-name">sell_opt_in</td><td class="col-note">default FALSE · opt-in required</td></tr>
+          <tr><td class="col-name">marketing_opt_in</td><td class="col-note">default FALSE</td></tr>
+          <tr><td class="col-name">updated_at</td></tr>
+        </table>
+        <h4>Why</h4>
+        <div class="why">Regulatory audit trail — we need to prove exactly which version of Terms/Privacy/HIPAA a given user agreed to, and when. Opt-in booleans gate data handling downstream: <code>sell_opt_in=FALSE</code> means the user's rows are excluded from any aggregate dataset sold or shared with commercial third parties (CCPA / CPRA / Washington MHMDA compliance). Versioned text columns let us re-prompt users when terms change without losing the historical record.</div>
+        <h4>Used by</h4>
+        <div class="used-by">
+          <span class="pill teal">/consent</span>
+          <span class="pill">/profile privacy view</span>
+          <span class="pill">downstream data-sharing jobs</span>
+        </div>
+      </div>
+
       <!-- notifications -->
       <div class="card">
         <div class="eyebrow">Output</div>
@@ -922,13 +1013,13 @@
         <p class="purpose">Outbound messages shown on the Notifications screen and as dashboard bell badges.</p>
         <h4>Fields</h4>
         <table class="field-table">
-          <tr><td class="col-name pk">id</td><td class="col-type">uuid PK</td></tr>
-          <tr><td class="col-name fk">user_id</td><td class="col-type">uuid FK</td></tr>
-          <tr><td class="col-name">type</td><td class="col-type">enum</td><td class="col-note">reminder / cohort_insight / weekly_summary / confirmation</td></tr>
-          <tr><td class="col-name">title</td><td class="col-type">text</td></tr>
-          <tr><td class="col-name">body</td><td class="col-type">text</td></tr>
-          <tr><td class="col-name">sent_at</td><td class="col-type">timestamp</td></tr>
-          <tr><td class="col-name">read_at</td><td class="col-type">timestamp?</td><td class="col-note">null = unread dot</td></tr>
+          <tr><td class="col-name pk">id</td></tr>
+          <tr><td class="col-name fk">user_id</td></tr>
+          <tr><td class="col-name">type</td><td class="col-note">reminder / cohort_insight / weekly_summary / confirmation</td></tr>
+          <tr><td class="col-name">title</td></tr>
+          <tr><td class="col-name">body</td></tr>
+          <tr><td class="col-name">sent_at</td></tr>
+          <tr><td class="col-name">read_at</td><td class="col-note">null = unread dot</td></tr>
         </table>
         <h4>Why</h4>
         <div class="why">Separating the message from the data generating it (e.g., a cohort insight is derived from other tables) lets the notification feed be rebuilt without losing history of what the user actually saw.</div>
@@ -974,19 +1065,13 @@
     <!-- ===== DATA DICTIONARY ===== -->
     <div class="dict-section">
       <div class="eyebrow">Data dictionary</div>
-      <h2>Every variable — type, storage, use, sensitivity</h2>
+      <h2>Every variable — type, use, sensitivity</h2>
       <p class="details-intro">
-        Cross-reference for every field. <strong>Storage</strong> is either
-        Supabase (primary DB, RLS-gated per user), a public-read reference
-        catalog in Supabase, or PreVeil (end-to-end encrypted transport for
-        clinician-facing exports). <strong>Sensitivity</strong> maps to HIPAA
-        PHI where applicable; PII covers locational / financial data.
+        Cross-reference for every field. <strong>Sensitivity</strong> maps to
+        HIPAA PHI where applicable; PII covers locational / financial data.
       </p>
 
       <div class="dict-legend">
-        <span class="dict-chip storage-rls">Supabase RLS</span>
-        <span class="dict-chip storage-public">Supabase · public read</span>
-        <span class="dict-chip storage-preveil">PreVeil · E2E encrypted</span>
         <span class="dict-chip sens-phi">PHI</span>
         <span class="dict-chip sens-pii">PII / financial</span>
         <span class="dict-chip sens-low">Non-sensitive</span>
@@ -997,12 +1082,12 @@
         <h3>public.users</h3>
         <div class="dict-sub">Identity wrapper. FK to auth.users. 1 row per person.</div>
         <table class="dict-table">
-          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <thead><tr><th>Variable</th><th>Type</th><th>Use</th><th>Sensitivity</th></tr></thead>
           <tbody>
-            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid PK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Auth linkage; FK target for every user-owned row.</td><td><span class="dict-chip sens-phi">PHI identifier</span></td></tr>
-            <tr><td class="dict-var">created_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Audit / cohort longevity.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
-            <tr><td class="dict-var">updated_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Cache invalidation, optimistic concurrency.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
-            <tr><td class="dict-var">display_name</td><td class="dict-type">text</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">UI greeting ("Good morning, Alex").</td><td><span class="dict-chip sens-pii">PII</span></td></tr>
+            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid PK</td><td class="dict-use">Auth linkage; FK target for every user-owned row.</td><td><span class="dict-chip sens-phi">PHI identifier</span></td></tr>
+            <tr><td class="dict-var">created_at</td><td class="dict-type">timestamptz</td><td class="dict-use">Audit / cohort longevity.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">updated_at</td><td class="dict-type">timestamptz</td><td class="dict-use">Cache invalidation, optimistic concurrency.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">display_name</td><td class="dict-type">text</td><td class="dict-use">UI greeting ("Good morning, Alex").</td><td><span class="dict-chip sens-pii">PII</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -1012,18 +1097,18 @@
         <h3>public.demographic_profile</h3>
         <div class="dict-sub">Cohort foundation. Set once on /demographics onboarding.</div>
         <table class="dict-table">
-          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <thead><tr><th>Variable</th><th>Type</th><th>Use</th><th>Sensitivity</th></tr></thead>
           <tbody>
-            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid PK/FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">1:1 with users.</td><td><span class="dict-chip sens-phi">PHI identifier</span></td></tr>
-            <tr><td class="dict-var">age</td><td class="dict-type">smallint</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Cohort matching window (±5y default).</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">sex</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Cohort filter; GLP-1 response differs by sex.</td><td><span class="dict-chip sens-phi">PHI · protected class</span></td></tr>
-            <tr><td class="dict-var">race_ethnicity</td><td class="dict-type">text[]</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Optional cohort lens on Insights. Never a treatment gate.</td><td><span class="dict-chip sens-phi">PHI · protected class</span></td></tr>
-            <tr><td class="dict-var">location_city</td><td class="dict-type">text</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Regional pricing variance on cost comparisons.</td><td><span class="dict-chip sens-pii">PII</span></td></tr>
-            <tr><td class="dict-var">location_state</td><td class="dict-type">char(2)</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">State-level cohort filter, pricing.</td><td><span class="dict-chip sens-pii">PII</span></td></tr>
-            <tr><td class="dict-var">height_inches</td><td class="dict-type">smallint</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">BMI input → cohort BMI window.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">starting_weight_lb</td><td class="dict-type">smallint</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">BMI input; baseline for weight Δ trend.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">created_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Audit.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
-            <tr><td class="dict-var">updated_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Cache invalidation.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid PK/FK</td><td class="dict-use">1:1 with users.</td><td><span class="dict-chip sens-phi">PHI identifier</span></td></tr>
+            <tr><td class="dict-var">age</td><td class="dict-type">smallint</td><td class="dict-use">Cohort matching window (±5y default).</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">sex</td><td class="dict-type">enum</td><td class="dict-use">Cohort filter; GLP-1 response differs by sex.</td><td><span class="dict-chip sens-phi">PHI · protected class</span></td></tr>
+            <tr><td class="dict-var">race_ethnicity</td><td class="dict-type">text[]</td><td class="dict-use">Optional cohort lens on Insights. Never a treatment gate.</td><td><span class="dict-chip sens-phi">PHI · protected class</span></td></tr>
+            <tr><td class="dict-var">location_city</td><td class="dict-type">text</td><td class="dict-use">Regional pricing variance on cost comparisons.</td><td><span class="dict-chip sens-pii">PII</span></td></tr>
+            <tr><td class="dict-var">location_state</td><td class="dict-type">char(2)</td><td class="dict-use">State-level cohort filter, pricing.</td><td><span class="dict-chip sens-pii">PII</span></td></tr>
+            <tr><td class="dict-var">height_inches</td><td class="dict-type">smallint</td><td class="dict-use">BMI input → cohort BMI window.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">starting_weight_lb</td><td class="dict-type">smallint</td><td class="dict-use">BMI input; baseline for weight Δ trend.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">created_at</td><td class="dict-type">timestamptz</td><td class="dict-use">Audit.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">updated_at</td><td class="dict-type">timestamptz</td><td class="dict-use">Cache invalidation.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -1033,14 +1118,14 @@
         <h3>public.cohort_definitions</h3>
         <div class="dict-sub">Editable cohort lens. Auto-seeded from demographic_profile.</div>
         <table class="dict-table">
-          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <thead><tr><th>Variable</th><th>Type</th><th>Use</th><th>Sensitivity</th></tr></thead>
           <tbody>
-            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid PK/FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">1:1 with users.</td><td><span class="dict-chip sens-phi">PHI identifier</span></td></tr>
-            <tr><td class="dict-var">age_min · age_max</td><td class="dict-type">smallint</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Cohort age window (default age ±5).</td><td><span class="dict-chip sens-pii">PHI-adjacent</span></td></tr>
-            <tr><td class="dict-var">sex_filter</td><td class="dict-type">enum[]</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Which sex(es) to include in cohort.</td><td><span class="dict-chip sens-low">Derived filter</span></td></tr>
-            <tr><td class="dict-var">bmi_min · bmi_max</td><td class="dict-type">numeric(4,1)</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Cohort BMI window (default BMI ±2).</td><td><span class="dict-chip sens-pii">PHI-adjacent</span></td></tr>
-            <tr><td class="dict-var">category_filter</td><td class="dict-type">int[]</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Which medication_categories to include.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
-            <tr><td class="dict-var">weeks_on_treatment</td><td class="dict-type">smallint</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Matched-cohort treatment window (default 12).</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid PK/FK</td><td class="dict-use">1:1 with users.</td><td><span class="dict-chip sens-phi">PHI identifier</span></td></tr>
+            <tr><td class="dict-var">age_min · age_max</td><td class="dict-type">smallint</td><td class="dict-use">Cohort age window (default age ±5).</td><td><span class="dict-chip sens-pii">PHI-adjacent</span></td></tr>
+            <tr><td class="dict-var">sex_filter</td><td class="dict-type">enum[]</td><td class="dict-use">Which sex(es) to include in cohort.</td><td><span class="dict-chip sens-low">Derived filter</span></td></tr>
+            <tr><td class="dict-var">bmi_min · bmi_max</td><td class="dict-type">numeric(4,1)</td><td class="dict-use">Cohort BMI window (default BMI ±2).</td><td><span class="dict-chip sens-pii">PHI-adjacent</span></td></tr>
+            <tr><td class="dict-var">category_filter</td><td class="dict-type">int[]</td><td class="dict-use">Which medication_categories to include.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">weeks_on_treatment</td><td class="dict-type">smallint</td><td class="dict-use">Matched-cohort treatment window (default 12).</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -1050,12 +1135,12 @@
         <h3>public.medication_categories</h3>
         <div class="dict-sub">Static reference catalog. World-readable.</div>
         <table class="dict-table">
-          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <thead><tr><th>Variable</th><th>Type</th><th>Use</th><th>Sensitivity</th></tr></thead>
           <tbody>
-            <tr><td class="dict-var">id</td><td class="dict-type">int PK</td><td><span class="dict-chip storage-public">Supabase · public</span></td><td class="dict-use">Category lookup.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
-            <tr><td class="dict-var">name</td><td class="dict-type">text</td><td><span class="dict-chip storage-public">Supabase · public</span></td><td class="dict-use">"GLP-1s" etc — UI display.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
-            <tr><td class="dict-var">slug</td><td class="dict-type">text</td><td><span class="dict-chip storage-public">Supabase · public</span></td><td class="dict-use">Stable URL key.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
-            <tr><td class="dict-var">is_active</td><td class="dict-type">bool</td><td><span class="dict-chip storage-public">Supabase · public</span></td><td class="dict-use">Gates "Coming soon" vs active category cards.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">id</td><td class="dict-type">int PK</td><td class="dict-use">Category lookup.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">name</td><td class="dict-type">text</td><td class="dict-use">"GLP-1s" etc — UI display.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">slug</td><td class="dict-type">text</td><td class="dict-use">Stable URL key.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">is_active</td><td class="dict-type">bool</td><td class="dict-use">Gates "Coming soon" vs active category cards.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -1065,13 +1150,13 @@
         <h3>public.drugs</h3>
         <div class="dict-sub">Static reference catalog. World-readable.</div>
         <table class="dict-table">
-          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <thead><tr><th>Variable</th><th>Type</th><th>Use</th><th>Sensitivity</th></tr></thead>
           <tbody>
-            <tr><td class="dict-var">id</td><td class="dict-type">int PK</td><td><span class="dict-chip storage-public">Supabase · public</span></td><td class="dict-use">Drug lookup.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
-            <tr><td class="dict-var">category_id</td><td class="dict-type">int FK</td><td><span class="dict-chip storage-public">Supabase · public</span></td><td class="dict-use">Taxonomy link.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
-            <tr><td class="dict-var">brand</td><td class="dict-type">text</td><td><span class="dict-chip storage-public">Supabase · public</span></td><td class="dict-use">"Mounjaro", "Ozempic".</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
-            <tr><td class="dict-var">generic</td><td class="dict-type">text</td><td><span class="dict-chip storage-public">Supabase · public</span></td><td class="dict-use">"tirzepatide", "semaglutide".</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
-            <tr><td class="dict-var">valid_doses</td><td class="dict-type">text[]</td><td><span class="dict-chip storage-public">Supabase · public</span></td><td class="dict-use">Drives dose dropdown on /medication + /switch.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">id</td><td class="dict-type">int PK</td><td class="dict-use">Drug lookup.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">category_id</td><td class="dict-type">int FK</td><td class="dict-use">Taxonomy link.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">brand</td><td class="dict-type">text</td><td class="dict-use">"Mounjaro", "Ozempic".</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">generic</td><td class="dict-type">text</td><td class="dict-use">"tirzepatide", "semaglutide".</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">valid_doses</td><td class="dict-type">text[]</td><td class="dict-use">Drives dose dropdown on /medication + /switch.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -1081,18 +1166,18 @@
         <h3>public.user_regimens</h3>
         <div class="dict-sub">Current + historical regimens. One active row per user (ended_at IS NULL).</div>
         <table class="dict-table">
-          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <thead><tr><th>Variable</th><th>Type</th><th>Use</th><th>Sensitivity</th></tr></thead>
           <tbody>
-            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Regimen identity; FK target for event logs.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Ownership.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">drug_id</td><td class="dict-type">int FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Which drug.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">dose</td><td class="dict-type">text</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Strength, e.g., "5 mg".</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">frequency</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Weekly / daily / etc.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">started_at</td><td class="dict-type">date</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Regimen start for duration calc.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">ended_at</td><td class="dict-type">date?</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Null = active. Set on switch.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">switch_reasons</td><td class="dict-type">text[]?</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Why the user switched. Cohort insight input.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">decision_maker</td><td class="dict-type">enum?</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Self vs doctor.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">created_at · updated_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Audit, cache.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td class="dict-use">Regimen identity; FK target for event logs.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid FK</td><td class="dict-use">Ownership.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">drug_id</td><td class="dict-type">int FK</td><td class="dict-use">Which drug.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">dose</td><td class="dict-type">text</td><td class="dict-use">Strength, e.g., "5 mg".</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">frequency</td><td class="dict-type">enum</td><td class="dict-use">Weekly / daily / etc.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">started_at</td><td class="dict-type">date</td><td class="dict-use">Regimen start for duration calc.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">ended_at</td><td class="dict-type">date?</td><td class="dict-use">Null = active. Set on switch.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">switch_reasons</td><td class="dict-type">text[]?</td><td class="dict-use">Why the user switched. Cohort insight input.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">decision_maker</td><td class="dict-type">enum?</td><td class="dict-use">Self vs doctor.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">created_at · updated_at</td><td class="dict-type">timestamptz</td><td class="dict-use">Audit, cache.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -1102,13 +1187,13 @@
         <h3>public.baseline_ratings</h3>
         <div class="dict-sub">6 one-time ratings set on /baselines onboarding.</div>
         <table class="dict-table">
-          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <thead><tr><th>Variable</th><th>Type</th><th>Use</th><th>Sensitivity</th></tr></thead>
           <tbody>
-            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Row identity.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Ownership.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">factor</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">energy / appetite / mood / sleep / activity / digestion.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
-            <tr><td class="dict-var">value</td><td class="dict-type">int 1–5</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Baseline rating. Anchor for all shift deltas.</td><td><span class="dict-chip sens-phi">PHI · PRO</span></td></tr>
-            <tr><td class="dict-var">recorded_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">When baseline was captured.</td><td><span class="dict-chip sens-pii">PHI-adjacent</span></td></tr>
+            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td class="dict-use">Row identity.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid FK</td><td class="dict-use">Ownership.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">factor</td><td class="dict-type">enum</td><td class="dict-use">energy / appetite / mood / sleep / activity / digestion.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">value</td><td class="dict-type">int 1–5</td><td class="dict-use">Baseline rating. Anchor for all shift deltas.</td><td><span class="dict-chip sens-phi">PHI · PRO</span></td></tr>
+            <tr><td class="dict-var">recorded_at</td><td class="dict-type">timestamptz</td><td class="dict-use">When baseline was captured.</td><td><span class="dict-chip sens-pii">PHI-adjacent</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -1118,14 +1203,14 @@
         <h3>public.checkin_ratings</h3>
         <div class="dict-sub">Ongoing 1–5 ratings from Log Dose optional check-in.</div>
         <table class="dict-table">
-          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <thead><tr><th>Variable</th><th>Type</th><th>Use</th><th>Sensitivity</th></tr></thead>
           <tbody>
-            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Row identity.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Ownership.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">dose_log_id</td><td class="dict-type">uuid FK?</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Correlates check-in to a specific dose.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">factor</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Which baseline factor.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
-            <tr><td class="dict-var">value</td><td class="dict-type">int 1–5</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Current rating. Drives "Baseline → now" grid.</td><td><span class="dict-chip sens-phi">PHI · PRO</span></td></tr>
-            <tr><td class="dict-var">recorded_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">When rating was taken.</td><td><span class="dict-chip sens-pii">PHI-adjacent</span></td></tr>
+            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td class="dict-use">Row identity.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid FK</td><td class="dict-use">Ownership.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">dose_log_id</td><td class="dict-type">uuid FK?</td><td class="dict-use">Correlates check-in to a specific dose.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">factor</td><td class="dict-type">enum</td><td class="dict-use">Which baseline factor.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">value</td><td class="dict-type">int 1–5</td><td class="dict-use">Current rating. Drives "Baseline → now" grid.</td><td><span class="dict-chip sens-phi">PHI · PRO</span></td></tr>
+            <tr><td class="dict-var">recorded_at</td><td class="dict-type">timestamptz</td><td class="dict-use">When rating was taken.</td><td><span class="dict-chip sens-pii">PHI-adjacent</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -1135,15 +1220,15 @@
         <h3>public.dose_logs</h3>
         <div class="dict-sub">One row per dose taken. Source of truth for adherence.</div>
         <table class="dict-table">
-          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <thead><tr><th>Variable</th><th>Type</th><th>Use</th><th>Sensitivity</th></tr></thead>
           <tbody>
-            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Event identity.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">user_id · regimen_id</td><td class="dict-type">uuid FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Composite FK ties event to correct regimen.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">taken_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Adherence % computation.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">site</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Injection site rotation for clinician reports.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">dose_override</td><td class="dict-type">text?</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">If dose changed this time.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">notes</td><td class="dict-type">text?</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Free-text observations. <strong>Candidate for PreVeil at v2</strong> — clinical free text has the highest re-identification risk.</td><td><span class="dict-chip sens-phi">PHI · free text</span></td></tr>
-            <tr><td class="dict-var">created_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Audit (when logged, vs taken_at = when event happened).</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td class="dict-use">Event identity.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">user_id · regimen_id</td><td class="dict-type">uuid FK</td><td class="dict-use">Composite FK ties event to correct regimen.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">taken_at</td><td class="dict-type">timestamptz</td><td class="dict-use">Adherence % computation.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">site</td><td class="dict-type">enum</td><td class="dict-use">Injection site rotation for clinician reports.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">dose_override</td><td class="dict-type">text?</td><td class="dict-use">If dose changed this time.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">notes</td><td class="dict-type">text?</td><td class="dict-use">Free-text observations. <strong>Candidate for PreVeil at v2</strong> — clinical free text has the highest re-identification risk.</td><td><span class="dict-chip sens-phi">PHI · free text</span></td></tr>
+            <tr><td class="dict-var">created_at</td><td class="dict-type">timestamptz</td><td class="dict-use">Audit (when logged, vs taken_at = when event happened).</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -1153,16 +1238,16 @@
         <h3>public.side_effect_logs</h3>
         <div class="dict-sub">Per-event tolerability capture. Feeds Insights "Side effects by drug".</div>
         <table class="dict-table">
-          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <thead><tr><th>Variable</th><th>Type</th><th>Use</th><th>Sensitivity</th></tr></thead>
           <tbody>
-            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Event identity.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">user_id · regimen_id</td><td class="dict-type">uuid FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Composite FK anchors side effect to drug in use.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">category</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">nausea / fatigue / diarrhea / …</td><td><span class="dict-chip sens-phi">PHI · medical</span></td></tr>
-            <tr><td class="dict-var">severity</td><td class="dict-type">int 1–5</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Severity scale.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">duration_bucket</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">&lt;1h / 1–4h / 4–12h / 12–24h / ongoing.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">impact_bucket</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Daily-activity impact.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">occurred_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Correlates to dose timing.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">created_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Audit.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td class="dict-use">Event identity.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">user_id · regimen_id</td><td class="dict-type">uuid FK</td><td class="dict-use">Composite FK anchors side effect to drug in use.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">category</td><td class="dict-type">enum</td><td class="dict-use">nausea / fatigue / diarrhea / …</td><td><span class="dict-chip sens-phi">PHI · medical</span></td></tr>
+            <tr><td class="dict-var">severity</td><td class="dict-type">int 1–5</td><td class="dict-use">Severity scale.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">duration_bucket</td><td class="dict-type">enum</td><td class="dict-use">&lt;1h / 1–4h / 4–12h / 12–24h / ongoing.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">impact_bucket</td><td class="dict-type">enum</td><td class="dict-use">Daily-activity impact.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">occurred_at</td><td class="dict-type">timestamptz</td><td class="dict-use">Correlates to dose timing.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">created_at</td><td class="dict-type">timestamptz</td><td class="dict-use">Audit.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -1172,17 +1257,17 @@
         <h3>public.cost_logs</h3>
         <div class="dict-sub">Per-fill cost. Normalizes to /month; powers Insights "Monthly cost by drug".</div>
         <table class="dict-table">
-          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <thead><tr><th>Variable</th><th>Type</th><th>Use</th><th>Sensitivity</th></tr></thead>
           <tbody>
-            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Event identity.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">user_id · regimen_id</td><td class="dict-type">uuid FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Composite FK.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">amount_cents</td><td class="dict-type">int</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">What the user paid (integer cents).</td><td><span class="dict-chip sens-pii">Financial</span></td></tr>
-            <tr><td class="dict-var">cost_type</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">copay / out_of_pocket / coupon / retail.</td><td><span class="dict-chip sens-pii">Financial</span></td></tr>
-            <tr><td class="dict-var">pharmacy</td><td class="dict-type">text?</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Optional. Where filled.</td><td><span class="dict-chip sens-pii">PII</span></td></tr>
-            <tr><td class="dict-var">insurance_applied</td><td class="dict-type">bool</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Split with-insurance vs retail bands.</td><td><span class="dict-chip sens-pii">Financial</span></td></tr>
-            <tr><td class="dict-var">supply_days</td><td class="dict-type">smallint</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">30 / 60 / 90 — normalizes to monthly.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
-            <tr><td class="dict-var">fill_date</td><td class="dict-type">date</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">When the fill happened.</td><td><span class="dict-chip sens-pii">PHI-adjacent</span></td></tr>
-            <tr><td class="dict-var">created_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Audit.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td class="dict-use">Event identity.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">user_id · regimen_id</td><td class="dict-type">uuid FK</td><td class="dict-use">Composite FK.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">amount_cents</td><td class="dict-type">int</td><td class="dict-use">What the user paid (integer cents).</td><td><span class="dict-chip sens-pii">Financial</span></td></tr>
+            <tr><td class="dict-var">cost_type</td><td class="dict-type">enum</td><td class="dict-use">copay / out_of_pocket / coupon / retail.</td><td><span class="dict-chip sens-pii">Financial</span></td></tr>
+            <tr><td class="dict-var">pharmacy</td><td class="dict-type">text?</td><td class="dict-use">Optional. Where filled.</td><td><span class="dict-chip sens-pii">PII</span></td></tr>
+            <tr><td class="dict-var">insurance_applied</td><td class="dict-type">bool</td><td class="dict-use">Split with-insurance vs retail bands.</td><td><span class="dict-chip sens-pii">Financial</span></td></tr>
+            <tr><td class="dict-var">supply_days</td><td class="dict-type">smallint</td><td class="dict-use">30 / 60 / 90 — normalizes to monthly.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">fill_date</td><td class="dict-type">date</td><td class="dict-use">When the fill happened.</td><td><span class="dict-chip sens-pii">PHI-adjacent</span></td></tr>
+            <tr><td class="dict-var">created_at</td><td class="dict-type">timestamptz</td><td class="dict-use">Audit.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -1192,13 +1277,13 @@
         <h3>public.notifications</h3>
         <div class="dict-sub">Outbound messages on /notifications. Backend-written only.</div>
         <table class="dict-table">
-          <thead><tr><th>Variable</th><th>Type</th><th>Storage</th><th>Use</th><th>Sensitivity</th></tr></thead>
+          <thead><tr><th>Variable</th><th>Type</th><th>Use</th><th>Sensitivity</th></tr></thead>
           <tbody>
-            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Message identity.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
-            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid FK</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Who receives it.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
-            <tr><td class="dict-var">type</td><td class="dict-type">enum</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">reminder / cohort_insight / weekly_summary / confirmation.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
-            <tr><td class="dict-var">title · body</td><td class="dict-type">text</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">May reference cohort %, adherence, drug names.</td><td><span class="dict-chip sens-phi">PHI (possible)</span></td></tr>
-            <tr><td class="dict-var">sent_at · read_at</td><td class="dict-type">timestamptz</td><td><span class="dict-chip storage-rls">Supabase RLS</span></td><td class="dict-use">Unread badge, engagement telemetry.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">id</td><td class="dict-type">uuid PK</td><td class="dict-use">Message identity.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">user_id</td><td class="dict-type">uuid FK</td><td class="dict-use">Who receives it.</td><td><span class="dict-chip sens-phi">PHI</span></td></tr>
+            <tr><td class="dict-var">type</td><td class="dict-type">enum</td><td class="dict-use">reminder / cohort_insight / weekly_summary / confirmation.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
+            <tr><td class="dict-var">title · body</td><td class="dict-type">text</td><td class="dict-use">May reference cohort %, adherence, drug names.</td><td><span class="dict-chip sens-phi">PHI (possible)</span></td></tr>
+            <tr><td class="dict-var">sent_at · read_at</td><td class="dict-type">timestamptz</td><td class="dict-use">Unread badge, engagement telemetry.</td><td><span class="dict-chip sens-low">Non-sensitive</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -1210,11 +1295,11 @@
         <table class="dict-table">
           <thead><tr><th>Output</th><th>Format</th><th>Storage / transport</th><th>Use</th><th>Sensitivity</th></tr></thead>
           <tbody>
-            <tr><td class="dict-var">Clinician PDF report</td><td class="dict-type">PDF</td><td><span class="dict-chip storage-preveil">PreVeil · E2E encrypted</span></td><td class="dict-use">Summary of regimen, adherence, side-effect timeline, cost for provider review. Triggered from Insights → Export → PDF Report.</td><td><span class="dict-chip sens-phi">PHI · full dossier</span></td></tr>
-            <tr><td class="dict-var">CSV data export</td><td class="dict-type">CSV</td><td><span class="dict-chip storage-preveil">PreVeil · E2E encrypted</span></td><td class="dict-use">Raw event logs for clinician / researcher. Triggered from Insights → Export → CSV.</td><td><span class="dict-chip sens-phi">PHI · full dossier</span></td></tr>
-            <tr><td class="dict-var">Cohort aggregates (mat. views)</td><td class="dict-type">numeric</td><td><span class="dict-chip storage-public">Supabase · public read</span></td><td class="dict-use">Nightly-refreshed materialized views (weight Δ median, side-effect incidence, cost median by drug). No user_id — safe for public read.</td><td><span class="dict-chip sens-low">Aggregate only</span></td></tr>
-            <tr><td class="dict-var">Cohort insights shown in-app</td><td class="dict-type">numeric</td><td><span class="dict-chip storage-public">Supabase · public read</span></td><td class="dict-use">Numbers on Comparison / Insights (e.g., "n=412 matched users"). Read directly from the materialized views.</td><td><span class="dict-chip sens-low">Aggregate only</span></td></tr>
-            <tr><td class="dict-var">Clinician messaging (future)</td><td class="dict-type">thread</td><td><span class="dict-chip storage-preveil">PreVeil · E2E encrypted</span></td><td class="dict-use">If we add patient↔provider messaging, route through PreVeil — not Supabase.</td><td><span class="dict-chip sens-phi">PHI · clinical detail</span></td></tr>
+            <tr><td class="dict-var">Clinician PDF report</td><td class="dict-type">PDF</td><td class="dict-use">Summary of regimen, adherence, side-effect timeline, cost for provider review. Triggered from Insights → Export → PDF Report.</td><td><span class="dict-chip sens-phi">PHI · full dossier</span></td></tr>
+            <tr><td class="dict-var">CSV data export</td><td class="dict-type">CSV</td><td class="dict-use">Raw event logs for clinician / researcher. Triggered from Insights → Export → CSV.</td><td><span class="dict-chip sens-phi">PHI · full dossier</span></td></tr>
+            <tr><td class="dict-var">Cohort aggregates (mat. views)</td><td class="dict-type">numeric</td><td class="dict-use">Nightly-refreshed materialized views (weight Δ median, side-effect incidence, cost median by drug). No user_id — safe for public read.</td><td><span class="dict-chip sens-low">Aggregate only</span></td></tr>
+            <tr><td class="dict-var">Cohort insights shown in-app</td><td class="dict-type">numeric</td><td class="dict-use">Numbers on Comparison / Insights (e.g., "n=412 matched users"). Read directly from the materialized views.</td><td><span class="dict-chip sens-low">Aggregate only</span></td></tr>
+            <tr><td class="dict-var">Clinician messaging (future)</td><td class="dict-type">thread</td><td class="dict-use">If we add patient↔provider messaging, route through PreVeil — not Supabase.</td><td><span class="dict-chip sens-phi">PHI · clinical detail</span></td></tr>
           </tbody>
         </table>
       </div>

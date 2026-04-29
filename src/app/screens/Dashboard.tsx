@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router';
+import { useState } from 'react';
 import {
   Bell,
   User,
@@ -9,13 +10,44 @@ import {
   ArrowUpRight,
   Users,
   Scale,
+  Flame,
+  Check,
+  Pill,
 } from 'lucide-react';
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+} from 'recharts';
 import { SectionHeader } from '../components/SectionHeader';
+import { BASELINE_FACTORS_COMPACT } from '../../data/factors';
 import { MOCK_USER } from '../../data/mockUser';
 import lokahiLogo from '../../imports/Lokahi-Therapeutics_logo-Picsart-BackgroundRemover.jpg';
 
+const COMPACT_LABEL = Object.fromEntries(
+  BASELINE_FACTORS_COMPACT.map((f) => [f.key, f.label])
+) as Record<string, string>;
+
+const WEIGHT_CHART_DATA = MOCK_USER.weightEntries.map((e) => ({
+  date: e.date,
+  label: new Date(e.date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  }),
+  weight: e.weightLb,
+}));
+
 export function Dashboard() {
   const navigate = useNavigate();
+  const [takenToday, setTakenToday] = useState(false);
+  const doseLabel =
+    MOCK_USER.currentRegimen.form === 'pill' ? 'pill' : 'dose';
+  const DoseIcon =
+    MOCK_USER.currentRegimen.form === 'pill' ? Pill : Syringe;
 
   return (
     <div className="h-full overflow-y-auto bg-[#FAFAFA]">
@@ -79,6 +111,53 @@ export function Dashboard() {
           </div>
         </div>
 
+        {/* 1-tap Taken */}
+        <button
+          onClick={() => {
+            if (takenToday) return;
+            setTakenToday(true);
+          }}
+          disabled={takenToday}
+          className={`w-full rounded-xl p-4 text-left transition-colors flex items-center gap-3 ${
+            takenToday
+              ? 'bg-[#ECFDF5] border-2 border-[#15803D]'
+              : 'bg-[#234a67] text-white hover:bg-[#1c425b] border-2 border-[#234a67]'
+          }`}
+        >
+          <div
+            className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 ${
+              takenToday ? 'bg-[#15803D]' : 'bg-white/15'
+            }`}
+          >
+            {takenToday ? (
+              <Check className="w-5 h-5 text-white" strokeWidth={3} />
+            ) : (
+              <DoseIcon className="w-5 h-5 text-white" />
+            )}
+          </div>
+          <div className="flex-1">
+            <div
+              className={`text-[10px] font-semibold tracking-[0.12em] uppercase mb-0.5 ${
+                takenToday ? 'text-[#15803D]' : 'opacity-80'
+              }`}
+            >
+              {takenToday ? 'Logged just now' : `Today's ${doseLabel}`}
+            </div>
+            <div
+              className={`font-semibold text-sm ${
+                takenToday ? 'text-[#15803D]' : ''
+              }`}
+            >
+              {takenToday
+                ? `${doseLabel === 'pill' ? 'Pill' : 'Dose'} taken — tap Log dose to add details`
+                : `Mark ${doseLabel} as taken`}
+            </div>
+          </div>
+          {!takenToday && (
+            <span className="text-xs font-semibold opacity-80">1 tap</span>
+          )}
+        </button>
+
         {/* Cohort CTA */}
         <button
           onClick={() => navigate('/comparison')}
@@ -104,7 +183,7 @@ export function Dashboard() {
         </button>
 
         {/* Adherence */}
-        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4 hover:border-[#234a67] transition-colors">
           <SectionHeader
             eyebrow="Adherence · 30 days"
             title="Weekly doses on schedule"
@@ -151,6 +230,28 @@ export function Dashboard() {
               </div>
             </div>
           </button>
+          <div className="mt-3 pt-3 border-t border-[#E5E7EB] flex items-center gap-3">
+            <div className="flex items-center gap-2 px-3 h-9 rounded-full bg-gradient-to-r from-[#FFF4E6] to-[#FFE4CC] border border-[#F59E0B]/30">
+              <Flame
+                className="w-4 h-4 text-[#EA580C]"
+                fill="#F97316"
+                strokeWidth={2}
+              />
+              <span className="text-sm font-bold text-[#9A3412] tabular-nums">
+                {MOCK_USER.adherenceStreakDays}
+              </span>
+              <span className="text-xs font-semibold text-[#9A3412]">
+                day streak
+              </span>
+            </div>
+            <div className="text-[11px] text-[#6B7280] leading-tight">
+              Longest:{' '}
+              <span className="font-semibold text-[#1C1C1C] tabular-nums">
+                {MOCK_USER.adherenceLongestStreakDays}
+              </span>{' '}
+              days
+            </div>
+          </div>
         </div>
 
         {/* Quick Actions */}
@@ -193,20 +294,13 @@ export function Dashboard() {
             title="Shifts since week 1"
           />
           <div className="grid grid-cols-3 gap-2">
-            {[
-              { factor: 'Energy', from: 2, to: 4 },
-              { factor: 'Mood', from: 3, to: 4 },
-              { factor: 'Sleep', from: 3, to: 4 },
-              { factor: 'Appetite', from: 5, to: 3 },
-              { factor: 'Activity', from: 2, to: 3 },
-              { factor: 'Digestion', from: 4, to: 3 },
-            ].map((d) => (
+            {MOCK_USER.baselineShifts.map((d) => (
               <div
-                key={d.factor}
+                key={d.key}
                 className="p-2 border border-[#E5E7EB] rounded-lg"
               >
                 <div className="text-[10px] text-[#6B7280] uppercase tracking-wide mb-0.5">
-                  {d.factor}
+                  {COMPACT_LABEL[d.key] ?? d.key}
                 </div>
                 <div className="flex items-baseline gap-1 tabular-nums">
                   <span className="text-xs text-[#6B7280]">{d.from}</span>
@@ -217,6 +311,76 @@ export function Dashboard() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Weight trend */}
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+          <div className="flex items-baseline justify-between mb-1">
+            <div>
+              <div className="text-[10px] font-semibold tracking-[0.12em] text-[#6B7280] uppercase mb-0.5">
+                Weight trend
+              </div>
+              <div className="text-sm font-semibold text-[#1C1C1C]">
+                Since starting {MOCK_USER.currentRegimen.brand}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-xl font-bold text-[#1C1C1C] tabular-nums leading-none">
+                {MOCK_USER.weightEntries[MOCK_USER.weightEntries.length - 1].weightLb}
+                <span className="text-xs font-medium text-[#6B7280]"> lb</span>
+              </div>
+              <div className="text-[11px] font-semibold text-[#15803D] tabular-nums mt-0.5">
+                {MOCK_USER.weightDeltaLb} lb
+              </div>
+            </div>
+          </div>
+          <div className="h-40 -mx-2 mt-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={WEIGHT_CHART_DATA}
+                margin={{ top: 8, right: 8, bottom: 0, left: 8 }}
+              >
+                <defs>
+                  <linearGradient id="weightFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#234a67" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#234a67" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid stroke="#F3F4F6" vertical={false} />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fontSize: 10, fill: '#6B7280' }}
+                  tickLine={false}
+                  axisLine={{ stroke: '#E5E7EB' }}
+                  interval="preserveStartEnd"
+                  minTickGap={24}
+                />
+                <YAxis
+                  domain={['dataMin - 2', 'dataMax + 2']}
+                  tick={{ fontSize: 10, fill: '#6B7280' }}
+                  tickLine={false}
+                  axisLine={false}
+                  width={28}
+                />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: 8,
+                    border: '1px solid #E5E7EB',
+                    fontSize: 11,
+                  }}
+                  formatter={(v: number) => [`${v} lb`, 'Weight']}
+                  labelFormatter={(l) => l}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="weight"
+                  stroke="#234a67"
+                  strokeWidth={2}
+                  fill="url(#weightFill)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>

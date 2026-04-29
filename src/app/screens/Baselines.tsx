@@ -25,12 +25,9 @@ export function Baselines() {
       <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 bg-[#FAFAFA]">
         {BASELINE_FACTORS.map((factor) => (
           <div key={factor.key}>
-            <div className="flex items-baseline justify-between mb-2">
+            <div className="mb-2">
               <span className="text-sm font-semibold text-[#1C1C1C]">
                 {factor.label}
-              </span>
-              <span className="text-xs text-[#6B7280]">
-                {factor.low} → {factor.high}
               </span>
             </div>
             <div className="flex gap-2">
@@ -53,13 +50,23 @@ export function Baselines() {
                 );
               })}
             </div>
+            <div className="flex gap-2 mt-1.5">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="flex-1 text-[11px] font-bold uppercase tracking-wide text-[#234a67] text-center"
+                >
+                  {i === 0 ? factor.low : i === 4 ? factor.high : ''}
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>
 
       <div className="p-6 bg-white border-t border-[#E5E7EB]">
         <button
-          onClick={() => navigate('/complete')}
+          onClick={() => navigate('/consent')}
           disabled={!canContinue}
           className="w-full h-14 bg-[#234a67] text-white rounded-xl font-semibold text-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#1c425b] transition-colors"
         >

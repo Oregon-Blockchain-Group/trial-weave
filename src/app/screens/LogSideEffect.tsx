@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft, Check, AlertTriangle } from 'lucide-react';
 import { SIDE_EFFECT_CATEGORIES } from '../../data/drugs';
 
 const CATEGORIES = SIDE_EFFECT_CATEGORIES;
@@ -16,6 +16,9 @@ export function LogSideEffect() {
     date: new Date().toISOString().split('T')[0],
     time: new Date().toTimeString().slice(0, 5),
   });
+
+  const showEscalation =
+    formData.severity >= 4 && formData.duration === 'Ongoing';
 
   const handleSubmit = () => {
     setSuccess(true);
@@ -67,7 +70,7 @@ export function LogSideEffect() {
               <button
                 key={cat}
                 onClick={() => setFormData({ ...formData, category: cat })}
-                className={`px-3 h-8 border-2 rounded-full text-xs font-medium transition-colors ${
+                className={`px-3.5 h-11 border-2 rounded-full text-xs font-medium transition-colors ${
                   formData.category === cat
                     ? 'border-[#234a67] bg-[#234a67] text-white'
                     : 'border-[#E5E7EB] bg-white text-[#1C1C1C]'
@@ -103,16 +106,25 @@ export function LogSideEffect() {
               </button>
             ))}
           </div>
-          <div className="flex justify-between text-[10px] text-[#6B7280] uppercase tracking-wide mt-2">
-            <span>Mild</span>
-            <span>Severe</span>
+          <div className="flex gap-1.5 mt-1.5">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="flex-1 text-[11px] font-bold uppercase tracking-wide text-[#234a67] text-center"
+              >
+                {i === 0 ? 'Mild' : i === 4 ? 'Severe' : ''}
+              </div>
+            ))}
           </div>
         </div>
 
         <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
-          <label className="block text-xs font-semibold text-[#1C1C1C] mb-2">
-            Duration
-          </label>
+          <div className="flex items-baseline justify-between mb-2">
+            <label className="block text-xs font-semibold text-[#1C1C1C]">
+              Duration
+            </label>
+            <span className="text-[10px] text-[#6B7280]">Optional</span>
+          </div>
           <div className="grid grid-cols-2 gap-2">
             {['<1 hour', '1–4 hours', '4–12 hours', '12–24 hours', 'Ongoing'].map(
               (dur) => (
@@ -133,9 +145,12 @@ export function LogSideEffect() {
         </div>
 
         <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
-          <label className="block text-xs font-semibold text-[#1C1C1C] mb-2">
-            Impact on daily activity
-          </label>
+          <div className="flex items-baseline justify-between mb-2">
+            <label className="block text-xs font-semibold text-[#1C1C1C]">
+              Impact on daily activity
+            </label>
+            <span className="text-[10px] text-[#6B7280]">Optional</span>
+          </div>
           <div className="grid grid-cols-2 gap-2">
             {['Not at all', 'Slightly', 'Moderately', 'Significantly'].map(
               (imp) => (
@@ -154,6 +169,41 @@ export function LogSideEffect() {
             )}
           </div>
         </div>
+
+        {showEscalation && (
+          <div className="bg-[#FEF2F2] border-2 border-[#B91C1C] rounded-xl p-4">
+            <div className="flex items-start gap-2.5">
+              <AlertTriangle
+                className="w-5 h-5 text-[#B91C1C] shrink-0 mt-0.5"
+                strokeWidth={2.25}
+              />
+              <div className="flex-1">
+                <div className="text-sm font-bold text-[#991B1B] mb-1">
+                  Contact your prescriber
+                </div>
+                <p className="text-xs text-[#991B1B] leading-relaxed mb-2">
+                  A severe, ongoing side effect may need medical attention. Call
+                  your prescriber or seek care now if you have any of these:
+                </p>
+                <ul className="text-xs text-[#991B1B] leading-relaxed list-disc pl-4 space-y-0.5">
+                  <li>Severe stomach pain that won't go away (pancreatitis)</li>
+                  <li>
+                    Pain in the upper right abdomen, yellowing skin or eyes
+                    (gallbladder)
+                  </li>
+                  <li>
+                    Lump or swelling in the neck, hoarseness, trouble swallowing
+                    (thyroid)
+                  </li>
+                  <li>Signs of dehydration, fainting, or severe vomiting</li>
+                </ul>
+                <p className="text-[11px] text-[#991B1B] mt-2 leading-relaxed">
+                  In an emergency, call 911.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="bg-white border border-[#E5E7EB] rounded-xl p-4 grid grid-cols-2 gap-3">
           <div>
@@ -184,7 +234,8 @@ export function LogSideEffect() {
       <div className="p-4 bg-white border-t border-[#E5E7EB]">
         <button
           onClick={handleSubmit}
-          className="w-full h-12 bg-[#234a67] text-white rounded-xl font-semibold text-sm hover:bg-[#1c425b] transition-colors"
+          disabled={!formData.category || !formData.severity}
+          className="w-full h-12 bg-[#234a67] text-white rounded-xl font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#1c425b] transition-colors"
         >
           Record side effect
         </button>
