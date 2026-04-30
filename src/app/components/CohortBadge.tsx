@@ -20,7 +20,7 @@ export function CohortBadge({
           Your matched cohort
         </span>
         <span className="ml-auto text-[11px] text-[#6B7280] tabular-nums">
-          n={n.toLocaleString()}
+          {n.toLocaleString()} people
         </span>
       </div>
       {!compact && (

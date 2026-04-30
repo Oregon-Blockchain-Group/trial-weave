@@ -12,7 +12,9 @@ import {
   Heart,
   Scale,
   Activity,
+  Repeat,
 } from 'lucide-react';
+import { useNavigate } from 'react-router';
 import { SectionHeader } from '../components/SectionHeader';
 import { MOCK_USER } from '../../data/mockUser';
 import { DEFAULT_COHORT_FILTERS } from '../../data/cohort';
@@ -37,6 +39,7 @@ const SETTINGS = [
 ];
 
 export function Profile() {
+  const navigate = useNavigate();
   return (
     <div className="h-full flex flex-col overflow-y-auto bg-[#FAFAFA]">
       <div className="p-4 bg-white border-b border-[#E5E7EB]">
@@ -64,7 +67,7 @@ export function Profile() {
           <SectionHeader
             eyebrow="Your matched cohort"
             title="People like you"
-            meta="n=1,247"
+            meta="1,247 people"
           />
           <div className="flex flex-wrap gap-1.5 mb-3">
             {DEFAULT_COHORT_FILTERS.map((f) => (
@@ -140,6 +143,13 @@ export function Profile() {
               </div>
             </div>
           </div>
+          <button
+            onClick={() => navigate('/switch-medication')}
+            className="mt-3 w-full h-11 border-2 border-[#234a67] text-[#234a67] rounded-xl font-semibold text-sm flex items-center justify-center gap-2 hover:bg-[#e8f4f8] transition-colors"
+          >
+            <Repeat className="w-4 h-4" />
+            Switch medication
+          </button>
         </div>
 
         {/* Integrations */}

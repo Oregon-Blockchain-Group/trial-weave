@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { ChevronDown } from 'lucide-react';
 import { OnboardingProgress } from '../components/OnboardingProgress';
 
 const GENDER_OPTIONS = ['Female', 'Male', 'Non-binary', 'Prefer not to say'];
@@ -28,21 +27,12 @@ const COMORBIDITIES = [
   'None',
 ];
 
-const US_STATES = [
-  'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA',
-  'KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ',
-  'NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT',
-  'VA','WA','WV','WI','WY',
-];
-
 export function Demographics() {
   const navigate = useNavigate();
   const [firstName, setFirstName] = useState('');
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
   const [races, setRaces] = useState<string[]>([]);
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
   const [heightFt, setHeightFt] = useState('');
   const [heightIn, setHeightIn] = useState('');
   const [weight, setWeight] = useState('');
@@ -60,7 +50,7 @@ export function Demographics() {
   };
 
   const canContinue =
-    age && gender && city && state && heightFt && heightIn && weight && comorbidities.length > 0;
+    age && gender && heightFt && heightIn && weight && comorbidities.length > 0;
 
   const toggleRace = (option: string) => {
     if (option === 'Prefer not to say') {
@@ -100,7 +90,7 @@ export function Demographics() {
             placeholder="e.g., Alex — used in greetings only"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
-            className="w-full h-12 px-4 border border-[#E5E7EB] rounded-xl bg-white text-[#1C1C1C] placeholder:text-[#6B7280]"
+            className="w-full h-12 px-4 border border-[#E5E7EB] rounded-xl bg-white text-[#1C1C1C] placeholder:text-[#D1D5DB]"
           />
         </div>
 
@@ -114,7 +104,7 @@ export function Demographics() {
             placeholder="e.g., 34"
             value={age}
             onChange={(e) => setAge(e.target.value)}
-            className="w-full h-12 px-4 border border-[#E5E7EB] rounded-xl bg-white text-[#1C1C1C] placeholder:text-[#6B7280]"
+            className="w-full h-12 px-4 border border-[#E5E7EB] rounded-xl bg-white text-[#1C1C1C] placeholder:text-[#D1D5DB]"
           />
         </div>
 
@@ -168,38 +158,6 @@ export function Demographics() {
 
         <div>
           <label className="block text-sm font-medium text-[#1C1C1C] mb-2">
-            Location
-          </label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              aria-label="City"
-              placeholder="City"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              className="flex-1 h-12 px-4 border border-[#E5E7EB] rounded-xl bg-white text-[#1C1C1C] placeholder:text-[#6B7280]"
-            />
-            <div className="relative w-24">
-              <select
-                aria-label="State"
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-                className="w-full h-12 pl-3 pr-8 border border-[#E5E7EB] rounded-xl bg-white text-[#1C1C1C] appearance-none"
-              >
-                <option value="">State</option>
-                {US_STATES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-[#1C1C1C] mb-2">
             Starting height
           </label>
           <div className="flex gap-2">
@@ -210,7 +168,7 @@ export function Demographics() {
                 placeholder="5"
                 value={heightFt}
                 onChange={(e) => setHeightFt(e.target.value)}
-                className="w-full h-12 pl-4 pr-10 border border-[#E5E7EB] rounded-xl bg-white text-[#1C1C1C] placeholder:text-[#6B7280]"
+                className="w-full h-12 pl-4 pr-10 border border-[#E5E7EB] rounded-xl bg-white text-[#1C1C1C] placeholder:text-[#D1D5DB]"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#6B7280]">
                 ft
@@ -223,7 +181,7 @@ export function Demographics() {
                 placeholder="8"
                 value={heightIn}
                 onChange={(e) => setHeightIn(e.target.value)}
-                className="w-full h-12 pl-4 pr-10 border border-[#E5E7EB] rounded-xl bg-white text-[#1C1C1C] placeholder:text-[#6B7280]"
+                className="w-full h-12 pl-4 pr-10 border border-[#E5E7EB] rounded-xl bg-white text-[#1C1C1C] placeholder:text-[#D1D5DB]"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[#6B7280]">
                 in
@@ -243,7 +201,7 @@ export function Demographics() {
               placeholder="185"
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
-              className="w-full h-12 pl-4 pr-12 border border-[#E5E7EB] rounded-xl bg-white text-[#1C1C1C] placeholder:text-[#6B7280]"
+              className="w-full h-12 pl-4 pr-12 border border-[#E5E7EB] rounded-xl bg-white text-[#1C1C1C] placeholder:text-[#D1D5DB]"
             />
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#6B7280]">
               lbs

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileDown, Share2, TrendingDown, TrendingUp, Activity, Stethoscope, Link2 } from 'lucide-react';
+import { FileDown, Share2, TrendingDown, TrendingUp, Activity, Stethoscope, Link2, ArrowUp, ArrowDown, Info } from 'lucide-react';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -49,6 +49,23 @@ const COHORT_CHART_DATA = COHORT_OUTCOMES.map((d) => ({
   best: !!d.best,
 }));
 
+type Outcome = {
+  label: string;
+  you: string;
+  cohort: string;
+  percentile: number;
+  direction: 'higher-better' | 'lower-better';
+};
+
+const YOU_VS_COHORT: Outcome[] = [
+  { label: 'Weight change (12 wk)', you: '−14.2 lb', cohort: '−11.8 lb', percentile: 72, direction: 'higher-better' },
+  { label: 'Adherence rate', you: '92%', cohort: '84%', percentile: 78, direction: 'higher-better' },
+  { label: 'Side-effect days / mo', you: '3.1', cohort: '5.4', percentile: 82, direction: 'lower-better' },
+  { label: 'Energy (1–5)', you: '3.8', cohort: '3.2', percentile: 69, direction: 'higher-better' },
+  { label: 'Mood (1–5)', you: '4.0', cohort: '3.5', percentile: 71, direction: 'higher-better' },
+  { label: 'Avg monthly copay (post-insurance)', you: '$45', cohort: '$62', percentile: 75, direction: 'lower-better' },
+];
+
 export function Insights() {
   const [clinicianView, setClinicianView] = useState(false);
 
@@ -70,7 +87,7 @@ export function Insights() {
                 : 'text-[#6B7280]'
             }`}
           >
-            My view
+            My summary
           </button>
           <button
             onClick={() => setClinicianView(true)}
@@ -81,7 +98,7 @@ export function Insights() {
             }`}
           >
             <Stethoscope className="w-3.5 h-3.5" />
-            Clinician view
+            For my doctor
           </button>
         </div>
       </div>
@@ -97,13 +114,14 @@ export function Insights() {
             <div className="grid grid-cols-2 gap-3 mb-3">
               <Stat label="Current regimen" value={`${MOCK_USER.currentRegimen.brand} ${MOCK_USER.currentRegimen.dose}`} />
               <Stat label="Days active" value={String(MOCK_USER.currentRegimen.daysActive)} />
-              <Stat label="Weight Δ" value={`${MOCK_USER.weightDeltaLb} lb`} />
+              <Stat label="Weight change" value={`${MOCK_USER.weightDeltaLb} lb`} />
               <Stat label="Adherence 30d" value={`${MOCK_USER.adherencePct}%`} />
               <Stat label="Streak" value={`${MOCK_USER.adherenceStreakDays} d`} />
               <Stat label="Side fx 90d" value={`${MOCK_USER.sideEffectCounts90d.reduce((a, b) => a + b.count, 0)}`} />
             </div>
             <p className="text-[11px] text-[#6B7280] leading-relaxed">
-              EHR-ready summary. Toggle to My view for cohort comparisons.
+              Ready to share or print. Switch to My summary for cohort
+              comparisons.
             </p>
           </div>
         )}
@@ -127,7 +145,25 @@ export function Insights() {
           </p>
           <div className="flex items-center gap-2 text-[11px] text-[#6B7280] tabular-nums">
             <Activity className="w-3.5 h-3.5" />
-            <span>Based on n=412 matched users</span>
+            <span>Based on 412 people like you</span>
+          </div>
+        </div>
+
+        {/* You vs. cohort */}
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+          <SectionHeader
+            eyebrow="You vs. matched cohort"
+            title={`${CURRENT_DRUG} · 12 weeks`}
+            meta="de-identified"
+          />
+          <div className="divide-y divide-[#E5E7EB]">
+            {YOU_VS_COHORT.map((o) => (
+              <OutcomeRow key={o.label} outcome={o} />
+            ))}
+          </div>
+          <div className="mt-3 pt-3 border-t border-[#E5E7EB] text-xs text-[#1C1C1C] leading-relaxed">
+            You're in the <strong>top 28%</strong> of your cohort on weight
+            change and the <strong>top 18%</strong> on side-effect burden.
           </div>
         </div>
 
@@ -247,6 +283,19 @@ export function Insights() {
               <div className="w-3 h-3 bg-[#9CA3AF] rounded-sm" />
               <span className="text-[#6B7280]">Other drugs</span>
             </div>
+          </div>
+          <p className="text-xs text-[#1C1C1C] leading-relaxed mt-3 pt-3 border-t border-[#E5E7EB]">
+            Among people matched to you, those on{' '}
+            <strong>Mounjaro</strong> reported the largest median weight
+            change, while those on <strong>Ozempic</strong> reported the
+            fewest side effects. Individual results vary — this is not a
+            recommendation.
+          </p>
+          <div className="flex items-start gap-2 mt-2 p-2.5 bg-[#FAFAFA] border border-[#E5E7EB] rounded-lg">
+            <Info className="w-3.5 h-3.5 text-[#6B7280] shrink-0 mt-0.5" />
+            <p className="text-[11px] text-[#6B7280] leading-relaxed">
+              Informational only. Your prescriber decides what's right for you.
+            </p>
           </div>
         </div>
 
@@ -455,10 +504,30 @@ export function Insights() {
           </div>
         </div>
 
+        {/* Methodology */}
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
+          <SectionHeader
+            eyebrow="Methodology"
+            title="How this is calculated"
+          />
+          <ul className="text-xs text-[#6B7280] space-y-1.5 leading-relaxed list-disc pl-4">
+            <li>
+              Cohort matched on age (±5y), sex, starting BMI (±2), and reported
+              comorbidities.
+            </li>
+            <li>Weight change = median reported at 52 weeks on therapy.</li>
+            <li>
+              Side-effect score = weighted severity × frequency, lower is
+              better.
+            </li>
+            <li>Cohort rating = mean 1–5 from users who stayed ≥90 days.</li>
+          </ul>
+        </div>
+
         {/* Export */}
         <div className="bg-white border border-[#E5E7EB] rounded-xl p-4">
           <SectionHeader
-            eyebrow="Share with clinician"
+            eyebrow="Share with your doctor"
             title="Export your data"
           />
           <p className="text-xs text-[#6B7280] mb-3 leading-relaxed">
@@ -494,6 +563,62 @@ function Stat({ label, value }: { label: string; value: string }) {
       </div>
       <div className="text-sm font-semibold text-[#1C1C1C] tabular-nums">
         {value}
+      </div>
+    </div>
+  );
+}
+
+function OutcomeRow({ outcome }: { outcome: Outcome }) {
+  const youNum = parseFloat(outcome.you.replace(/[^0-9.-]/g, ''));
+  const cohortNum = parseFloat(outcome.cohort.replace(/[^0-9.-]/g, ''));
+  const better =
+    outcome.direction === 'higher-better' ? youNum > cohortNum : youNum < cohortNum;
+
+  return (
+    <div className="py-3 first:pt-0 last:pb-0">
+      <div className="flex items-baseline justify-between mb-2">
+        <span className="text-sm text-[#1C1C1C]">{outcome.label}</span>
+        <span className="text-[11px] text-[#6B7280] tabular-nums">
+          {outcome.percentile}th pct
+        </span>
+      </div>
+      <div className="flex items-baseline gap-3 mb-1.5">
+        <div className="flex-1">
+          <div className="text-[10px] text-[#6B7280] uppercase tracking-wide">You</div>
+          <div className="text-base font-bold text-[#1C1C1C] tabular-nums">
+            {outcome.you}
+          </div>
+        </div>
+        <div className="flex-1">
+          <div className="text-[10px] text-[#6B7280] uppercase tracking-wide">
+            Cohort median
+          </div>
+          <div className="text-base font-semibold text-[#6B7280] tabular-nums">
+            {outcome.cohort}
+          </div>
+        </div>
+        <div
+          className={`flex items-center gap-1 text-xs font-semibold ${
+            better ? 'text-[#15803D]' : 'text-[#B45309]'
+          }`}
+        >
+          {better ? (
+            <ArrowUp className="w-3.5 h-3.5" />
+          ) : (
+            <ArrowDown className="w-3.5 h-3.5" />
+          )}
+          {better ? 'Better' : 'Below'}
+        </div>
+      </div>
+      <div className="relative h-1.5 bg-[#E5E7EB] rounded-full overflow-hidden">
+        <div
+          className="absolute inset-y-0 left-0 bg-[#234a67] rounded-full"
+          style={{ width: `${outcome.percentile}%` }}
+        />
+        <div
+          className="absolute inset-y-0 w-px bg-[#6B7280]"
+          style={{ left: '50%' }}
+        />
       </div>
     </div>
   );

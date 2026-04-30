@@ -106,7 +106,7 @@ export function Dashboard() {
           </div>
           <div className="grid grid-cols-3 gap-3 pt-3 border-t border-[#E5E7EB]">
             <MetaStat label="Days" value={String(MOCK_USER.currentRegimen.daysActive)} />
-            <MetaStat label="Weight Δ" value={`${MOCK_USER.weightDeltaLb} lb`} />
+            <MetaStat label="Weight change" value={`${MOCK_USER.weightDeltaLb} lb`} />
             <MetaStat label="Next dose" value={MOCK_USER.currentRegimen.nextDoseLabel} highlight />
           </div>
         </div>
@@ -160,7 +160,7 @@ export function Dashboard() {
 
         {/* Cohort CTA */}
         <button
-          onClick={() => navigate('/comparison')}
+          onClick={() => navigate('/insights')}
           className="w-full bg-[#234a67] text-white rounded-xl p-4 text-left hover:bg-[#1c425b] transition-colors"
         >
           <div className="flex items-start gap-3">
@@ -175,7 +175,7 @@ export function Dashboard() {
                 You're in the top 28% of people like you
               </div>
               <div className="text-xs opacity-90">
-                See how your results compare · n=1,247
+                See how your results compare · 1,247 people
               </div>
             </div>
             <ArrowUpRight className="w-4 h-4 shrink-0 opacity-80" />
