@@ -50,15 +50,162 @@ Copy `.env.example` to `.env` and fill in the required values. Never commit `.en
 
 ## Project layout
 
-<!-- TODO: fill in once the Flutter scaffold lands (lib/, test/, ios/, android/, etc.) -->
+The Flutter app lives under `src/`. Within `src/lib/`, code is split by responsibility — UI on one side, data on the other, with a thin shared `core/` for app-wide singletons.
 
 ```
 .
-├── .fvmrc                # Pinned Flutter SDK version
-├── .gitignore            # Build artifacts, secrets, IDE state
-├── LICENSE               # MIT
-└── README.md             # You are here
+├── .fvmrc                              # Pinned Flutter SDK version
+├── run_chrome.ps1                      # Launches the app in Chrome
+├── run_ios.ps1                         # Launches the app on iOS (macOS only)
+└── src/
+    ├── pubspec.yaml
+    └── lib/
+        ├── main.dart                   # Entry point — runs TrialWeaveApp
+        ├── core/                       # App-wide config & singletons
+        │   ├── supabase.dart           # Supabase client init
+        │   └── theme.dart              # Cupertino/Material themes
+        ├── backend/                    # Data layer (no Flutter widgets here)
+        │   ├── models/                 # Plain Dart data classes
+        │   ├── repositories/           # Talks to Supabase / external APIs
+        │   └── providers/              # Riverpod providers exposing repos & state
+        └── frontend/                   # UI layer (widgets only)
+            ├── app.dart                # Root widget (TrialWeaveApp)
+            └── components/             # Reusable widgets, grouped by kind
+                └── buttons/
 ```
+
+**Direction of dependencies**: `frontend/` may import from `backend/providers/` and `core/`. `backend/` must never import from `frontend/`. Repositories don't import providers; providers wrap repositories.
+
+## Adding features
+
+Two recipes cover most work in this app: **adding a CRUD entity** (a new table you read/write) and **adding a frontend component** (a reusable widget). Follow the templates below so files stay consistent.
+
+### CRUD: model → repository → provider
+
+For a new entity (e.g. `Workout`), add three files in lockstep:
+
+**1. Model — `src/lib/backend/models/workout.dart`**
+
+Plain data class with `fromJson` / `toJson`. No Flutter imports.
+
+```dart
+class Workout {
+  final String id;
+  final String userId;
+  final String name;
+  final DateTime createdAt;
+
+  const Workout({
+    required this.id,
+    required this.userId,
+    required this.name,
+    required this.createdAt,
+  });
+
+  factory Workout.fromJson(Map<String, dynamic> json) => Workout(
+        id: json['id'] as String,
+        userId: json['user_id'] as String,
+        name: json['name'] as String,
+        createdAt: DateTime.parse(json['created_at'] as String),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'user_id': userId,
+        'name': name,
+        'created_at': createdAt.toIso8601String(),
+      };
+}
+```
+
+**2. Repository — `src/lib/backend/repositories/workouts_repository.dart`**
+
+One class per entity. Owns all Supabase queries for that table. Returns models, never raw rows.
+
+```dart
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/workout.dart';
+
+class WorkoutsRepository {
+  WorkoutsRepository(this._client);
+  final SupabaseClient _client;
+
+  static const _table = 'workouts';
+
+  Future<List<Workout>> list() async {
+    final rows = await _client.from(_table).select();
+    return rows.map((r) => Workout.fromJson(r)).toList();
+  }
+
+  Future<Workout> create(Workout w) async {
+    final row = await _client.from(_table).insert(w.toJson()).select().single();
+    return Workout.fromJson(row);
+  }
+
+  Future<Workout> update(Workout w) async {
+    final row = await _client.from(_table).update(w.toJson()).eq('id', w.id).select().single();
+    return Workout.fromJson(row);
+  }
+
+  Future<void> delete(String id) async {
+    await _client.from(_table).delete().eq('id', id);
+  }
+}
+```
+
+**3. Providers — `src/lib/backend/providers/workouts_providers.dart`**
+
+Riverpod providers. One provides the repository; others provide derived state (lists, single items). UI only ever reads providers — never instantiates repositories directly.
+
+```dart
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/workout.dart';
+import '../repositories/workouts_repository.dart';
+import 'supabase_provider.dart';
+
+final workoutsRepositoryProvider = Provider<WorkoutsRepository>((ref) {
+  return WorkoutsRepository(ref.watch(supabaseClientProvider));
+});
+
+final workoutsProvider = FutureProvider<List<Workout>>((ref) async {
+  return ref.watch(workoutsRepositoryProvider).list();
+});
+```
+
+Mutations (create/update/delete) go through the repository and then `ref.invalidate(workoutsProvider)` to refetch.
+
+### Frontend components
+
+A "component" is a reusable widget — a button, card, form field, etc. Anything used in more than one screen, or anything complex enough to deserve its own file.
+
+**Where it goes**: `src/lib/frontend/components/<kind>/<name>.dart`, where `<kind>` is `buttons/`, `cards/`, `inputs/`, `dialogs/`, etc.
+
+**Template — `src/lib/frontend/components/buttons/log_weight.dart`**
+
+```dart
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class LogWeightButton extends ConsumerWidget {
+  const LogWeightButton({super.key, required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return CupertinoButton.filled(
+      onPressed: onTap,
+      child: const Text('Log weight'),
+    );
+  }
+}
+```
+
+**Conventions**:
+- One widget per file. Filename is `snake_case`, class name is `PascalCase`.
+- Use `ConsumerWidget` if the component reads providers; plain `StatelessWidget` otherwise.
+- Components take callbacks (`onTap`, `onSubmit`) rather than performing mutations themselves — keep side effects in the screen that owns the component.
+- Screens (full pages) live alongside `app.dart` in `frontend/` (e.g. `frontend/screens/home_screen.dart`); they compose components and wire providers to callbacks.
 
 ## Development
 
