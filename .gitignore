@@ -1,13 +1,135 @@
-# Flutter project lives in src/ — full .gitignore is at src/.gitignore
+# ==============================================================================
+# Repo-root .gitignore
+#
+# Cross-cutting patterns only — OS junk, editors, secrets, logs, generic build
+# artifacts. These are patterns without path slashes, so they match at ANY depth.
+#
+# Flutter-specific patterns (ios/Pods/, android/.gradle/, etc.) live in
+# src/.gitignore and the platform subdirectories' .gitignore files.
+# ==============================================================================
 
-# OS junk
+# ------------------------------------------------------------------------------
+# OS / filesystem junk
+# ------------------------------------------------------------------------------
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 *~
+.nfs*
 
-# Editor files at the repo root (per-project settings live in src/.vscode)
-.idea/
-.vscode/
+# ------------------------------------------------------------------------------
+# Editors / IDEs — user-specific, never commit
+# ------------------------------------------------------------------------------
+
+# IntelliJ / Android Studio
 *.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code
+.vscode/
+
+# Cursor / Zed / Fleet / Sublime / Vim / Emacs
+.cursor/
+.zed/
+.fleet/
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+.\#*
+\#*\#
+
+# Xcode user state
+xcuserdata/
+
+# ------------------------------------------------------------------------------
+# Secrets / env — NEVER commit, anywhere in the tree
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+!.env.sample
+secrets/
+*.pem
+*.key
+*.p12
+*.p8
+*.mobileprovision
+*.cer
+*.certSigningRequest
+credentials.json
+service-account*.json
+gha-creds-*.json
+
+# ------------------------------------------------------------------------------
+# Logs / tmp / crashes
+# ------------------------------------------------------------------------------
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+crash-*.log
+hs_err_pid*.log
+
+# ------------------------------------------------------------------------------
+# Build / caches — anywhere
+# ------------------------------------------------------------------------------
+build/
+.dart_tool/
+.generated/
+coverage/
+*.lcov
+
+# ------------------------------------------------------------------------------
+# Node (if used — e.g. Firebase Functions under src/)
+# ------------------------------------------------------------------------------
+node_modules/
+.npm/
+.yarn/
+.pnp.*
+
+# ------------------------------------------------------------------------------
+# Python (tooling / scripts)
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# ------------------------------------------------------------------------------
+# Release binaries — anywhere
+# ------------------------------------------------------------------------------
+*.apk
+*.aab
+*.app
+*.ipa
+*.xcarchive
+*.dmg
+*.pkg
+*.exe
+*.msi
+
+# ------------------------------------------------------------------------------
+# Misc tooling
+# ------------------------------------------------------------------------------
+.direnv/
+.envrc.local
+.netrc
+.history/
+.turbo/
+.nx/
