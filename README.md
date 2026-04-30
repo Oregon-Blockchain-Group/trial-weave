@@ -82,97 +82,149 @@ Two recipes cover most work in this app: **adding a CRUD entity** (a new table y
 
 ### CRUD: model → repository → provider
 
-For a new entity (e.g. `Workout`), add three files in lockstep:
+The canonical example in this app is **weight logging** — a user records their weight; the app reads, edits, and deletes those entries from Supabase. Three files, one per layer:
 
-**1. Model — `src/lib/backend/models/workout.dart`**
+**1. Model — `src/lib/backend/models/weight_log.dart`**
 
 Plain data class with `fromJson` / `toJson`. No Flutter imports.
 
 ```dart
-class Workout {
+class WeightLog {
   final String id;
   final String userId;
-  final String name;
-  final DateTime createdAt;
+  final double weightKg;
+  final DateTime loggedAt;
+  final String? notes;
 
-  const Workout({
+  const WeightLog({
     required this.id,
     required this.userId,
-    required this.name,
-    required this.createdAt,
+    required this.weightKg,
+    required this.loggedAt,
+    this.notes,
   });
 
-  factory Workout.fromJson(Map<String, dynamic> json) => Workout(
+  factory WeightLog.fromJson(Map<String, dynamic> json) => WeightLog(
         id: json['id'] as String,
         userId: json['user_id'] as String,
-        name: json['name'] as String,
-        createdAt: DateTime.parse(json['created_at'] as String),
+        weightKg: (json['weight_kg'] as num).toDouble(),
+        loggedAt: DateTime.parse(json['logged_at'] as String),
+        notes: json['notes'] as String?,
       );
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'user_id': userId,
-        'name': name,
-        'created_at': createdAt.toIso8601String(),
+        'weight_kg': weightKg,
+        'logged_at': loggedAt.toIso8601String(),
+        'notes': notes,
       };
 }
 ```
 
-**2. Repository — `src/lib/backend/repositories/workouts_repository.dart`**
+**2. Repository — `src/lib/backend/repositories/weight_logs_repository.dart`**
 
 One class per entity. Owns all Supabase queries for that table. Returns models, never raw rows.
 
 ```dart
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../models/workout.dart';
+import '../models/weight_log.dart';
 
-class WorkoutsRepository {
-  WorkoutsRepository(this._client);
+class WeightLogsRepository {
+  WeightLogsRepository(this._client);
   final SupabaseClient _client;
 
-  static const _table = 'workouts';
+  static const _table = 'weight_logs';
 
-  Future<List<Workout>> list() async {
-    final rows = await _client.from(_table).select();
-    return rows.map((r) => Workout.fromJson(r)).toList();
+  // READ — newest first
+  Future<List<WeightLog>> list() async {
+    final rows = await _client
+        .from(_table)
+        .select()
+        .order('logged_at', ascending: false);
+    return rows.map((r) => WeightLog.fromJson(r)).toList();
   }
 
-  Future<Workout> create(Workout w) async {
-    final row = await _client.from(_table).insert(w.toJson()).select().single();
-    return Workout.fromJson(row);
+  // CREATE — insert a new log; Supabase fills id/created_at defaults
+  Future<WeightLog> create({
+    required double weightKg,
+    DateTime? loggedAt,
+    String? notes,
+  }) async {
+    final userId = _client.auth.currentUser!.id;
+    final row = await _client.from(_table).insert({
+      'user_id': userId,
+      'weight_kg': weightKg,
+      'logged_at': (loggedAt ?? DateTime.now()).toIso8601String(),
+      'notes': notes,
+    }).select().single();
+    return WeightLog.fromJson(row);
   }
 
-  Future<Workout> update(Workout w) async {
-    final row = await _client.from(_table).update(w.toJson()).eq('id', w.id).select().single();
-    return Workout.fromJson(row);
+  // UPDATE — edit an existing log
+  Future<WeightLog> update(WeightLog log) async {
+    final row = await _client
+        .from(_table)
+        .update(log.toJson())
+        .eq('id', log.id)
+        .select()
+        .single();
+    return WeightLog.fromJson(row);
   }
 
+  // DELETE — remove by id
   Future<void> delete(String id) async {
     await _client.from(_table).delete().eq('id', id);
   }
 }
 ```
 
-**3. Providers — `src/lib/backend/providers/workouts_providers.dart`**
+**3. Providers — `src/lib/backend/providers/weight_logs_providers.dart`**
 
 Riverpod providers. One provides the repository; others provide derived state (lists, single items). UI only ever reads providers — never instantiates repositories directly.
 
 ```dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/workout.dart';
-import '../repositories/workouts_repository.dart';
+import '../models/weight_log.dart';
+import '../repositories/weight_logs_repository.dart';
 import 'supabase_provider.dart';
 
-final workoutsRepositoryProvider = Provider<WorkoutsRepository>((ref) {
-  return WorkoutsRepository(ref.watch(supabaseClientProvider));
+final weightLogsRepositoryProvider = Provider<WeightLogsRepository>((ref) {
+  return WeightLogsRepository(ref.watch(supabaseClientProvider));
 });
 
-final workoutsProvider = FutureProvider<List<Workout>>((ref) async {
-  return ref.watch(workoutsRepositoryProvider).list();
+final weightLogsProvider = FutureProvider<List<WeightLog>>((ref) async {
+  return ref.watch(weightLogsRepositoryProvider).list();
 });
 ```
 
-Mutations (create/update/delete) go through the repository and then `ref.invalidate(workoutsProvider)` to refetch.
+**Calling a mutation from the UI** — perform the write through the repository, then invalidate the list provider so consumers refetch:
+
+```dart
+Future<void> _onLogWeight(WidgetRef ref, double kg) async {
+  await ref.read(weightLogsRepositoryProvider).create(weightKg: kg);
+  ref.invalidate(weightLogsProvider);
+}
+```
+
+**Supabase table** (run once in the SQL editor):
+
+```sql
+create table weight_logs (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  weight_kg   numeric not null check (weight_kg > 0),
+  logged_at   timestamptz not null default now(),
+  notes       text,
+  created_at  timestamptz not null default now()
+);
+
+alter table weight_logs enable row level security;
+create policy "users read own logs"   on weight_logs for select using (auth.uid() = user_id);
+create policy "users write own logs"  on weight_logs for insert with check (auth.uid() = user_id);
+create policy "users update own logs" on weight_logs for update using (auth.uid() = user_id);
+create policy "users delete own logs" on weight_logs for delete using (auth.uid() = user_id);
+```
 
 ### Frontend components
 
@@ -182,17 +234,18 @@ A "component" is a reusable widget — a button, card, form field, etc. Anything
 
 **Template — `src/lib/frontend/components/buttons/log_weight.dart`**
 
+The button itself is dumb — it just renders and fires a callback. The screen that uses it is responsible for collecting input and calling the repository.
+
 ```dart
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LogWeightButton extends ConsumerWidget {
+class LogWeightButton extends StatelessWidget {
   const LogWeightButton({super.key, required this.onTap});
 
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return CupertinoButton.filled(
       onPressed: onTap,
       child: const Text('Log weight'),
@@ -201,11 +254,21 @@ class LogWeightButton extends ConsumerWidget {
 }
 ```
 
+Used from a screen like:
+
+```dart
+LogWeightButton(
+  onTap: () => _onLogWeight(ref, 75.4),  // see "Calling a mutation" above
+)
+```
+
 **Conventions**:
 - One widget per file. Filename is `snake_case`, class name is `PascalCase`.
 - Use `ConsumerWidget` if the component reads providers; plain `StatelessWidget` otherwise.
 - Components take callbacks (`onTap`, `onSubmit`) rather than performing mutations themselves — keep side effects in the screen that owns the component.
 - Screens (full pages) live alongside `app.dart` in `frontend/` (e.g. `frontend/screens/home_screen.dart`); they compose components and wire providers to callbacks.
+
+**Reference**: before building a new component from scratch, check the [Flutter Component Library](https://fluttercomponentlibrary.com/) for an existing pattern you can adapt.
 
 ## Development
 
