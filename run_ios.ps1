@@ -6,3 +6,5 @@
 $env:PATH = [Environment]::GetEnvironmentVariable('PATH', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('PATH', 'User')
 Set-Location -Path (Join-Path $PSScriptRoot 'src')
 & fvm flutter run -d ios
+
+
