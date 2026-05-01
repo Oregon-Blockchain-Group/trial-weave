@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart'; // WelcomeScreen uses Material widgets
 import 'screens/welcome_screen.dart';
+import 'frontend/components/onboarding_2.dart';
 
 class TrialWeaveApp extends StatelessWidget {
   const TrialWeaveApp({super.key});
