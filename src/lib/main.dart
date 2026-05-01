@@ -1,6 +1,5 @@
-import 'package:flutter/cupertino.dart';
-
-import 'frontend/app.dart';
+import 'package:flutter/widgets.dart';
+import 'app.dart';
 
 void main() {
   runApp(const TrialWeaveApp());

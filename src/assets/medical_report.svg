@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg fill="none" width="800" height="800" viewBox="0 0 24 24" id="medical-report" xmlns="http://www.w3.org/2000/svg">
+  <path d="M15,6h3a1,1,0,0,1,1,1V20a1,1,0,0,1-1,1H6a1,1,0,0,1-1-1V7A1,1,0,0,1,6,6H9" style="fill: none; stroke: #234A67; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;"/>
+  <path d="M14,5h0a2,2,0,0,0-2-2h0a2,2,0,0,0-2,2h0A1,1,0,0,0,9,6V8h6V6A1,1,0,0,0,14,5ZM12,16V12m2,2H10" style="fill: none; stroke: #234A67; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;"/>
+</svg>

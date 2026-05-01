@@ -93,6 +93,8 @@ build/
 .generated/
 coverage/
 *.lcov
+# Flutter web build output at repo root
+/dist/
 
 # ------------------------------------------------------------------------------
 # Node (if used — e.g. Firebase Functions under src/)
