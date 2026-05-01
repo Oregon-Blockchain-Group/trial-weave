@@ -16,6 +16,7 @@ import { Adherence } from './screens/Adherence';
 import { Insights } from './screens/Insights';
 import { Profile } from './screens/Profile';
 import { Notifications } from './screens/Notifications';
+import { ChatProvider } from './screens/ChatProvider';
 
 export const router = createBrowserRouter([
   {
@@ -38,6 +39,7 @@ export const router = createBrowserRouter([
       { path: 'insights', Component: Insights },
       { path: 'profile', Component: Profile },
       { path: 'notifications', Component: Notifications },
+      { path: 'chat-provider', Component: ChatProvider },
     ],
   },
 ]);

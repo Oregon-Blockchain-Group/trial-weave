@@ -13,6 +13,7 @@ import {
   Flame,
   Check,
   Pill,
+  MessageCircle,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -60,6 +61,14 @@ export function Dashboard() {
             className="h-8 w-auto"
           />
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate('/chat-provider')}
+              aria-label="Message your provider"
+              className="w-9 h-9 flex items-center justify-center rounded-full border border-[#E5E7EB] hover:bg-[#FAFAFA] transition-colors relative"
+            >
+              <MessageCircle className="w-4 h-4 text-[#1C1C1C]" />
+              <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-[#234a67] rounded-full" />
+            </button>
             <button
               onClick={() => navigate('/notifications')}
               className="w-9 h-9 flex items-center justify-center rounded-full border border-[#E5E7EB] hover:bg-[#FAFAFA] transition-colors relative"
