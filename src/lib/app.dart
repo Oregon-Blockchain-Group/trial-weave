@@ -1,7 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart'; // WelcomeScreen uses Material widgets
 import 'screens/welcome_screen.dart';
-import 'frontend/components/onboarding_2.dart';
+import 'frontend/components/onboarding_medication.dart';
+import 'frontend/components/onboarding_baselines.dart';
+import 'frontend/components/onboarding_consent.dart';
+import 'frontend/components/onboarding_complete.dart';
 
 class TrialWeaveApp extends StatelessWidget {
   const TrialWeaveApp({super.key});
@@ -77,9 +80,50 @@ class _AuthGateState extends State<AuthGate> {
         },
       );
     }
-    return const CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(middle: Text('Trial Weave')),
-      child: Center(child: Text('Dashboard goes here')),
-    );
+    return const OnboardingFlow();
+  }
+}
+
+enum _Step { medication, baselines, consent, complete, dashboard }
+
+class OnboardingFlow extends StatefulWidget {
+  const OnboardingFlow({super.key});
+
+  @override
+  State<OnboardingFlow> createState() => _OnboardingFlowState();
+}
+
+class _OnboardingFlowState extends State<OnboardingFlow> {
+  _Step _step = _Step.medication;
+
+  void _go(_Step s) => setState(() => _step = s);
+
+  @override
+  Widget build(BuildContext context) {
+    switch (_step) {
+      case _Step.medication:
+        return OnboardingTwoScreen(
+          onContinue: () => _go(_Step.baselines),
+        );
+      case _Step.baselines:
+        return OnboardingBaselinesScreen(
+          onBack: () => _go(_Step.medication),
+          onContinue: () => _go(_Step.consent),
+        );
+      case _Step.consent:
+        return OnboardingConsentScreen(
+          onBack: () => _go(_Step.baselines),
+          onContinue: () => _go(_Step.complete),
+        );
+      case _Step.complete:
+        return OnboardingCompleteScreen(
+          onGoToDashboard: () => _go(_Step.dashboard),
+        );
+      case _Step.dashboard:
+        return const CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(middle: Text('Trial Weave')),
+          child: Center(child: Text('Dashboard goes here')),
+        );
+    }
   }
 }
