@@ -5,6 +5,7 @@ import 'frontend/components/onboarding_medication.dart';
 import 'frontend/components/onboarding_baselines.dart';
 import 'frontend/components/onboarding_consent.dart';
 import 'frontend/components/onboarding_complete.dart';
+import 'frontend/components/onboarding_demographics.dart';
 
 class TrialWeaveApp extends StatelessWidget {
   const TrialWeaveApp({super.key});
@@ -84,7 +85,7 @@ class _AuthGateState extends State<AuthGate> {
   }
 }
 
-enum _Step { medication, baselines, consent, complete, dashboard }
+enum _Step { demographics, medication, baselines, consent, complete, dashboard }
 
 class OnboardingFlow extends StatefulWidget {
   const OnboardingFlow({super.key});
@@ -94,15 +95,20 @@ class OnboardingFlow extends StatefulWidget {
 }
 
 class _OnboardingFlowState extends State<OnboardingFlow> {
-  _Step _step = _Step.medication;
+  _Step _step = _Step.demographics;
 
   void _go(_Step s) => setState(() => _step = s);
 
   @override
   Widget build(BuildContext context) {
     switch (_step) {
+      case _Step.demographics:
+        return OnboardingDemographicsScreen(
+          onContinue: () => _go(_Step.medication),
+        );
       case _Step.medication:
         return OnboardingTwoScreen(
+          onBack: () => _go(_Step.demographics),
           onContinue: () => _go(_Step.baselines),
         );
       case _Step.baselines:
