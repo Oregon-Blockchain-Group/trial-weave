@@ -235,6 +235,13 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
         );
 
     state = state.copyWith(committedRegimen: regimen);
+
+    // Tell downstream consumers (router redirect, home tiles) that the
+    // user now has a profile + active regimen so they don't keep showing
+    // empty / "not onboarded" states.
+    ref.invalidate(currentProfileProvider);
+    ref.invalidate(activeRegimenProvider);
+
     return regimen;
   }
 }
