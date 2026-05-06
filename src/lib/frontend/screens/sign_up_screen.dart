@@ -41,12 +41,26 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       _error = null;
     });
     try {
-      await ref
+      final res = await ref
           .read(authRepositoryProvider)
           .signUpWithEmail(email: email, password: pw);
+      if (!mounted) return;
+      if (res.session == null) {
+        // Supabase has "Confirm email" enabled — account was created but no
+        // session is returned until the user clicks the confirmation link.
+        // Without this branch we'd navigate to /onboarding/medication and
+        // the router would bounce back to /welcome with no explanation.
+        setState(() {
+          _error =
+              'Account created. Check your email for a confirmation link, '
+              'then come back and sign in. (Or disable "Confirm email" in '
+              'Supabase Auth settings for dev.)';
+        });
+        return;
+      }
       // New users go through onboarding before /home. We navigate explicitly
       // because the router's default post-sign-in redirect targets /home.
-      if (mounted) context.go('/onboarding/medication');
+      context.go('/onboarding/medication');
     } on Exception catch (e) {
       if (mounted) setState(() => _error = e.toString());
     } finally {

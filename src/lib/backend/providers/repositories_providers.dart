@@ -13,6 +13,7 @@ import '../models/weight_log.dart';
 import '../repositories/cohort_repository.dart';
 import '../repositories/consents_repository.dart';
 import '../repositories/cost_logs_repository.dart';
+import '../repositories/data_privacy_repository.dart';
 import '../repositories/dose_logs_repository.dart';
 import '../repositories/factor_logs_repository.dart';
 import '../repositories/profiles_repository.dart';
@@ -60,10 +61,20 @@ final costLogsRepositoryProvider = Provider<CostLogsRepository>((ref) {
   return CostLogsRepository(ref.watch(supabaseClientProvider));
 });
 
+final dataPrivacyRepositoryProvider = Provider<DataPrivacyRepository>((ref) {
+  return DataPrivacyRepository(ref.watch(supabaseClientProvider));
+});
+
 /// The caller's currently-active [Regimen], or null if they have none.
 /// Cached for the session — invalidate after starting/ending a regimen.
 final activeRegimenProvider = FutureProvider<Regimen?>((ref) {
   return ref.watch(regimensRepositoryProvider).currentActive();
+});
+
+/// All of the caller's regimens, newest first. Drives the Regimen screen's
+/// history list.
+final allRegimensProvider = FutureProvider<List<Regimen>>((ref) {
+  return ref.watch(regimensRepositoryProvider).listAll();
 });
 
 /// The caller's [Profile], or null if onboarding hasn't completed yet.

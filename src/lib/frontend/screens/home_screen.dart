@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../backend/providers/repositories_providers.dart';
-import '../../backend/repositories/auth_repository.dart';
 import '../../core/theme.dart';
 import '../components/home/adherence_tile.dart';
 import '../components/home/cohort_teaser_tile.dart';
@@ -26,10 +25,7 @@ class HomeScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.person_outline),
             tooltip: 'Profile',
-            onPressed: () {
-              // Profile screen ships in Stage 7. Sign out for now.
-              ref.read(authRepositoryProvider).signOut();
-            },
+            onPressed: () => context.go('/profile'),
           ),
         ],
       ),
@@ -84,6 +80,11 @@ class HomeScreen extends ConsumerWidget {
                     icon: Icons.show_chart,
                     label: 'Progress',
                     onTap: () => context.go('/progress'),
+                  ),
+                  _QuickAction(
+                    icon: Icons.person_outline,
+                    label: 'Profile',
+                    onTap: () => context.go('/profile'),
                   ),
                 ],
               ),

@@ -64,4 +64,30 @@ class RegimensRepository {
     if (row == null) return null;
     return Regimen.fromJson(row);
   }
+
+  /// All of the caller's regimens, newest first. Used by the Regimen
+  /// screen's history list.
+  Future<List<Regimen>> listAll() async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return const [];
+    final rows = await _client
+        .from(_table)
+        .select()
+        .eq('user_id', userId)
+        .order('started_at', ascending: false);
+    return rows.map((r) => Regimen.fromJson(r)).toList();
+  }
+
+  /// Marks the active regimen inactive without starting a new one. Used by
+  /// the Regimen screen's "Stop drug" action.
+  Future<void> endActive() async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return;
+    final now = DateTime.now().toUtc();
+    await _client
+        .from(_table)
+        .update({'is_active': false, 'ended_at': now.toIso8601String()})
+        .eq('user_id', userId)
+        .eq('is_active', true);
+  }
 }

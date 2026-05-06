@@ -18,6 +18,11 @@ import '../frontend/screens/cohort/cohort_home_screen.dart';
 import '../frontend/screens/cohort/cohort_outcomes_screen.dart';
 import '../frontend/screens/cohort/cohort_side_effects_screen.dart';
 import '../frontend/screens/onboarding/medication_screen.dart';
+import '../frontend/screens/profile/data_privacy_screen.dart';
+import '../frontend/screens/profile/edit_profile_screen.dart';
+import '../frontend/screens/profile/profile_screen.dart';
+import '../frontend/screens/profile/regimen_screen.dart';
+import '../frontend/screens/profile/switch_drug_screen.dart';
 import '../frontend/screens/progress_screen.dart';
 import '../frontend/screens/sign_in_screen.dart';
 import '../frontend/screens/sign_up_screen.dart';
@@ -101,6 +106,23 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/cohort/cost',
         builder: (_, _) => const CohortCostScreen(),
+      ),
+      GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen()),
+      GoRoute(
+        path: '/profile/edit',
+        builder: (_, _) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: '/profile/regimen',
+        builder: (_, _) => const RegimenScreen(),
+      ),
+      GoRoute(
+        path: '/profile/regimen/switch',
+        builder: (_, _) => const SwitchDrugScreen(),
+      ),
+      GoRoute(
+        path: '/profile/data-privacy',
+        builder: (_, _) => const DataPrivacyScreen(),
       ),
     ],
   );
