@@ -2,8 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/cohort_outcome.dart';
 import '../models/dose_log.dart';
+import '../models/factor_log.dart';
 import '../models/profile.dart';
 import '../models/regimen.dart';
+import '../models/side_effect_log.dart';
 import '../models/weight_log.dart';
 import '../repositories/cohort_repository.dart';
 import '../repositories/consents_repository.dart';
@@ -81,4 +83,28 @@ final recentWeightLogsProvider = FutureProvider<List<WeightLog>>((ref) {
 /// will add a family-keyed variant for filtered queries.
 final cohortOutcomesProvider = FutureProvider<List<CohortOutcome>>((ref) {
   return ref.watch(cohortRepositoryProvider).outcomes();
+});
+
+// ── Progress-screen providers ────────────────────────────────────────────
+
+/// All weight logs in the last 365 days, oldest first — chronological
+/// order is what the chart needs.
+final progressWeightLogsProvider = FutureProvider<List<WeightLog>>((ref) {
+  final since = DateTime.now().subtract(const Duration(days: 365));
+  return ref.watch(weightLogsRepositoryProvider).listSince(since);
+});
+
+/// Latest baseline rating per factor key, captured during onboarding.
+final latestBaselineProvider = FutureProvider<Map<String, int>>((ref) {
+  return ref.watch(factorLogsRepositoryProvider).latestBaseline();
+});
+
+/// Check-in factor ratings in the last 30 days.
+final recentCheckInsProvider = FutureProvider<List<FactorLog>>((ref) {
+  return ref.watch(factorLogsRepositoryProvider).recentCheckIns();
+});
+
+/// Side-effect logs in the last 90 days. Drives the Progress trends.
+final recentSideEffectsProvider = FutureProvider<List<SideEffectLog>>((ref) {
+  return ref.watch(sideEffectLogsRepositoryProvider).listInWindow(90);
 });

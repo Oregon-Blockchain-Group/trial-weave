@@ -24,7 +24,7 @@ class WeightLogsRepository {
   }
 
   /// Most recent [limit] weight logs, newest first. Used by the home Weight
-  /// tile + Stage 5 Progress chart.
+  /// tile.
   Future<List<WeightLog>> listRecent({int limit = 30}) async {
     final userId = _client.auth.currentUser?.id;
     if (userId == null) return const [];
@@ -34,6 +34,20 @@ class WeightLogsRepository {
         .eq('user_id', userId)
         .order('date', ascending: false)
         .limit(limit);
+    return rows.map((r) => WeightLog.fromJson(r)).toList();
+  }
+
+  /// All weight logs since [since], oldest first. Used by the Progress
+  /// screen's full chart so the line plots in chronological order.
+  Future<List<WeightLog>> listSince(DateTime since) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return const [];
+    final rows = await _client
+        .from(_table)
+        .select()
+        .eq('user_id', userId)
+        .gte('date', _toDateOnly(since))
+        .order('date', ascending: true);
     return rows.map((r) => WeightLog.fromJson(r)).toList();
   }
 

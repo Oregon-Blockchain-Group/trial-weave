@@ -80,6 +80,11 @@ class HomeScreen extends ConsumerWidget {
                     label: 'Log weight',
                     onTap: () => context.go('/log/weight'),
                   ),
+                  _QuickAction(
+                    icon: Icons.show_chart,
+                    label: 'Progress',
+                    onTap: () => context.go('/progress'),
+                  ),
                 ],
               ),
             ],

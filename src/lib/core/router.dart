@@ -14,6 +14,7 @@ import '../frontend/screens/onboarding/baseline_screen.dart';
 import '../frontend/screens/onboarding/consent_screen.dart';
 import '../frontend/screens/onboarding/demographics_screen.dart';
 import '../frontend/screens/onboarding/medication_screen.dart';
+import '../frontend/screens/progress_screen.dart';
 import '../frontend/screens/sign_in_screen.dart';
 import '../frontend/screens/sign_up_screen.dart';
 import '../frontend/screens/welcome_screen.dart';
@@ -83,6 +84,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/check-in/side-effect',
         builder: (_, _) => const SideEffectCheckInScreen(),
       ),
+      GoRoute(path: '/progress', builder: (_, _) => const ProgressScreen()),
     ],
   );
 });
