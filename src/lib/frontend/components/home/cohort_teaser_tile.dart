@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../backend/models/cohort_outcome.dart';
 import '../../../backend/providers/repositories_providers.dart';
@@ -16,8 +17,8 @@ class CohortTeaserTile extends ConsumerWidget {
     final profileAsync = ref.watch(currentProfileProvider);
     final weightsAsync = ref.watch(recentWeightLogsProvider);
 
-    // No onTap until Stage 6 wires up the /cohort routes.
     return HomeCard(
+      onTap: () => context.go('/cohort'),
       child: regimenAsync.when(
         loading: () => const _Loading(),
         error: (e, _) =>

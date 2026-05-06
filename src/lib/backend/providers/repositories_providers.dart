@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/cohort_cost.dart';
 import '../models/cohort_outcome.dart';
+import '../models/cohort_side_effect.dart';
+import '../models/cost_log.dart';
 import '../models/dose_log.dart';
 import '../models/factor_log.dart';
 import '../models/profile.dart';
@@ -9,12 +12,14 @@ import '../models/side_effect_log.dart';
 import '../models/weight_log.dart';
 import '../repositories/cohort_repository.dart';
 import '../repositories/consents_repository.dart';
+import '../repositories/cost_logs_repository.dart';
 import '../repositories/dose_logs_repository.dart';
 import '../repositories/factor_logs_repository.dart';
 import '../repositories/profiles_repository.dart';
 import '../repositories/regimens_repository.dart';
 import '../repositories/side_effect_logs_repository.dart';
 import '../repositories/weight_logs_repository.dart';
+import 'cohort_filters_provider.dart';
 import 'supabase_provider.dart';
 
 final profilesRepositoryProvider = Provider<ProfilesRepository>((ref) {
@@ -49,6 +54,10 @@ final sideEffectLogsRepositoryProvider = Provider<SideEffectLogsRepository>((
 
 final cohortRepositoryProvider = Provider<CohortRepository>((ref) {
   return CohortRepository(ref.watch(supabaseClientProvider));
+});
+
+final costLogsRepositoryProvider = Provider<CostLogsRepository>((ref) {
+  return CostLogsRepository(ref.watch(supabaseClientProvider));
 });
 
 /// The caller's currently-active [Regimen], or null if they have none.
@@ -107,4 +116,37 @@ final recentCheckInsProvider = FutureProvider<List<FactorLog>>((ref) {
 /// Side-effect logs in the last 90 days. Drives the Progress trends.
 final recentSideEffectsProvider = FutureProvider<List<SideEffectLog>>((ref) {
   return ref.watch(sideEffectLogsRepositoryProvider).listInWindow(90);
+});
+
+// ── Cohort-screen providers ─────────────────────────────────────────────
+
+/// Cohort outcomes filtered by the active CohortFilters. Re-runs the RPC
+/// whenever filters change.
+final filteredCohortOutcomesProvider = FutureProvider<List<CohortOutcome>>((
+  ref,
+) {
+  final filters = ref.watch(cohortFiltersProvider);
+  return ref
+      .watch(cohortRepositoryProvider)
+      .outcomes(filters: filters.toJsonForRpc());
+});
+
+final filteredCohortSideEffectsProvider =
+    FutureProvider<List<CohortSideEffect>>((ref) {
+      final filters = ref.watch(cohortFiltersProvider);
+      return ref
+          .watch(cohortRepositoryProvider)
+          .sideEffects(filters: filters.toJsonForRpc());
+    });
+
+final filteredCohortCostProvider = FutureProvider<List<CohortCost>>((ref) {
+  final filters = ref.watch(cohortFiltersProvider);
+  return ref
+      .watch(cohortRepositoryProvider)
+      .cost(filters: filters.toJsonForRpc());
+});
+
+/// The User's cost_log row for the current calendar month, or null.
+final currentMonthCostProvider = FutureProvider<CostLog?>((ref) {
+  return ref.watch(costLogsRepositoryProvider).currentMonth();
 });

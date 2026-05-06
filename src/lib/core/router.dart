@@ -13,6 +13,10 @@ import '../frontend/screens/onboarding/activation_gate_screen.dart';
 import '../frontend/screens/onboarding/baseline_screen.dart';
 import '../frontend/screens/onboarding/consent_screen.dart';
 import '../frontend/screens/onboarding/demographics_screen.dart';
+import '../frontend/screens/cohort/cohort_cost_screen.dart';
+import '../frontend/screens/cohort/cohort_home_screen.dart';
+import '../frontend/screens/cohort/cohort_outcomes_screen.dart';
+import '../frontend/screens/cohort/cohort_side_effects_screen.dart';
 import '../frontend/screens/onboarding/medication_screen.dart';
 import '../frontend/screens/progress_screen.dart';
 import '../frontend/screens/sign_in_screen.dart';
@@ -85,6 +89,19 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, _) => const SideEffectCheckInScreen(),
       ),
       GoRoute(path: '/progress', builder: (_, _) => const ProgressScreen()),
+      GoRoute(path: '/cohort', builder: (_, _) => const CohortHomeScreen()),
+      GoRoute(
+        path: '/cohort/outcomes',
+        builder: (_, _) => const CohortOutcomesScreen(),
+      ),
+      GoRoute(
+        path: '/cohort/side-effects',
+        builder: (_, _) => const CohortSideEffectsScreen(),
+      ),
+      GoRoute(
+        path: '/cohort/cost',
+        builder: (_, _) => const CohortCostScreen(),
+      ),
     ],
   );
 });
