@@ -1,140 +1,106 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../backend/providers/repositories_providers.dart';
 import '../../core/theme.dart';
-import '../components/home/adherence_tile.dart';
-import '../components/home/cohort_teaser_tile.dart';
-import '../components/home/greeting_tile.dart';
-import '../components/home/next_dose_tile.dart';
-import '../components/home/weight_tile.dart';
+import '../components/home/cohort_pane.dart';
+import '../components/home/dashboard_top.dart';
+import '../components/home/metric_strip.dart';
+import '../components/home/segmented_tabs.dart';
+import '../components/home/today_pane.dart';
+import '../components/home/trends_pane.dart';
+import '../components/nav/bottom_nav.dart';
 
-class HomeScreen extends ConsumerWidget {
+enum _DashTab { today, trends, cohort }
+
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Trial Weave'),
-        backgroundColor: AppColors.cardBg,
-        foregroundColor: AppColors.inkBlack,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person_outline),
-            tooltip: 'Profile',
-            onPressed: () => context.go('/profile'),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () async {
-            ref.invalidate(activeRegimenProvider);
-            ref.invalidate(currentProfileProvider);
-            ref.invalidate(lastDoseProvider);
-            ref.invalidate(recentDoseLogsProvider);
-            ref.invalidate(recentWeightLogsProvider);
-            ref.invalidate(cohortOutcomesProvider);
-            // Wait briefly so the indicator doesn't snap shut before the
-            // FutureProviders kick off.
-            await Future<void>.delayed(const Duration(milliseconds: 200));
-          },
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-            children: [
-              const GreetingTile(),
-              const SizedBox(height: 20),
-              const NextDoseTile(),
-              const SizedBox(height: 12),
-              const AdherenceTile(),
-              const SizedBox(height: 12),
-              const WeightTile(),
-              const SizedBox(height: 12),
-              const CohortTeaserTile(),
-              const SizedBox(height: 28),
-              const Text('QUICK ACTIONS', style: AppText.eyebrow),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _QuickAction(
-                    icon: Icons.checklist_outlined,
-                    label: 'Daily check-in',
-                    onTap: () => context.go('/check-in/post-dose'),
-                  ),
-                  _QuickAction(
-                    icon: Icons.healing_outlined,
-                    label: 'Side effects',
-                    onTap: () => context.go('/check-in/side-effect'),
-                  ),
-                  _QuickAction(
-                    icon: Icons.monitor_weight_outlined,
-                    label: 'Log weight',
-                    onTap: () => context.go('/log/weight'),
-                  ),
-                  _QuickAction(
-                    icon: Icons.show_chart,
-                    label: 'Progress',
-                    onTap: () => context.go('/progress'),
-                  ),
-                  _QuickAction(
-                    icon: Icons.person_outline,
-                    label: 'Profile',
-                    onTap: () => context.go('/profile'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _QuickAction extends StatelessWidget {
-  const _QuickAction({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  _DashTab _tab = _DashTab.today;
 
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
+  Future<void> _refreshAll() async {
+    ref.invalidate(activeRegimenProvider);
+    ref.invalidate(currentProfileProvider);
+    ref.invalidate(lastDoseProvider);
+    ref.invalidate(recentDoseLogsProvider);
+    ref.invalidate(recentWeightLogsProvider);
+    ref.invalidate(progressWeightLogsProvider);
+    ref.invalidate(recentSideEffectsProvider);
+    ref.invalidate(latestBaselineProvider);
+    ref.invalidate(recentCheckInsProvider);
+    ref.invalidate(cohortOutcomesProvider);
+    ref.invalidate(filteredCohortOutcomesProvider);
+    ref.invalidate(filteredCohortCostProvider);
+    ref.invalidate(currentMonthCostProvider);
+    ref.invalidate(recentActivityProvider);
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+  }
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadii.pill),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: AppColors.cardBg,
-          borderRadius: BorderRadius.circular(AppRadii.pill),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 16, color: AppColors.darkTeal),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                fontFamily: AppText.fontFamily,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.inkBlack,
+    return Scaffold(
+      backgroundColor: AppColors.screenBg,
+      body: Column(
+        children: [
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: _refreshAll,
+              child: CustomScrollView(
+                slivers: [
+                  const SliverToBoxAdapter(child: DashboardTop()),
+                  SliverToBoxAdapter(
+                    child: Transform.translate(
+                      offset: const Offset(0, -16),
+                      child: const MetricStrip(),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
+                      child: SegmentedTabs<_DashTab>(
+                        value: _tab,
+                        options: const [
+                          SegmentedOption(
+                            value: _DashTab.today,
+                            label: 'Today',
+                          ),
+                          SegmentedOption(
+                            value: _DashTab.trends,
+                            label: 'Trends',
+                          ),
+                          SegmentedOption(
+                            value: _DashTab.cohort,
+                            label: 'Cohort',
+                          ),
+                        ],
+                        onChanged: (v) => setState(() => _tab = v),
+                      ),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: KeyedSubtree(
+                        key: ValueKey(_tab),
+                        child: switch (_tab) {
+                          _DashTab.today => const TodayPane(),
+                          _DashTab.trends => const TrendsPane(),
+                          _DashTab.cohort => const CohortPane(),
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+          const BottomNav(currentRoute: '/home'),
+        ],
       ),
     );
   }

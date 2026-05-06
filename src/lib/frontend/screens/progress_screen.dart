@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../backend/providers/repositories_providers.dart';
 import '../../core/theme.dart';
+import '../components/nav/bottom_nav.dart';
 import '../components/progress/baseline_shifts.dart';
 import '../components/progress/side_effect_trends.dart';
 import '../components/progress/weight_chart.dart';
@@ -23,12 +23,9 @@ class ProgressScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.inkBlack,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/home'),
-        ),
         title: const Text('Progress', style: AppText.title),
       ),
+      bottomNavigationBar: const BottomNav(currentRoute: '/progress'),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {

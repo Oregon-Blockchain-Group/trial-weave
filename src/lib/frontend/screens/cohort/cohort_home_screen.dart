@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../backend/providers/repositories_providers.dart';
 import '../../../core/theme.dart';
 import '../../components/cohort/filter_chips_bar.dart';
+import '../../components/nav/bottom_nav.dart';
 
 class CohortHomeScreen extends ConsumerWidget {
   const CohortHomeScreen({super.key});
@@ -20,12 +21,9 @@ class CohortHomeScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.inkBlack,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/home'),
-        ),
         title: const Text('Cohort', style: AppText.title),
       ),
+      bottomNavigationBar: const BottomNav(currentRoute: '/cohort'),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),

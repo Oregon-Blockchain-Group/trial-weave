@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/activity_entry.dart';
 import '../models/cohort_cost.dart';
 import '../models/cohort_outcome.dart';
 import '../models/cohort_side_effect.dart';
@@ -75,6 +76,53 @@ final activeRegimenProvider = FutureProvider<Regimen?>((ref) {
 /// history list.
 final allRegimensProvider = FutureProvider<List<Regimen>>((ref) {
   return ref.watch(regimensRepositoryProvider).listAll();
+});
+
+/// Merged dose / weight / side-effect feed for the home dashboard's
+/// "Recent activity" timeline. Newest first, capped at [limit] entries.
+final recentActivityProvider = FutureProvider<List<ActivityEntry>>((ref) async {
+  final doses = await ref.watch(doseLogsRepositoryProvider).listInWindow(14);
+  final weights = await ref
+      .watch(weightLogsRepositoryProvider)
+      .listRecent(limit: 10);
+  final sideEffects = await ref
+      .watch(sideEffectLogsRepositoryProvider)
+      .listInWindow(14);
+
+  final entries = <ActivityEntry>[];
+
+  for (final d in doses) {
+    entries.add(
+      ActivityEntry(
+        kind: ActivityKind.dose,
+        at: d.takenAt,
+        title: 'Logged dose',
+        subtitle: d.notes?.isNotEmpty == true ? d.notes! : 'No notes',
+      ),
+    );
+  }
+  for (final w in weights) {
+    entries.add(
+      ActivityEntry(
+        kind: ActivityKind.weight,
+        at: w.date,
+        title: '${w.weightLb.toStringAsFixed(1)} lb',
+        subtitle: 'Weight logged',
+      ),
+    );
+  }
+  for (final s in sideEffects) {
+    entries.add(
+      ActivityEntry(
+        kind: ActivityKind.sideEffect,
+        at: s.loggedAt,
+        title: ActivityEntry.labelForSideEffect(s.name),
+        subtitle: 'Severity ${s.severity}',
+      ),
+    );
+  }
+  entries.sort((a, b) => b.at.compareTo(a.at));
+  return entries.take(8).toList();
 });
 
 /// The caller's [Profile], or null if onboarding hasn't completed yet.

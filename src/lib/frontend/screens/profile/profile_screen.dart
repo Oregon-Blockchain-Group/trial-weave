@@ -6,6 +6,7 @@ import '../../../backend/providers/auth_state_provider.dart';
 import '../../../backend/providers/repositories_providers.dart';
 import '../../../backend/repositories/auth_repository.dart';
 import '../../../core/theme.dart';
+import '../../components/nav/bottom_nav.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -20,12 +21,9 @@ class ProfileScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.inkBlack,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/home'),
-        ),
         title: const Text('Profile', style: AppText.title),
       ),
+      bottomNavigationBar: const BottomNav(currentRoute: '/profile'),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
