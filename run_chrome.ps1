@@ -24,5 +24,18 @@ if (-not (Get-Command fvm -ErrorAction SilentlyContinue)) {
 }
 
 Set-Location -Path $srcDir
+
+# Bootstrap .env from .env.example on first run so flutter_dotenv's asset
+# requirement is satisfied. The app's MisconfiguredScreen handles the
+# still-blank values from there.
+if (-not (Test-Path .env)) {
+    if (Test-Path .env.example) {
+        Copy-Item .env.example .env
+        Write-Host "Created src/.env from .env.example. Fill in SUPABASE_URL and SUPABASE_ANON_KEY before sign-in will work."
+    } else {
+        Write-Warning "Neither src/.env nor src/.env.example found. Build may fail."
+    }
+}
+
 & fvm flutter run -d chrome
 exit $LASTEXITCODE

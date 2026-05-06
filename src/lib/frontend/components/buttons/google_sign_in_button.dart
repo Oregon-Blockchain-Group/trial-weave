@@ -64,8 +64,6 @@ class GoogleSignInButton extends StatelessWidget {
   }
 }
 
-/// Inline Google "G" mark drawn with a custom painter so the component has
-/// no external asset dependency. Uses the four official brand colors.
 class _GoogleGlyph extends StatelessWidget {
   const _GoogleGlyph({required this.size});
   final double size;
@@ -103,16 +101,11 @@ class _GoogleGlyphPainter extends CustomPainter {
       return Path()..addArc(rect, start, sweep);
     }
 
-    // Blue arc — top-right quadrant + into bottom-right (for the "tail")
     canvas.drawPath(arc(-0.26, 1.05), stroke..color = _blue);
-    // Green arc — bottom
     canvas.drawPath(arc(0.85, 1.10), stroke..color = _green);
-    // Yellow arc — bottom-left
     canvas.drawPath(arc(2.00, 1.10), stroke..color = _yellow);
-    // Red arc — top-left
     canvas.drawPath(arc(3.15, 1.10), stroke..color = _red);
 
-    // Horizontal bar on the right side that forms the "G" crossbar.
     final barPaint = Paint()..color = _blue;
     final barRect = Rect.fromLTWH(
       cx + inner * 0.05,

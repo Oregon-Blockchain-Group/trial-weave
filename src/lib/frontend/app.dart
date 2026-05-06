@@ -1,16 +1,19 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class TrialWeaveApp extends StatelessWidget {
+import '../core/router.dart';
+import '../core/theme.dart';
+
+class TrialWeaveApp extends ConsumerWidget {
   const TrialWeaveApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const CupertinoApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MaterialApp.router(
       title: 'Trial Weave',
-      home: CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(middle: Text('Trial Weave')),
-        child: Center(child: Text('Hello, Trial Weave')),
-      ),
+      theme: buildAppTheme(),
+      routerConfig: ref.watch(routerProvider),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

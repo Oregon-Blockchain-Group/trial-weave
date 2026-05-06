@@ -7,10 +7,9 @@ import 'package:flutter/material.dart';
 ///   - Black fill, white Apple glyph + label "Continue with Apple"
 ///   - Inter 600, 14px
 ///
-/// Wire [onPressed] to your sign-in-with-apple flow (e.g. the
-/// `sign_in_with_apple` package). After a successful sign-in, persist the
-/// resulting credential token in secure storage so subsequent app opens can
-/// auto-login without showing the welcome screen.
+/// Wire [onPressed] to your sign-in-with-apple flow. After a successful
+/// sign-in, persist the resulting credential token in secure storage so
+/// subsequent app opens can auto-login without showing the welcome screen.
 class AppleSignInButton extends StatelessWidget {
   const AppleSignInButton({
     super.key,
@@ -31,7 +30,7 @@ class AppleSignInButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.black,
           foregroundColor: Colors.white,
-          disabledBackgroundColor: Colors.black.withOpacity(0.6),
+          disabledBackgroundColor: Colors.black.withValues(alpha: 0.6),
           disabledForegroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
@@ -69,8 +68,6 @@ class AppleSignInButton extends StatelessWidget {
   }
 }
 
-/// Inline Apple logo glyph drawn with a custom painter so the component has
-/// no external asset dependency.
 class _AppleGlyph extends StatelessWidget {
   const _AppleGlyph({required this.size});
   final double size;
@@ -95,16 +92,13 @@ class _AppleGlyphPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    // Body of the apple — two overlapping ovals make the classic bitten shape.
     final body = Path()
       ..addOval(Rect.fromLTWH(w * 0.10, h * 0.25, w * 0.85, h * 0.70));
 
-    // Bite — subtract a circle on the right edge.
     final bite = Path()
       ..addOval(Rect.fromLTWH(w * 0.78, h * 0.40, w * 0.30, h * 0.30));
     final apple = Path.combine(PathOperation.difference, body, bite);
 
-    // Stem leaf
     final leaf = Path()
       ..moveTo(w * 0.55, h * 0.18)
       ..quadraticBezierTo(w * 0.65, h * 0.05, w * 0.78, h * 0.18)
