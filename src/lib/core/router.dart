@@ -5,6 +5,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../backend/providers/auth_state_provider.dart';
 import '../frontend/screens/home_screen.dart';
+import '../frontend/screens/logging/log_dose_screen.dart';
+import '../frontend/screens/logging/log_weight_screen.dart';
+import '../frontend/screens/logging/post_dose_check_in_screen.dart';
+import '../frontend/screens/logging/side_effect_check_in_screen.dart';
 import '../frontend/screens/onboarding/activation_gate_screen.dart';
 import '../frontend/screens/onboarding/baseline_screen.dart';
 import '../frontend/screens/onboarding/consent_screen.dart';
@@ -68,6 +72,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/onboarding/activation-gate',
         builder: (_, _) => const ActivationGateScreen(),
+      ),
+      GoRoute(path: '/log/dose', builder: (_, _) => const LogDoseScreen()),
+      GoRoute(path: '/log/weight', builder: (_, _) => const LogWeightScreen()),
+      GoRoute(
+        path: '/check-in/post-dose',
+        builder: (_, _) => const PostDoseCheckInScreen(),
+      ),
+      GoRoute(
+        path: '/check-in/side-effect',
+        builder: (_, _) => const SideEffectCheckInScreen(),
       ),
     ],
   );
