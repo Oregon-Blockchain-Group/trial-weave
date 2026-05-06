@@ -44,7 +44,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       await ref
           .read(authRepositoryProvider)
           .signUpWithEmail(email: email, password: pw);
-      // Router redirect handles navigation on auth state change.
+      // New users go through onboarding before /home. We navigate explicitly
+      // because the router's default post-sign-in redirect targets /home.
+      if (mounted) context.go('/onboarding/medication');
     } on Exception catch (e) {
       if (mounted) setState(() => _error = e.toString());
     } finally {

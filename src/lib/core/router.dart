@@ -5,6 +5,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../backend/providers/auth_state_provider.dart';
 import '../frontend/screens/home_screen.dart';
+import '../frontend/screens/onboarding/activation_gate_screen.dart';
+import '../frontend/screens/onboarding/baseline_screen.dart';
+import '../frontend/screens/onboarding/consent_screen.dart';
+import '../frontend/screens/onboarding/demographics_screen.dart';
+import '../frontend/screens/onboarding/medication_screen.dart';
 import '../frontend/screens/sign_in_screen.dart';
 import '../frontend/screens/sign_up_screen.dart';
 import '../frontend/screens/welcome_screen.dart';
@@ -44,6 +49,26 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/sign-up', builder: (_, _) => const SignUpScreen()),
       GoRoute(path: '/sign-in', builder: (_, _) => const SignInScreen()),
       GoRoute(path: '/home', builder: (_, _) => const HomeScreen()),
+      GoRoute(
+        path: '/onboarding/medication',
+        builder: (_, _) => const MedicationScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding/demographics',
+        builder: (_, _) => const DemographicsScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding/baseline',
+        builder: (_, _) => const BaselineScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding/consent',
+        builder: (_, _) => const ConsentScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding/activation-gate',
+        builder: (_, _) => const ActivationGateScreen(),
+      ),
     ],
   );
 });
