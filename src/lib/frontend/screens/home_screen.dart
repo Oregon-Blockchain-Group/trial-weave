@@ -2,20 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../backend/providers/auth_state_provider.dart';
+import '../../backend/providers/repositories_providers.dart';
 import '../../backend/repositories/auth_repository.dart';
 import '../../core/theme.dart';
+import '../components/home/adherence_tile.dart';
+import '../components/home/cohort_teaser_tile.dart';
+import '../components/home/greeting_tile.dart';
+import '../components/home/next_dose_tile.dart';
+import '../components/home/weight_tile.dart';
 
-/// Stage 1 placeholder + Stage 3 quick-action tiles. Real adherence /
-/// next-dose / weight summary / cohort teaser wiring lands in Stage 4.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(currentUserProvider);
-    final email = user?.email ?? 'there';
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Trial Weave'),
@@ -24,48 +24,63 @@ class HomeScreen extends ConsumerWidget {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Sign out',
-            onPressed: () => ref.read(authRepositoryProvider).signOut(),
+            icon: const Icon(Icons.person_outline),
+            tooltip: 'Profile',
+            onPressed: () {
+              // Profile screen ships in Stage 7. Sign out for now.
+              ref.read(authRepositoryProvider).signOut();
+            },
           ),
         ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(activeRegimenProvider);
+            ref.invalidate(currentProfileProvider);
+            ref.invalidate(lastDoseProvider);
+            ref.invalidate(recentDoseLogsProvider);
+            ref.invalidate(recentWeightLogsProvider);
+            ref.invalidate(cohortOutcomesProvider);
+            // Wait briefly so the indicator doesn't snap shut before the
+            // FutureProviders kick off.
+            await Future<void>.delayed(const Duration(milliseconds: 200));
+          },
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
             children: [
-              Text('Hello, $email', style: AppText.displayLg),
-              const SizedBox(height: 4),
-              const Text(
-                'Quick actions — Stage 4 will replace these with adherence, '
-                'next-dose, weight, and cohort tiles.',
-                style: AppText.bodyMuted,
-              ),
-              const SizedBox(height: 24),
-              _ActionTile(
-                icon: Icons.medical_services_outlined,
-                label: 'Log a dose',
-                onTap: () => context.go('/log/dose'),
-              ),
+              const GreetingTile(),
+              const SizedBox(height: 20),
+              const NextDoseTile(),
               const SizedBox(height: 12),
-              _ActionTile(
-                icon: Icons.monitor_weight_outlined,
-                label: 'Log weight',
-                onTap: () => context.go('/log/weight'),
-              ),
+              const AdherenceTile(),
               const SizedBox(height: 12),
-              _ActionTile(
-                icon: Icons.checklist_outlined,
-                label: 'Daily check-in',
-                onTap: () => context.go('/check-in/post-dose'),
-              ),
+              const WeightTile(),
               const SizedBox(height: 12),
-              _ActionTile(
-                icon: Icons.healing_outlined,
-                label: 'Side effects',
-                onTap: () => context.go('/check-in/side-effect'),
+              const CohortTeaserTile(),
+              const SizedBox(height: 28),
+              const Text('QUICK ACTIONS', style: AppText.eyebrow),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _QuickAction(
+                    icon: Icons.checklist_outlined,
+                    label: 'Daily check-in',
+                    onTap: () => context.go('/check-in/post-dose'),
+                  ),
+                  _QuickAction(
+                    icon: Icons.healing_outlined,
+                    label: 'Side effects',
+                    onTap: () => context.go('/check-in/side-effect'),
+                  ),
+                  _QuickAction(
+                    icon: Icons.monitor_weight_outlined,
+                    label: 'Log weight',
+                    onTap: () => context.go('/log/weight'),
+                  ),
+                ],
               ),
             ],
           ),
@@ -75,8 +90,8 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-class _ActionTile extends StatelessWidget {
-  const _ActionTile({
+class _QuickAction extends StatelessWidget {
+  const _QuickAction({
     required this.icon,
     required this.label,
     required this.onTap,
@@ -90,20 +105,28 @@ class _ActionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadii.lg),
+      borderRadius: BorderRadius.circular(AppRadii.pill),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: AppColors.cardBg,
-          borderRadius: BorderRadius.circular(AppRadii.lg),
+          borderRadius: BorderRadius.circular(AppRadii.pill),
           border: Border.all(color: AppColors.border),
         ),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: AppColors.darkTeal),
-            const SizedBox(width: 12),
-            Expanded(child: Text(label, style: AppText.title)),
-            const Icon(Icons.chevron_right, color: AppColors.muted),
+            Icon(icon, size: 16, color: AppColors.darkTeal),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                fontFamily: AppText.fontFamily,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.inkBlack,
+              ),
+            ),
           ],
         ),
       ),

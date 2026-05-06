@@ -1,5 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../models/weight_log.dart';
+
 class WeightLogsRepository {
   WeightLogsRepository(this._client);
   final SupabaseClient _client;
@@ -19,6 +21,20 @@ class WeightLogsRepository {
       'date': dateStr,
       'weight_lb': weightLb,
     });
+  }
+
+  /// Most recent [limit] weight logs, newest first. Used by the home Weight
+  /// tile + Stage 5 Progress chart.
+  Future<List<WeightLog>> listRecent({int limit = 30}) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return const [];
+    final rows = await _client
+        .from(_table)
+        .select()
+        .eq('user_id', userId)
+        .order('date', ascending: false)
+        .limit(limit);
+    return rows.map((r) => WeightLog.fromJson(r)).toList();
   }
 
   /// `YYYY-MM-DD` for Postgres `date` columns.
