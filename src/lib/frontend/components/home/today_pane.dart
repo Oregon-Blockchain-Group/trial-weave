@@ -386,9 +386,9 @@ class _QuickLogGrid extends StatelessWidget {
               const SizedBox(width: 6),
               Expanded(
                 child: _QuickButton(
-                  icon: Icons.checklist_outlined,
-                  label: 'Check-in',
-                  onTap: () => context.go('/check-in/post-dose'),
+                  icon: Icons.attach_money,
+                  label: 'Cost',
+                  onTap: () => context.go('/log/cost'),
                 ),
               ),
               const SizedBox(width: 6),

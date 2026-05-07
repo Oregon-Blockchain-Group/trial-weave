@@ -11,6 +11,7 @@ import '../frontend/screens/cohort/cohort_home_screen.dart';
 import '../frontend/screens/cohort/cohort_outcomes_screen.dart';
 import '../frontend/screens/cohort/cohort_side_effects_screen.dart';
 import '../frontend/screens/home_screen.dart';
+import '../frontend/screens/logging/log_cost_screen.dart';
 import '../frontend/screens/logging/log_dose_screen.dart';
 import '../frontend/screens/logging/log_weight_screen.dart';
 import '../frontend/screens/logging/post_dose_check_in_screen.dart';
@@ -147,6 +148,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/log/dose', builder: (_, _) => const LogDoseScreen()),
       GoRoute(path: '/log/weight', builder: (_, _) => const LogWeightScreen()),
+      GoRoute(path: '/log/cost', builder: (_, _) => const LogCostScreen()),
       GoRoute(
         path: '/check-in/post-dose',
         builder: (_, _) => const PostDoseCheckInScreen(),

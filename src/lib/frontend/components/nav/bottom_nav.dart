@@ -216,6 +216,15 @@ class _LogSheet extends StatelessWidget {
                 context.go('/check-in/post-dose');
               },
             ),
+            _SheetItem(
+              icon: Icons.attach_money,
+              label: 'Monthly cost',
+              subtitle: 'What you paid this month',
+              onTap: () {
+                Navigator.of(context).pop();
+                context.go('/log/cost');
+              },
+            ),
           ],
         ),
       ),
