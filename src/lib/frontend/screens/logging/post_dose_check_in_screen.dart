@@ -48,6 +48,11 @@ class _PostDoseCheckInScreenState extends ConsumerState<PostDoseCheckInScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.inkBlack,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go('/home'),
+        ),
         title: const Text('Post-dose check-in', style: AppText.title),
       ),
       body: SafeArea(

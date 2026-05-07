@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../backend/models/activity_entry.dart';
+import '../../../backend/models/dose_log.dart';
+import '../../../backend/models/regimen.dart';
 import '../../../backend/providers/repositories_providers.dart';
 import '../../../core/theme.dart';
 
@@ -36,9 +38,16 @@ class _DoseCard extends ConsumerStatefulWidget {
   ConsumerState<_DoseCard> createState() => _DoseCardState();
 }
 
+/// Three real states + a transient "just logged" flash:
+///   - none:         no last dose ever → enabled, "Log your first dose"
+///   - dueOrOverdue: enough time has passed since last dose → enabled
+///   - logged:       last dose was within the current dose period →
+///                   disabled, shows "Last dose Xh ago · next in Y"
+///   - justLogged:   logged in the last 5 minutes → green flash
+enum _DoseState { none, dueOrOverdue, logged, justLogged }
+
 class _DoseCardState extends ConsumerState<_DoseCard> {
   bool _busy = false;
-  bool _justLogged = false;
 
   Future<void> _logNow() async {
     final regimen = await ref.read(activeRegimenProvider.future);
@@ -52,7 +61,6 @@ class _DoseCardState extends ConsumerState<_DoseCard> {
       ref.invalidate(lastDoseProvider);
       ref.invalidate(recentDoseLogsProvider);
       ref.invalidate(recentActivityProvider);
-      if (mounted) setState(() => _justLogged = true);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -61,21 +69,60 @@ class _DoseCardState extends ConsumerState<_DoseCard> {
   @override
   Widget build(BuildContext context) {
     final regimen = ref.watch(activeRegimenProvider).valueOrNull;
-    final isDone = _justLogged;
-    final bg = isDone ? AppColors.successBg : AppColors.darkTeal;
-    final fg = isDone ? AppColors.success : Colors.white;
+    final lastDose = ref.watch(lastDoseProvider).valueOrNull;
+    final state = _classify(regimen, lastDose);
+    final isLocked =
+        _busy || state == _DoseState.logged || state == _DoseState.justLogged;
+
+    final isJust = state == _DoseState.justLogged;
+    final isLogged = state == _DoseState.logged;
+
+    final bg = isJust
+        ? AppColors.successBg
+        : isLogged
+        ? AppColors.borderSubtle
+        : AppColors.darkTeal;
+    final fg = isJust
+        ? AppColors.success
+        : isLogged
+        ? AppColors.muted
+        : Colors.white;
+
+    final headline = switch (state) {
+      _DoseState.justLogged => 'Logged just now',
+      _DoseState.logged =>
+        regimen != null ? '${regimen.brand} ${regimen.dose ?? ''}' : 'Logged',
+      _DoseState.dueOrOverdue =>
+        regimen != null
+            ? '${regimen.brand} ${regimen.dose ?? ''}'
+            : 'Tap to log',
+      _DoseState.none =>
+        regimen != null ? 'Log your first dose' : 'No active regimen',
+    };
+
+    final subline = switch (state) {
+      _DoseState.justLogged =>
+        'Next dose in ${_humanDuration(_nextDue(regimen, lastDose).difference(DateTime.now()))}',
+      _DoseState.logged =>
+        'Last dose ${_ago(lastDose!.takenAt)} · next in ${_humanDuration(_nextDue(regimen, lastDose).difference(DateTime.now()))}',
+      _DoseState.dueOrOverdue => 'Due now · tap to log',
+      _DoseState.none =>
+        regimen != null
+            ? '${_capitalize(regimen.frequency)} dose · tap to log'
+            : 'Start a regimen to track doses',
+    };
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: _busy ? null : _logNow,
+        onTap: isLocked ? null : _logNow,
         borderRadius: BorderRadius.circular(AppRadii.lg + 2),
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: bg,
             borderRadius: BorderRadius.circular(AppRadii.lg + 2),
-            border: isDone
+            border: isJust
                 ? Border.all(color: AppColors.success, width: 2)
                 : null,
           ),
@@ -85,14 +132,24 @@ class _DoseCardState extends ConsumerState<_DoseCard> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: isDone
+                  color: isJust
                       ? AppColors.success
+                      : isLogged
+                      ? AppColors.cardBg
                       : Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(22),
                 ),
                 child: Icon(
-                  isDone ? Icons.check : Icons.medical_services,
-                  color: isDone ? Colors.white : Colors.white,
+                  isJust
+                      ? Icons.check
+                      : isLogged
+                      ? Icons.check_circle_outline
+                      : Icons.medical_services,
+                  color: isJust
+                      ? Colors.white
+                      : isLogged
+                      ? AppColors.muted
+                      : Colors.white,
                   size: 22,
                 ),
               ),
@@ -102,11 +159,7 @@ class _DoseCardState extends ConsumerState<_DoseCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isDone
-                          ? 'Logged just now'
-                          : (regimen != null
-                                ? '${regimen.brand} ${regimen.dose ?? ''}'
-                                : 'No active regimen'),
+                      headline,
                       style: TextStyle(
                         fontFamily: AppText.fontFamily,
                         fontSize: 16,
@@ -116,11 +169,7 @@ class _DoseCardState extends ConsumerState<_DoseCard> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      isDone
-                          ? 'Tap below to add notes'
-                          : (regimen != null
-                                ? '${_capitalize(regimen.frequency)} dose · tap to log'
-                                : 'Start a regimen to track doses'),
+                      subline,
                       style: TextStyle(
                         fontFamily: AppText.fontFamily,
                         fontSize: 12,
@@ -139,7 +188,8 @@ class _DoseCardState extends ConsumerState<_DoseCard> {
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
                 )
-              else if (!isDone)
+              else if (state == _DoseState.dueOrOverdue ||
+                  state == _DoseState.none)
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -164,6 +214,44 @@ class _DoseCardState extends ConsumerState<_DoseCard> {
         ),
       ),
     );
+  }
+
+  static _DoseState _classify(Regimen? regimen, DoseLog? lastDose) {
+    if (regimen == null || lastDose == null) return _DoseState.none;
+    final stride = regimen.frequency == 'weekly' ? 7 : 1;
+    final due = lastDose.takenAt.add(Duration(days: stride));
+    final now = DateTime.now();
+    if (!now.isBefore(due)) return _DoseState.dueOrOverdue;
+    if (now.difference(lastDose.takenAt) < const Duration(minutes: 5)) {
+      return _DoseState.justLogged;
+    }
+    return _DoseState.logged;
+  }
+
+  static DateTime _nextDue(Regimen? regimen, DoseLog? lastDose) {
+    final stride = regimen?.frequency == 'weekly' ? 7 : 1;
+    return (lastDose?.takenAt ?? DateTime.now()).add(Duration(days: stride));
+  }
+
+  static String _ago(DateTime t) {
+    final diff = DateTime.now().difference(t);
+    if (diff.inDays >= 1) return '${diff.inDays}d ago';
+    if (diff.inHours >= 1) return '${diff.inHours}h ago';
+    if (diff.inMinutes >= 1) return '${diff.inMinutes}m ago';
+    return 'just now';
+  }
+
+  static String _humanDuration(Duration d) {
+    if (d.isNegative) return 'overdue';
+    if (d.inDays >= 1) {
+      return d.inDays == 1 ? '1 day' : '${d.inDays} days';
+    }
+    if (d.inHours >= 1) {
+      final h = d.inHours;
+      final m = d.inMinutes - h * 60;
+      return m > 0 ? '${h}h ${m}m' : '${h}h';
+    }
+    return '${d.inMinutes}m';
   }
 
   static String _capitalize(String? s) {

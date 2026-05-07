@@ -59,6 +59,11 @@ class _LogDoseScreenState extends ConsumerState<LogDoseScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.inkBlack,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go('/home'),
+        ),
         title: const Text('Log a dose', style: AppText.title),
       ),
       body: SafeArea(
