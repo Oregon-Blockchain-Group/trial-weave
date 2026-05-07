@@ -37,16 +37,42 @@ bool _isOnboardingRoute(String loc) => loc.startsWith('/onboarding');
 /// Bridges Riverpod's auth + profile streams to a `Listenable` so the
 /// go_router redirect re-runs whenever either changes. Without this,
 /// sign-in / sign-out / profile-fetch don't trigger a redirect.
+///
+/// Also invalidates user-scoped caches on sign-in / sign-out / user-updated
+/// events so a returning user (or a different account on the same device)
+/// doesn't see the previous user's cached profile + regimen + logs. Token
+/// refresh events are intentionally NOT in the list — those keep the same
+/// user and we don't want to thrash the cache hourly.
 class _AuthRefreshNotifier extends ChangeNotifier {
   _AuthRefreshNotifier(Ref ref) {
-    ref.listen<AsyncValue<AuthState>>(
-      authStateChangesProvider,
-      (_, _) => notifyListeners(),
-    );
+    ref.listen<AsyncValue<AuthState>>(authStateChangesProvider, (_, next) {
+      final ev = next.valueOrNull?.event;
+      if (ev == AuthChangeEvent.signedIn ||
+          ev == AuthChangeEvent.signedOut ||
+          ev == AuthChangeEvent.userUpdated) {
+        _invalidateUserScopedProviders(ref);
+      }
+      notifyListeners();
+    });
     ref.listen<AsyncValue<Profile?>>(
       currentProfileProvider,
       (_, _) => notifyListeners(),
     );
+  }
+
+  static void _invalidateUserScopedProviders(Ref ref) {
+    ref.invalidate(currentProfileProvider);
+    ref.invalidate(activeRegimenProvider);
+    ref.invalidate(allRegimensProvider);
+    ref.invalidate(lastDoseProvider);
+    ref.invalidate(recentDoseLogsProvider);
+    ref.invalidate(recentWeightLogsProvider);
+    ref.invalidate(progressWeightLogsProvider);
+    ref.invalidate(latestBaselineProvider);
+    ref.invalidate(recentCheckInsProvider);
+    ref.invalidate(recentSideEffectsProvider);
+    ref.invalidate(recentActivityProvider);
+    ref.invalidate(currentMonthCostProvider);
   }
 }
 
@@ -69,15 +95,17 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       // Signed in. Check whether onboarding is complete.
-      // Profile fetch is async — while it's loading, don't redirect (avoids
-      // a flicker on cold start). Once data lands, the listener fires and
-      // this redirect re-runs.
+      //   - Loading or errored: don't redirect. We only know "no profile"
+      //     for sure when the fetch *succeeded* with a null result; on
+      //     errors (network blip, transient RLS hiccup) the user stays
+      //     where they are instead of getting bounced to onboarding.
+      //   - Once data lands the listener fires and this re-runs.
       final profileAsync = ref.read(currentProfileProvider);
-      if (profileAsync.isLoading) return null;
-      final hasProfile = profileAsync.valueOrNull != null;
+      if (!profileAsync.hasValue) return null;
+      final hasProfile = profileAsync.value != null;
 
       if (!hasProfile) {
-        // No profile row yet → must complete onboarding before anything else.
+        // Confirmed: no profile row yet → must complete onboarding.
         return isOnboardingRoute ? null : '/onboarding/medication';
       }
 
