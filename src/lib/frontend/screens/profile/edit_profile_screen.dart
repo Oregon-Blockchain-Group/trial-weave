@@ -6,6 +6,7 @@ import '../../../backend/models/profile.dart';
 import '../../../backend/providers/auth_state_provider.dart';
 import '../../../backend/providers/repositories_providers.dart';
 import '../../../core/theme.dart';
+import '../../components/dialogs/reason_dialog.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -27,6 +28,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   bool _busy = false;
   bool _hydrated = false;
   String? _error;
+  Profile? _original;
 
   @override
   void dispose() {
@@ -42,6 +44,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   void _hydrate(Profile p) {
     if (_hydrated) return;
     _hydrated = true;
+    _original = p;
     _age.text = p.age?.toString() ?? '';
     _city.text = p.city ?? '';
     _state.text = p.state ?? '';
@@ -52,6 +55,35 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     _race = p.raceEthnicity;
   }
 
+  /// Builds the (column, newValue) list of fields the user actually changed
+  /// vs the hydrated profile. Empty strings become null to match the model.
+  List<MapEntry<String, Object?>> _diff() {
+    final orig = _original;
+    if (orig == null) return const [];
+    String? trimOrNull(String s) => s.trim().isEmpty ? null : s.trim();
+    final next = <String, Object?>{
+      'age': int.parse(_age.text),
+      'sex': _sex,
+      'race_ethnicity': _race,
+      'city': trimOrNull(_city.text),
+      'state': trimOrNull(_state.text),
+      'height_feet': int.parse(_heightFt.text),
+      'height_inches': int.parse(_heightIn.text),
+      'starting_weight_lb': double.parse(_weight.text),
+    };
+    final current = <String, Object?>{
+      'age': orig.age,
+      'sex': orig.sex,
+      'race_ethnicity': orig.raceEthnicity,
+      'city': orig.city,
+      'state': orig.state,
+      'height_feet': orig.heightFeet,
+      'height_inches': orig.heightInches,
+      'starting_weight_lb': orig.startingWeightLb,
+    };
+    return next.entries.where((e) => e.value != current[e.key]).toList();
+  }
+
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (_sex == null || _race == null) {
@@ -60,26 +92,29 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     }
     final userId = ref.read(currentUserProvider)?.id;
     if (userId == null) return;
+
+    final changes = _diff();
+    if (changes.isEmpty) {
+      if (mounted) context.go('/profile');
+      return;
+    }
+
+    final reason = await showReasonDialog(context);
+    if (reason == null) return;
+
     setState(() {
       _busy = true;
       _error = null;
     });
     try {
-      await ref
-          .read(profilesRepositoryProvider)
-          .upsert(
-            Profile(
-              userId: userId,
-              age: int.parse(_age.text),
-              sex: _sex,
-              raceEthnicity: _race,
-              city: _city.text.trim().isEmpty ? null : _city.text.trim(),
-              state: _state.text.trim().isEmpty ? null : _state.text.trim(),
-              heightFeet: int.parse(_heightFt.text),
-              heightInches: int.parse(_heightIn.text),
-              startingWeightLb: double.parse(_weight.text),
-            ),
-          );
+      final repo = ref.read(profilesRepositoryProvider);
+      for (final change in changes) {
+        await repo.updateField(
+          column: change.key,
+          value: change.value,
+          reason: reason,
+        );
+      }
       ref.invalidate(currentProfileProvider);
       if (mounted) context.go('/profile');
     } on Exception catch (e) {
