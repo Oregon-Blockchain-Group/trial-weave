@@ -5,10 +5,12 @@ import 'package:go_router/go_router.dart';
 import '../../../backend/models/drug.dart';
 import '../../../backend/providers/repositories_providers.dart';
 import '../../../core/theme.dart';
+import '../../components/dialogs/reason_dialog.dart';
 
 /// Mirrors onboarding's MedicationScreen but writes directly to the
-/// regimens table instead of going through OnboardingNotifier. The active
-/// regimen is auto-deactivated by RegimensRepository.startNew.
+/// regimens table instead of going through OnboardingNotifier. Stopping
+/// the existing active regimen requires a reason; the new regimen is then
+/// inserted.
 class SwitchDrugScreen extends ConsumerStatefulWidget {
   const SwitchDrugScreen({super.key});
 
@@ -36,23 +38,31 @@ class _SwitchDrugScreenState extends ConsumerState<SwitchDrugScreen> {
 
   Future<void> _save() async {
     if (!_isComplete) return;
+
+    final reason = await showReasonDialog(
+      context,
+      title: 'Why are you switching?',
+      hint: 'e.g. side effects, dose change, switching insurance',
+    );
+    if (reason == null) return;
+
     setState(() {
       _busy = true;
       _error = null;
     });
     try {
-      await ref
-          .read(regimensRepositoryProvider)
-          .startNew(
-            brand: _drug!.brand,
-            generic: _drug!.generic,
-            dose: _dose,
-            form: _drug!.form,
-            frequency: _frequency,
-            indication: _indication,
-            priorGlp1: _priorGlp1,
-            supply: _supply,
-          );
+      final repo = ref.read(regimensRepositoryProvider);
+      await repo.stopActive(reason: reason);
+      await repo.startNew(
+        brand: _drug!.brand,
+        generic: _drug!.generic,
+        dose: _dose,
+        form: _drug!.form,
+        frequency: _frequency,
+        indication: _indication,
+        priorGlp1: _priorGlp1,
+        supply: _supply,
+      );
       ref.invalidate(activeRegimenProvider);
       ref.invalidate(allRegimensProvider);
       if (mounted) context.go('/profile/regimen');

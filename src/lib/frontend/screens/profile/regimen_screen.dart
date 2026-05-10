@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../backend/models/regimen.dart';
 import '../../../backend/providers/repositories_providers.dart';
 import '../../../core/theme.dart';
+import '../../components/dialogs/reason_dialog.dart';
 
 class RegimenScreen extends ConsumerWidget {
   const RegimenScreen({super.key});
@@ -71,29 +72,17 @@ class RegimenScreen extends ConsumerWidget {
     WidgetRef ref,
     Regimen current,
   ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Stop ${current.brand}?'),
-        content: const Text(
+    final reason = await showReasonDialog(
+      context,
+      title: 'Stop ${current.brand}?',
+      body:
           'Stopping marks your current regimen ended. Past dose, weight, '
           'and check-in logs stay; you just won\'t have an active drug '
           'until you start a new one.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Stop'),
-          ),
-        ],
-      ),
+      hint: 'e.g. switching insurance, side effects, doctor stopped it',
     );
-    if (confirmed != true) return;
-    await ref.read(regimensRepositoryProvider).endActive();
+    if (reason == null) return;
+    await ref.read(regimensRepositoryProvider).stopActive(reason: reason);
     ref.invalidate(activeRegimenProvider);
     ref.invalidate(allRegimensProvider);
   }

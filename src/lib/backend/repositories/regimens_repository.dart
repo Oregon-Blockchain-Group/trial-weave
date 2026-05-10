@@ -8,10 +8,10 @@ class RegimensRepository {
 
   static const _table = 'regimens';
 
-  /// Ends any active regimen for the caller, then creates a new active one
-  /// in a single sequence. The schema's partial unique index
-  /// `regimens_one_active_per_user` enforces at-most-one-active; this method
-  /// honors that invariant by deactivating before insert.
+  /// Creates a new active regimen. Caller must ensure no other regimen is
+  /// active first (use [stopActive] with a reason); the schema's partial
+  /// unique index `regimens_one_active_per_user` will reject an insert
+  /// otherwise.
   Future<Regimen> startNew({
     required String brand,
     String? generic,
@@ -24,12 +24,6 @@ class RegimensRepository {
   }) async {
     final userId = _client.auth.currentUser!.id;
     final now = DateTime.now().toUtc();
-
-    await _client
-        .from(_table)
-        .update({'is_active': false, 'ended_at': now.toIso8601String()})
-        .eq('user_id', userId)
-        .eq('is_active', true);
 
     final row = await _client
         .from(_table)
@@ -78,16 +72,11 @@ class RegimensRepository {
     return rows.map((r) => Regimen.fromJson(r)).toList();
   }
 
-  /// Marks the active regimen inactive without starting a new one. Used by
-  /// the Regimen screen's "Stop drug" action.
-  Future<void> endActive() async {
-    final userId = _client.auth.currentUser?.id;
-    if (userId == null) return;
-    final now = DateTime.now().toUtc();
-    await _client
-        .from(_table)
-        .update({'is_active': false, 'ended_at': now.toIso8601String()})
-        .eq('user_id', userId)
-        .eq('is_active', true);
+  /// Audited deactivation of the caller's active regimen. No-ops on the
+  /// server if nothing is active. Routes through the `stop_regimen` RPC,
+  /// which writes audit_log rows in the same transaction. Direct updates
+  /// to `regimens` are blocked by RLS.
+  Future<void> stopActive({required String reason}) async {
+    await _client.rpc('stop_regimen', params: {'p_reason': reason});
   }
 }

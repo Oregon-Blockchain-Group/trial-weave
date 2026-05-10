@@ -10,18 +10,20 @@ Future<String?> showReasonDialog(
   BuildContext context, {
   String title = 'Why are you making this change?',
   String hint = 'e.g. entered the wrong value at signup',
+  String? body,
 }) {
   return showDialog<String>(
     context: context,
     barrierDismissible: false,
-    builder: (ctx) => _ReasonDialog(title: title, hint: hint),
+    builder: (ctx) => _ReasonDialog(title: title, hint: hint, body: body),
   );
 }
 
 class _ReasonDialog extends StatefulWidget {
-  const _ReasonDialog({required this.title, required this.hint});
+  const _ReasonDialog({required this.title, required this.hint, this.body});
   final String title;
   final String hint;
+  final String? body;
 
   @override
   State<_ReasonDialog> createState() => _ReasonDialogState();
@@ -50,12 +52,22 @@ class _ReasonDialogState extends State<_ReasonDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(widget.title, style: AppText.title),
-      content: TextField(
-        controller: _controller,
-        autofocus: true,
-        maxLines: 3,
-        minLines: 2,
-        decoration: InputDecoration(hintText: widget.hint),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (widget.body != null) ...[
+            Text(widget.body!, style: AppText.bodyMuted),
+            const SizedBox(height: 12),
+          ],
+          TextField(
+            controller: _controller,
+            autofocus: true,
+            maxLines: 3,
+            minLines: 2,
+            decoration: InputDecoration(hintText: widget.hint),
+          ),
+        ],
       ),
       actions: [
         TextButton(
