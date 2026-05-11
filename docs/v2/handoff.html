@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Trial Weave — Flutter handoff</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/atom-one-light.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/languages/dart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/languages/yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/languages/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/languages/markdown.min.js"></script>
+<style>
+:root {
+  --teal: #234A67;
+  --teal-deep: #1C425B;
+  --navy: #113687;
+  --sky: #7ABEE1;
+  --tint: #E8F4F8;
+  --offwhite: #FDFCFA;
+  --bg: #FAFAFA;
+  --card: #FFFFFF;
+  --ink: #1C1C1C;
+  --muted: #6B7280;
+  --subtle: #9CA3AF;
+  --border: #E5E7EB;
+  --border-soft: #F3F4F6;
+  --success: #15803D;
+  --success-bg: #ECFDF5;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+code, pre { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+/* layout */
+.wrap { max-width: 1280px; margin: 0 auto; padding: 32px 28px 80px; }
+header.hero { padding-bottom: 24px; border-bottom: 1px solid var(--border); margin-bottom: 0; }
+.eyebrow { text-transform: uppercase; letter-spacing: 0.12em; font-size: 11px; color: var(--muted); font-weight: 600; }
+h1 { font-size: 32px; font-weight: 700; margin: 6px 0 4px; letter-spacing: -0.01em; }
+h1 .accent { color: var(--teal); }
+.subhead { color: var(--muted); font-size: 15px; max-width: 720px; }
+.meta-pills { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+.pill { background: var(--card); border: 1px solid var(--border); padding: 4px 10px; border-radius: 999px; font-size: 12px; color: var(--muted); }
+.pill strong { color: var(--ink); font-weight: 600; }
+.pill.brand { background: var(--tint); border-color: transparent; color: var(--teal); }
+
+nav.tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-top: 24px; overflow-x: auto; }
+nav.tabs button {
+  background: transparent;
+  border: 0;
+  padding: 12px 16px;
+  font: inherit;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  font-weight: 500;
+}
+nav.tabs button:hover { color: var(--ink); }
+nav.tabs button.active { color: var(--teal); border-bottom-color: var(--teal); font-weight: 600; }
+
+.tab-panel { display: none; padding-top: 28px; }
+.tab-panel.active { display: block; }
+
+/* cards */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 22px;
+  margin-bottom: 16px;
+}
+.card h2 { font-size: 18px; margin: 0 0 6px; font-weight: 700; }
+.card h3 { font-size: 14px; margin: 16px 0 6px; font-weight: 600; color: var(--teal-deep); }
+.card p { color: var(--muted); margin: 6px 0; }
+.card p strong { color: var(--ink); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 720px) { .grid-2 { grid-template-columns: 1fr; } }
+
+/* file browser */
+.code-layout { display: grid; grid-template-columns: 280px 1fr; gap: 16px; }
+@media (max-width: 820px) { .code-layout { grid-template-columns: 1fr; } }
+.file-tree {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  max-height: 720px;
+  overflow: auto;
+  position: sticky;
+  top: 16px;
+  align-self: start;
+}
+.tree-section { margin-bottom: 8px; }
+.tree-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--subtle);
+  text-transform: uppercase;
+  padding: 8px 10px 4px;
+}
+.tree-file {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ink);
+}
+.tree-file:hover { background: var(--border-soft); }
+.tree-file.active { background: var(--tint); color: var(--teal); font-weight: 600; }
+.tree-file .lines { font-size: 11px; color: var(--subtle); font-family: 'JetBrains Mono', monospace; }
+.tree-file.active .lines { color: var(--teal); }
+
+.code-pane {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.code-header .path { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); }
+.code-header .path strong { color: var(--ink); }
+.code-header button {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--ink);
+}
+.code-header button:hover { background: var(--tint); border-color: var(--teal); color: var(--teal); }
+.code-pane pre {
+  margin: 0;
+  padding: 16px 20px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  overflow: auto;
+  max-height: 70vh;
+  background: var(--card);
+}
+
+/* schema table */
+table.schema { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.schema th, table.schema td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border-soft); vertical-align: top; }
+table.schema th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; }
+table.schema td.col-name { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--teal); white-space: nowrap; }
+table.schema td.col-type { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); }
+
+/* route table */
+table.routes { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.routes th, table.routes td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border-soft); vertical-align: top; }
+table.routes th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; }
+table.routes td.path { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--teal); white-space: nowrap; }
+
+ul.crisp { margin: 8px 0; padding-left: 18px; color: var(--muted); }
+ul.crisp li { margin: 4px 0; }
+ul.crisp li strong { color: var(--ink); }
+
+.badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+.badge.ok { background: var(--success-bg); color: var(--success); }
+.badge.todo { background: #FEF3C7; color: #B45309; }
+
+.hl-row { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-top: 1px solid var(--border-soft); }
+.hl-row:first-child { border-top: 0; }
+.hl-row .key { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--teal); min-width: 200px; }
+.hl-row .desc { color: var(--ink); font-size: 13px; }
+.hl-row .desc small { color: var(--muted); display: block; margin-top: 2px; }
+
+.swatch-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.swatch { display: flex; flex-direction: column; min-width: 110px; }
+.swatch .chip { height: 56px; border-radius: 8px; border: 1px solid var(--border-soft); }
+.swatch .name { font-size: 12px; font-weight: 600; margin-top: 6px; }
+.swatch .hex { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); }
+
+footer { margin-top: 40px; color: var(--subtle); font-size: 12px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">Engineering handoff</div>
+    <h1>Trial Weave <span class="accent">Flutter</span> + Supabase</h1>
+    <p class="subhead">Production scaffold mirroring the React prototype. Same 17 screens, same Lokahi tokens, wired to Supabase auth + RLS-protected tables + a privacy-floored cohort RPC. This page lets you browse every file, the route map, and the schema.</p>
+    <div class="meta-pills">
+      <span class="pill brand"><strong>Flutter</strong> 3.24+</span>
+      <span class="pill"><strong>Riverpod</strong> 2.5</span>
+      <span class="pill"><strong>go_router</strong> 14</span>
+      <span class="pill"><strong>supabase_flutter</strong> 2.5</span>
+      <span class="pill"><strong>fl_chart</strong> 0.68</span>
+      <span class="pill"><strong>20</strong> files · <strong>17</strong> screens · <strong>8</strong> tables</span>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button data-tab="overview" class="active">Overview</button>
+      <button data-tab="code">Code browser</button>
+      <button data-tab="routes">Routes</button>
+      <button data-tab="schema">Supabase schema</button>
+      <button data-tab="theme">Design tokens</button>
+      <button data-tab="setup">Setup &amp; ship</button>
+    </nav>
+  </header>
+
+  <!-- ── OVERVIEW ─────────────────────────────────────────────────────────── -->
+  <section id="tab-overview" class="tab-panel active">
+    <div class="grid-2">
+      <div class="card">
+        <h2>What this delivers</h2>
+        <p>A Flutter app that's screen-for-screen identical to the React prototype, with three real backend integrations the prototype only mocks:</p>
+        <ul class="crisp">
+          <li><strong>Auth</strong> — email + Apple + Google via Supabase, with PKCE flow.</li>
+          <li><strong>Per-user storage</strong> — RLS policies guarantee users only see their own rows.</li>
+          <li><strong>Cohort RPC</strong> — server-side aggregate with a 20-person privacy floor; clients never see row-level data from other users.</li>
+        </ul>
+        <h3>What is NOT in scope</h3>
+        <ul class="crisp">
+          <li>Push notifications (intentionally deferred — the spec calls for client-side reminders only at MVP).</li>
+          <li>HealthKit / Google Fit weight import — clean to add as a service in <code>data/</code> later.</li>
+          <li>Apple/Google OAuth client config — code path exists, you'll need to set redirect URLs in Supabase + native side.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Architecture at a glance</h2>
+        <div class="hl-row">
+          <div class="key">main.dart</div>
+          <div class="desc">Bootstraps Supabase + ProviderScope.<small>Reads <code>SUPABASE_URL</code> / <code>SUPABASE_ANON_KEY</code> via <code>--dart-define</code>.</small></div>
+        </div>
+        <div class="hl-row">
+          <div class="key">app/router.dart</div>
+          <div class="desc">go_router with auth-aware redirects.<small>Watches <code>authStateProvider</code> + <code>demoModeProvider</code>; everything outside the auth flow requires a session OR demo mode.</small></div>
+        </div>
+        <div class="hl-row">
+          <div class="key">data/repositories/<br>supabase_repository.dart</div>
+          <div class="desc">Sole consumer of the Supabase SDK.<small>Every screen reaches the backend through this class — swap in a fake for tests.</small></div>
+        </div>
+        <div class="hl-row">
+          <div class="key">providers/providers.dart</div>
+          <div class="desc">Riverpod tree.<small><code>activeUserProvider</code> resolves either Supabase data or <code>demoUser</code>; <code>onboardingProvider</code> is a notifier; <code>cohortOutcomesProvider</code> is autoDispose+family.</small></div>
+        </div>
+        <div class="hl-row">
+          <div class="key">theme/app_theme.dart</div>
+          <div class="desc">Design tokens 1:1 with <code>theme.css</code>.<small>Lokahi brand palette + the screen-level neutrals the React app actually uses (#FAFAFA, #E5E7EB, #6B7280).</small></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Wired vs stubbed</h2>
+      <div class="hl-row">
+        <div class="key">Auth (email + OAuth)</div>
+        <div class="desc"><span class="badge ok">wired</span> &nbsp; <code>signUpWithEmail</code> / <code>signInWithApple</code> / <code>signInWithGoogle</code> all call the SDK. Sign-in form is a stub UI.</div>
+      </div>
+      <div class="hl-row">
+        <div class="key">Dose log</div>
+        <div class="desc"><span class="badge ok">wired</span> &nbsp; <code>LogDoseScreen</code> → <code>repo.logDose()</code> → routes into post-dose check-in.</div>
+      </div>
+      <div class="hl-row">
+        <div class="key">Weight log + chart</div>
+        <div class="desc"><span class="badge ok">wired</span> &nbsp; <code>repo.logWeight()</code> upserts on <code>(user_id, date)</code>; <code>fl_chart</code> renders the spark + full chart.</div>
+      </div>
+      <div class="hl-row">
+        <div class="key">Side-effect log</div>
+        <div class="desc"><span class="badge ok">wired</span> &nbsp; multi-select chips → batched <code>repo.logSideEffect()</code> calls.</div>
+      </div>
+      <div class="hl-row">
+        <div class="key">Factor ratings (baseline + check-in)</div>
+        <div class="desc"><span class="badge ok">wired</span> &nbsp; <code>repo.logFactorRatings()</code> writes one row per factor; <code>is_baseline</code> flag distinguishes onboarding vs daily.</div>
+      </div>
+      <div class="hl-row">
+        <div class="key">Regimen start / end</div>
+        <div class="desc"><span class="badge ok">wired</span> &nbsp; <code>startRegimen()</code> auto-deactivates the previous active row in a single transaction.</div>
+      </div>
+      <div class="hl-row">
+        <div class="key">Cohort outcomes</div>
+        <div class="desc"><span class="badge ok">wired</span> &nbsp; <code>cohort_outcomes(p_filters jsonb)</code> RPC; <code>HAVING count &gt;= 20</code> enforces the privacy floor server-side.</div>
+      </div>
+      <div class="hl-row">
+        <div class="key">Demographics form fields</div>
+        <div class="desc"><span class="badge todo">stub</span> &nbsp; field decorations correct, controllers not yet bound to <code>onboardingProvider</code>. Search <code>TODO</code>.</div>
+      </div>
+      <div class="hl-row">
+        <div class="key">Edit-profile fields</div>
+        <div class="desc"><span class="badge todo">stub</span> &nbsp; same pattern as demographics — wire to <code>repo.upsertDemographics()</code>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CODE BROWSER ─────────────────────────────────────────────────────── -->
+  <section id="tab-code" class="tab-panel">
+    <div class="code-layout">
+      <aside class="file-tree" id="fileTree"></aside>
+      <div class="code-pane">
+        <div class="code-header">
+          <div class="path" id="codePath"></div>
+          <button id="copyBtn">Copy</button>
+        </div>
+        <pre><code id="codeBody"></code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ROUTES ───────────────────────────────────────────────────────────── -->
+  <section id="tab-routes" class="tab-panel">
+    <div class="card">
+      <h2>Route map</h2>
+      <p>Every route declared in <code>app/router.dart</code>. Auth + onboarding routes are reachable when logged out; everything else is gated behind a session OR <code>demoModeProvider == true</code>.</p>
+      <table class="routes">
+        <thead><tr><th>Path</th><th>Screen</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td class="path">/welcome</td><td>WelcomeScreen</td><td>Sign up / sign in / "Try the demo".</td></tr>
+          <tr><td class="path">/sign-up</td><td>SignUpScreen</td><td>Email/pw + Apple + Google. Routes to onboarding on success.</td></tr>
+          <tr><td class="path">/sign-in</td><td>SignInScreen</td><td>Symmetric to sign-up.</td></tr>
+          <tr><td class="path">/onboarding/medication</td><td>OnboardingMedicationScreen</td><td>Step 1/4 — drug, dose, frequency.</td></tr>
+          <tr><td class="path">/onboarding/demographics</td><td>OnboardingDemographicsScreen</td><td>Step 2/4 — age, sex, race, height, weight.</td></tr>
+          <tr><td class="path">/onboarding/baseline</td><td>OnboardingBaselineScreen</td><td>Step 3/4 — 6 well-being sliders (1–5).</td></tr>
+          <tr><td class="path">/onboarding/consent</td><td>OnboardingConsentScreen</td><td>Step 4/4 — research / cohort / marketing grants.</td></tr>
+          <tr><td class="path">/onboarding/activation-gate</td><td>ActivationGateScreen</td><td>Confirms first dose so all logging anchors to a real start date.</td></tr>
+          <tr><td class="path">/home</td><td>HomeScreen</td><td>Greeting + next dose + adherence + weight + cohort teaser.</td></tr>
+          <tr><td class="path">/progress</td><td>ProgressScreen</td><td>Weight chart + baseline shifts + 90-day side effect trends.</td></tr>
+          <tr><td class="path">/cohort</td><td>CohortHomeScreen</td><td>Filter chips + 3 drill-ins.</td></tr>
+          <tr><td class="path">/cohort/outcomes</td><td>CohortOutcomesScreen</td><td>Weight loss % by drug, "best in cohort" badge.</td></tr>
+          <tr><td class="path">/cohort/side-effects</td><td>CohortSideEffectsScreen</td><td>Per-drug incidence bars + your count overlaid.</td></tr>
+          <tr><td class="path">/cohort/cost</td><td>CohortCostScreen</td><td>Median monthly cost vs your spend.</td></tr>
+          <tr><td class="path">/log/dose</td><td>LogDoseScreen</td><td>One-tap "I took it now" + notes.</td></tr>
+          <tr><td class="path">/check-in/post-dose</td><td>PostDoseCheckInScreen</td><td>10 sliders (6 baseline + 4 GLP-1 extras).</td></tr>
+          <tr><td class="path">/check-in/side-effect</td><td>SideEffectCheckInScreen</td><td>Multi-select side effect chips with severity.</td></tr>
+          <tr><td class="path">/profile</td><td>ProfileScreen</td><td>Settings hub.</td></tr>
+          <tr><td class="path">/profile/edit</td><td>EditProfileScreen</td><td>Editable demographics.</td></tr>
+          <tr><td class="path">/profile/regimen</td><td>RegimenScreen</td><td>Current + previous regimens; "switch / stop drug".</td></tr>
+          <tr><td class="path">/profile/data-privacy</td><td>DataPrivacyScreen</td><td>Export + delete account.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── SCHEMA ───────────────────────────────────────────────────────────── -->
+  <section id="tab-schema" class="tab-panel">
+    <div class="card">
+      <h2>Tables &amp; row-level security</h2>
+      <p>Eight tables. Every table has RLS on with a single policy: <code>auth.uid() = user_id</code>. There is <strong>no</strong> path for one user to read another user's rows from the client SDK — cohort comparisons are computed exclusively through the <code>cohort_outcomes</code> RPC, which is <code>SECURITY DEFINER</code> and applies a 20-person privacy floor.</p>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h3>profiles</h3>
+        <table class="schema"><tbody>
+          <tr><td class="col-name">user_id</td><td class="col-type">uuid PK → auth.users</td></tr>
+          <tr><td class="col-name">age</td><td class="col-type">int (13–100)</td></tr>
+          <tr><td class="col-name">sex</td><td class="col-type">text</td></tr>
+          <tr><td class="col-name">race_ethnicity</td><td class="col-type">text</td></tr>
+          <tr><td class="col-name">city, state</td><td class="col-type">text</td></tr>
+          <tr><td class="col-name">height_feet, height_inches</td><td class="col-type">int</td></tr>
+          <tr><td class="col-name">starting_weight_lb</td><td class="col-type">numeric(5,1)</td></tr>
+        </tbody></table>
+      </div>
+      <div class="card">
+        <h3>regimens</h3>
+        <table class="schema"><tbody>
+          <tr><td class="col-name">id</td><td class="col-type">uuid PK</td></tr>
+          <tr><td class="col-name">user_id</td><td class="col-type">uuid → auth.users</td></tr>
+          <tr><td class="col-name">brand, generic, dose</td><td class="col-type">text</td></tr>
+          <tr><td class="col-name">form</td><td class="col-type">text (injection|pill)</td></tr>
+          <tr><td class="col-name">frequency</td><td class="col-type">text</td></tr>
+          <tr><td class="col-name">indication</td><td class="col-type">text (weight|t2d|both)</td></tr>
+          <tr><td class="col-name">prior_glp1</td><td class="col-type">text (naive|switched|restarted)</td></tr>
+          <tr><td class="col-name">supply</td><td class="col-type">text (branded|compounded)</td></tr>
+          <tr><td class="col-name">started_at, ended_at</td><td class="col-type">timestamptz</td></tr>
+          <tr><td class="col-name">is_active</td><td class="col-type">bool, partial idx</td></tr>
+        </tbody></table>
+      </div>
+      <div class="card">
+        <h3>dose_logs</h3>
+        <table class="schema"><tbody>
+          <tr><td class="col-name">id</td><td class="col-type">uuid PK</td></tr>
+          <tr><td class="col-name">user_id, regimen_id</td><td class="col-type">uuid FKs</td></tr>
+          <tr><td class="col-name">taken_at</td><td class="col-type">timestamptz</td></tr>
+          <tr><td class="col-name">notes</td><td class="col-type">text</td></tr>
+        </tbody></table>
+      </div>
+      <div class="card">
+        <h3>weight_logs</h3>
+        <table class="schema"><tbody>
+          <tr><td class="col-name">user_id, date</td><td class="col-type">composite PK</td></tr>
+          <tr><td class="col-name">weight_lb</td><td class="col-type">numeric(5,1)</td></tr>
+        </tbody></table>
+      </div>
+      <div class="card">
+        <h3>side_effect_logs</h3>
+        <table class="schema"><tbody>
+          <tr><td class="col-name">id, user_id, regimen_id</td><td class="col-type">uuid</td></tr>
+          <tr><td class="col-name">name</td><td class="col-type">text (whitelisted client-side)</td></tr>
+          <tr><td class="col-name">severity</td><td class="col-type">int (1–5)</td></tr>
+          <tr><td class="col-name">logged_at</td><td class="col-type">timestamptz</td></tr>
+        </tbody></table>
+      </div>
+      <div class="card">
+        <h3>factor_logs</h3>
+        <table class="schema"><tbody>
+          <tr><td class="col-name">id, user_id</td><td class="col-type">uuid</td></tr>
+          <tr><td class="col-name">factor_key</td><td class="col-type">text (energy, mood, ...)</td></tr>
+          <tr><td class="col-name">rating</td><td class="col-type">int (1–5)</td></tr>
+          <tr><td class="col-name">is_baseline</td><td class="col-type">bool</td></tr>
+          <tr><td class="col-name">logged_at</td><td class="col-type">timestamptz</td></tr>
+        </tbody></table>
+      </div>
+      <div class="card">
+        <h3>cost_logs</h3>
+        <table class="schema"><tbody>
+          <tr><td class="col-name">user_id, month</td><td class="col-type">composite PK</td></tr>
+          <tr><td class="col-name">amount_usd</td><td class="col-type">int</td></tr>
+        </tbody></table>
+      </div>
+      <div class="card">
+        <h3>consents</h3>
+        <table class="schema"><tbody>
+          <tr><td class="col-name">id, user_id</td><td class="col-type">uuid</td></tr>
+          <tr><td class="col-name">version</td><td class="col-type">text</td></tr>
+          <tr><td class="col-name">grants</td><td class="col-type">jsonb</td></tr>
+          <tr><td class="col-name">granted_at</td><td class="col-type">timestamptz</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>cohort_outcomes RPC</h2>
+      <p>Server-side aggregation of weight-loss % by drug for users matching <code>p_filters</code>. <code>SECURITY DEFINER</code> + <code>HAVING count(distinct user_id) &gt;= 20</code> means the result set never reveals fewer than 20 people — drugs with a small cohort simply don't appear. Only authenticated roles can call it.</p>
+    </div>
+  </section>
+
+  <!-- ── DESIGN TOKENS ────────────────────────────────────────────────────── -->
+  <section id="tab-theme" class="tab-panel">
+    <div class="card">
+      <h2>Brand palette</h2>
+      <p>From <code>theme.css</code>; surfaced through <code>AppColors</code> in <code>theme/app_theme.dart</code>.</p>
+      <div class="swatch-row">
+        <div class="swatch"><div class="chip" style="background:#234A67"></div><div class="name">darkTeal</div><div class="hex">#234A67 · primary</div></div>
+        <div class="swatch"><div class="chip" style="background:#1C425B"></div><div class="name">mediumTeal</div><div class="hex">#1C425B · hover</div></div>
+        <div class="swatch"><div class="chip" style="background:#113687"></div><div class="name">deepNavy</div><div class="hex">#113687 · accent</div></div>
+        <div class="swatch"><div class="chip" style="background:#7ABEE1"></div><div class="name">skyBlue</div><div class="hex">#7ABEE1 · secondary</div></div>
+        <div class="swatch"><div class="chip" style="background:#E8F4F8"></div><div class="name">tealTint</div><div class="hex">#E8F4F8 · muted bg</div></div>
+        <div class="swatch"><div class="chip" style="background:#FDFCFA"></div><div class="name">offWhite</div><div class="hex">#FDFCFA</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Screen neutrals</h2>
+      <div class="swatch-row">
+        <div class="swatch"><div class="chip" style="background:#FAFAFA"></div><div class="name">screenBg</div><div class="hex">#FAFAFA</div></div>
+        <div class="swatch"><div class="chip" style="background:#FFFFFF;border-color:#E5E7EB"></div><div class="name">cardBg</div><div class="hex">#FFFFFF</div></div>
+        <div class="swatch"><div class="chip" style="background:#E5E7EB"></div><div class="name">border</div><div class="hex">#E5E7EB</div></div>
+        <div class="swatch"><div class="chip" style="background:#F3F4F6"></div><div class="name">borderSubtle</div><div class="hex">#F3F4F6</div></div>
+        <div class="swatch"><div class="chip" style="background:#6B7280"></div><div class="name">muted</div><div class="hex">#6B7280</div></div>
+        <div class="swatch"><div class="chip" style="background:#1C1C1C"></div><div class="name">inkBlack</div><div class="hex">#1C1C1C</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Semantic</h2>
+      <div class="swatch-row">
+        <div class="swatch"><div class="chip" style="background:#15803D"></div><div class="name">success</div><div class="hex">#15803D</div></div>
+        <div class="swatch"><div class="chip" style="background:#ECFDF5"></div><div class="name">successBg</div><div class="hex">#ECFDF5</div></div>
+        <div class="swatch"><div class="chip" style="background:#B45309"></div><div class="name">warning</div><div class="hex">#B45309</div></div>
+        <div class="swatch"><div class="chip" style="background:#FEF3C7"></div><div class="name">warningBg</div><div class="hex">#FEF3C7</div></div>
+        <div class="swatch"><div class="chip" style="background:#DC2626"></div><div class="name">danger</div><div class="hex">#DC2626</div></div>
+        <div class="swatch"><div class="chip" style="background:#FEF2F2"></div><div class="name">dangerBg</div><div class="hex">#FEF2F2</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Type scale</h2>
+      <p style="font-size:24px;font-weight:700;color:var(--ink);margin:6px 0">displayLg · 24/700</p>
+      <p style="font-size:20px;font-weight:700;color:var(--ink);margin:6px 0">displayMd · 20/700</p>
+      <p style="font-size:18px;font-weight:700;color:var(--ink);margin:6px 0">title · 18/700</p>
+      <p style="font-size:14px;color:var(--ink);margin:6px 0">body · 14/400</p>
+      <p style="font-size:14px;color:var(--muted);margin:6px 0">bodyMuted · 14/400 muted</p>
+      <p style="font-size:12px;color:var(--muted);margin:6px 0">caption · 12/400 muted</p>
+      <p style="font-size:10px;font-weight:600;letter-spacing:.12em;color:var(--muted);margin:6px 0">EYEBROW · 10/600 +0.12em</p>
+      <h3>Radii</h3>
+      <p>sm 6 · md 8 · lg 12 · xl 16 · pill 999</p>
+    </div>
+  </section>
+
+  <!-- ── SETUP ────────────────────────────────────────────────────────────── -->
+  <section id="tab-setup" class="tab-panel">
+    <div class="card">
+      <h2>Get the app running</h2>
+      <pre style="background:var(--bg);padding:14px 16px;border:1px solid var(--border);border-radius:8px;overflow:auto"><code class="language-yaml">cd flutter_app
+flutter pub get
+flutter run \
+  --dart-define=SUPABASE_URL=https://YOUR.supabase.co \
+  --dart-define=SUPABASE_ANON_KEY=eyJ...</code></pre>
+      <h3>Provision Supabase</h3>
+      <pre style="background:var(--bg);padding:14px 16px;border:1px solid var(--border);border-radius:8px;overflow:auto"><code class="language-sql">supabase db push   # applies supabase/migrations/0001_init.sql</code></pre>
+      <p>The migration creates all 8 tables, enables RLS on each, installs the policies, and creates the <code>cohort_outcomes</code> RPC.</p>
+    </div>
+    <div class="card">
+      <h2>Native config (OAuth)</h2>
+      <ul class="crisp">
+        <li><strong>Apple</strong> — enable Sign in with Apple capability in Xcode; add the redirect URL in Supabase Auth → Providers.</li>
+        <li><strong>Google</strong> — add a Google OAuth client (iOS + Android), configure URL schemes per <code>supabase_flutter</code> docs.</li>
+        <li><strong>Deep links</strong> — register <code>io.supabase.trialweave://login-callback/</code> in <code>Info.plist</code> + <code>AndroidManifest.xml</code>.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Suggested next-up tickets</h2>
+      <ul class="crisp">
+        <li><strong>P0</strong> — finish demographics + edit-profile field bindings (the <code>TODO</code>s).</li>
+        <li><strong>P0</strong> — replace the placeholder <code>activeUserProvider</code> composition with a real join (profile + active regimen + weight summary + adherence stats).</li>
+        <li><strong>P1</strong> — push notifications: dose reminder + post-dose check-in nudge.</li>
+        <li><strong>P1</strong> — adherence calendar widget on Progress.</li>
+        <li><strong>P2</strong> — HealthKit / Google Fit weight import.</li>
+        <li><strong>P2</strong> — fixture seed script for cohort RPC dev (so &gt;20 row floor doesn't return empty in dev).</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>Trial Weave handoff · Generated for the engineering team · All source under <code>flutter_app/</code></footer>
+</div>
+
+<script>
+const FILES = {
+  'flutter_app/README.md':                                  { group: 'docs',      lang: 'markdown' },
+  'flutter_app/pubspec.yaml':                               { group: 'docs',      lang: 'yaml' },
+  'flutter_app/lib/main.dart':                              { group: 'app',       lang: 'dart' },
+  'flutter_app/lib/app/router.dart':                        { group: 'app',       lang: 'dart' },
+  'flutter_app/lib/theme/app_theme.dart':                   { group: 'theme',     lang: 'dart' },
+  'flutter_app/lib/data/models/drug.dart':                  { group: 'data',      lang: 'dart' },
+  'flutter_app/lib/data/models/factor.dart':                { group: 'data',      lang: 'dart' },
+  'flutter_app/lib/data/models/user.dart':                  { group: 'data',      lang: 'dart' },
+  'flutter_app/lib/data/repositories/supabase_repository.dart': { group: 'data',  lang: 'dart' },
+  'flutter_app/lib/providers/providers.dart':               { group: 'state',     lang: 'dart' },
+  'flutter_app/lib/widgets/common.dart':                    { group: 'widgets',   lang: 'dart' },
+  'flutter_app/lib/screens/auth_screens.dart':              { group: 'screens',   lang: 'dart' },
+  'flutter_app/lib/screens/onboarding_screens.dart':        { group: 'screens',   lang: 'dart' },
+  'flutter_app/lib/screens/home_screen.dart':               { group: 'screens',   lang: 'dart' },
+  'flutter_app/lib/screens/progress_screen.dart':           { group: 'screens',   lang: 'dart' },
+  'flutter_app/lib/screens/cohort_screens.dart':            { group: 'screens',   lang: 'dart' },
+  'flutter_app/lib/screens/log_dose_screen.dart':           { group: 'screens',   lang: 'dart' },
+  'flutter_app/lib/screens/check_in_screens.dart':          { group: 'screens',   lang: 'dart' },
+  'flutter_app/lib/screens/profile_screens.dart':           { group: 'screens',   lang: 'dart' },
+  'flutter_app/supabase/migrations/0001_init.sql':          { group: 'supabase',  lang: 'sql' },
+};
+
+const GROUP_ORDER = ['docs', 'app', 'theme', 'data', 'state', 'widgets', 'screens', 'supabase'];
+const GROUP_LABEL = {
+  docs: 'Project',
+  app: 'App entry',
+  theme: 'Theme',
+  data: 'Data + models',
+  state: 'Riverpod',
+  widgets: 'Widgets',
+  screens: 'Screens',
+  supabase: 'Supabase',
+};
+
+let CONTENTS = {};
+
+async function loadContents() {
+  const r = await fetch('files.json');
+  CONTENTS = await r.json();
+  buildTree();
+  // open the first dart file
+  showFile('flutter_app/lib/main.dart');
+}
+
+function buildTree() {
+  const tree = document.getElementById('fileTree');
+  tree.innerHTML = '';
+  for (const g of GROUP_ORDER) {
+    const filesInGroup = Object.entries(FILES).filter(([, m]) => m.group === g);
+    if (!filesInGroup.length) continue;
+    const sec = document.createElement('div');
+    sec.className = 'tree-section';
+    const lbl = document.createElement('div');
+    lbl.className = 'tree-section-label';
+    lbl.textContent = GROUP_LABEL[g];
+    sec.appendChild(lbl);
+    for (const [path] of filesInGroup) {
+      const row = document.createElement('div');
+      row.className = 'tree-file';
+      row.dataset.path = path;
+      const short = path.replace('flutter_app/', '').replace('lib/', '');
+      const lines = (CONTENTS[path] || '').split('\n').length;
+      row.innerHTML = `<span>${short}</span><span class="lines">${lines}</span>`;
+      row.addEventListener('click', () => showFile(path));
+      sec.appendChild(row);
+    }
+    tree.appendChild(sec);
+  }
+}
+
+function showFile(path) {
+  document.querySelectorAll('.tree-file').forEach(n => n.classList.toggle('active', n.dataset.path === path));
+  document.getElementById('codePath').innerHTML = `<strong>${path}</strong>`;
+  const codeEl = document.getElementById('codeBody');
+  const lang = FILES[path].lang;
+  codeEl.className = 'language-' + lang;
+  codeEl.textContent = CONTENTS[path] || '(loading…)';
+  delete codeEl.dataset.highlighted;
+  hljs.highlightElement(codeEl);
+}
+
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  const path = document.querySelector('.tree-file.active')?.dataset.path;
+  if (!path) return;
+  await navigator.clipboard.writeText(CONTENTS[path] || '');
+  const btn = document.getElementById('copyBtn');
+  const orig = btn.textContent;
+  btn.textContent = 'Copied';
+  setTimeout(() => btn.textContent = orig, 1200);
+});
+
+// Tabs
+document.getElementById('tabs').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-tab]');
+  if (!btn) return;
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b === btn));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + btn.dataset.tab));
+});
+
+loadContents();
+</script>
+</body>
+</html>

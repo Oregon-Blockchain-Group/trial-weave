@@ -1,0 +1,1151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Trial Weave — Dashboard variations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@0.453.0/dist/umd/lucide.min.js"></script>
+<style>
+:root {
+  --teal: #234a67;
+  --teal-deep: #1c425b;
+  --navy: #113687;
+  --sky: #7abee1;
+  --tint: #e8f4f8;
+  --bg: #fafafa;
+  --card: #ffffff;
+  --ink: #1c1c1c;
+  --muted: #6b7280;
+  --subtle: #9ca3af;
+  --border: #e5e7eb;
+  --border-soft: #f3f4f6;
+  --success: #15803d;
+  --success-bg: #ecfdf5;
+  --warning: #b45309;
+  --warning-bg: #fef3c7;
+  --danger: #dc2626;
+  --flame-bg-a: #fff4e6;
+  --flame-bg-b: #ffe4cc;
+  --flame-ink: #9a3412;
+  --flame-mid: #ea580c;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: #f4f5f7;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* page chrome */
+.page { max-width: 1120px; margin: 0 auto; padding: 28px 24px 80px; }
+.eyebrow { text-transform: uppercase; letter-spacing: 0.12em; font-size: 11px; color: var(--muted); font-weight: 600; }
+h1 { font-size: 28px; font-weight: 700; margin: 6px 0 4px; letter-spacing: -0.01em; }
+h1 .accent { color: var(--teal); }
+.subhead { color: var(--muted); font-size: 14px; max-width: 720px; }
+.controls { display: flex; gap: 8px; margin: 18px 0 24px; flex-wrap: wrap; }
+.controls button {
+  background: var(--card); border: 1px solid var(--border); border-radius: 999px;
+  padding: 6px 14px; font: inherit; font-size: 12px; cursor: pointer; color: var(--ink);
+  transition: all 0.15s;
+}
+.controls button.active, .controls button:hover { background: var(--teal); border-color: var(--teal); color: white; }
+
+/* phones */
+.phones { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; align-items: flex-start; }
+.phone-col { display: flex; flex-direction: column; align-items: center; }
+.phone-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin-bottom: 8px; }
+.phone-label strong { color: var(--ink); display: block; font-size: 16px; letter-spacing: 0; text-transform: none; margin-top: 2px; }
+
+.phone {
+  width: 390px;
+  height: 844px;
+  background: black;
+  border-radius: 48px;
+  padding: 12px;
+  box-shadow: 0 24px 64px -24px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.05);
+  position: relative;
+}
+.phone::before {
+  /* dynamic island */
+  content: '';
+  position: absolute;
+  top: 22px; left: 50%; transform: translateX(-50%);
+  width: 110px; height: 32px;
+  background: black; border-radius: 999px;
+  z-index: 10;
+}
+.screen {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  border-radius: 36px;
+  overflow: hidden;
+  position: relative;
+}
+.screen-scroll { height: 100%; overflow-y: auto; overflow-x: hidden; padding-bottom: 100px; }
+.screen-scroll::-webkit-scrollbar { width: 0; }
+
+/* status bar */
+.status-bar {
+  height: 47px;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  padding: 0 30px 6px;
+  font-size: 14px; font-weight: 600; color: var(--ink);
+}
+.status-bar .icons { display: flex; gap: 5px; align-items: center; }
+.status-bar .icons svg { width: 16px; height: 12px; }
+
+/* generic card */
+.card-base {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+.section-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.section-title { font-size: 14px; font-weight: 600; color: var(--ink); }
+.section-meta { font-size: 18px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* ────────────────────────────────────────────────────────────────────── */
+/* LAYOUT A — Stacked                                                     */
+/* ────────────────────────────────────────────────────────────────────── */
+
+.A .top {
+  background: white;
+  padding: 12px 16px 16px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 5;
+}
+.A .top-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--border);
+}
+.A .logo { font-weight: 700; color: var(--teal); font-size: 18px; letter-spacing: -0.01em; }
+.A .logo small { display: block; font-size: 9px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.18em; }
+.icon-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border); background: white; cursor: pointer; position: relative;
+  color: var(--ink);
+}
+.icon-btn:hover { background: var(--bg); }
+.icon-btn .dot { position: absolute; top: 8px; right: 8px; width: 6px; height: 6px; background: var(--danger); border-radius: 50%; }
+.avatar-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--teal); display: flex; align-items: center; justify-content: center; border: 0; cursor: pointer; color: white; }
+.greet-eye { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.greet-h1 { font-size: 20px; font-weight: 700; color: var(--ink); }
+
+.A .stack { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+.A .regimen .row1 { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+.A .regimen .name { font-size: 18px; font-weight: 700; color: var(--ink); }
+.A .regimen .gen { font-size: 12px; color: var(--muted); }
+.A .regimen .ico { width: 40px; height: 40px; border-radius: 50%; background: var(--tint); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--teal); }
+.A .meta-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.A .meta-grid .lbl { font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.A .meta-grid .val { font-size: 14px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.A .meta-grid .val.hl { color: var(--teal); }
+
+.A .tap-dose, .A .tap-dose-done {
+  width: 100%; border-radius: 12px; padding: 14px 16px; text-align: left; cursor: pointer;
+  display: flex; align-items: center; gap: 12px; font: inherit; transition: all 0.2s;
+}
+.A .tap-dose { background: var(--teal); color: white; border: 2px solid var(--teal); }
+.A .tap-dose:hover { background: var(--teal-deep); }
+.A .tap-dose-done { background: var(--success-bg); color: var(--success); border: 2px solid var(--success); }
+.A .tap-dose .ico, .A .tap-dose-done .ico { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.A .tap-dose .ico { background: rgba(255,255,255,0.15); }
+.A .tap-dose-done .ico { background: var(--success); color: white; }
+.A .tap-dose .text, .A .tap-dose-done .text { flex: 1; }
+.A .tap-dose .eye, .A .tap-dose-done .eye { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.85; margin-bottom: 2px; }
+.A .tap-dose .lbl, .A .tap-dose-done .lbl { font-size: 14px; font-weight: 600; }
+.A .tap-dose .badge { font-size: 11px; font-weight: 600; opacity: 0.8; }
+
+.A .cohort-cta {
+  width: 100%; background: var(--teal); color: white; border-radius: 12px; padding: 14px 16px;
+  display: flex; gap: 12px; align-items: flex-start; cursor: pointer; border: 0; text-align: left; font: inherit;
+}
+.A .cohort-cta:hover { background: var(--teal-deep); }
+.A .cohort-cta .ico { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.A .cohort-cta .text { flex: 1; }
+.A .cohort-cta .eye { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.85; margin-bottom: 2px; }
+.A .cohort-cta .h { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.A .cohort-cta .sub { font-size: 12px; opacity: 0.9; }
+
+.A .card-base > .section-eyebrow + .section-title { margin-bottom: 8px; }
+.A .adh .head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 12px; }
+.A .adh .head .section-meta { line-height: 1; padding-top: 12px; }
+.A .adh .ring-row { display: flex; align-items: center; gap: 16px; }
+.A .ring { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
+.A .ring svg { transform: rotate(-90deg); width: 80px; height: 80px; }
+.A .ring .num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+.A .adh .meta { font-size: 13px; color: var(--ink); margin-bottom: 4px; }
+.A .adh .sub { font-size: 11px; color: var(--muted); }
+.A .adh .sub .pos { color: var(--success); font-weight: 600; }
+.A .adh .streak-row { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+.A .streak-pill {
+  display: flex; align-items: center; gap: 6px; padding: 0 12px; height: 32px; border-radius: 999px;
+  background: linear-gradient(to right, var(--flame-bg-a), var(--flame-bg-b));
+  border: 1px solid rgba(245,158,11,0.3);
+}
+.A .streak-pill .num { font-size: 13px; font-weight: 700; color: var(--flame-ink); font-variant-numeric: tabular-nums; }
+.A .streak-pill .lbl { font-size: 11px; font-weight: 600; color: var(--flame-ink); }
+.A .adh .longest { font-size: 11px; color: var(--muted); }
+
+.A .qa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.A .qa {
+  height: 56px; border-radius: 12px; display: flex; align-items: center; gap: 8px;
+  padding: 0 12px; border: 1px solid var(--border); background: white; cursor: pointer; font: inherit;
+  color: var(--ink);
+}
+.A .qa:hover { border-color: var(--teal); }
+.A .qa.primary { background: var(--teal); color: white; border-color: var(--teal); }
+.A .qa.primary:hover { background: var(--teal-deep); }
+.A .qa .lbl { font-size: 13px; font-weight: 600; }
+
+.A .baseline-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px; }
+.A .b-cell { padding: 8px; border: 1px solid var(--border); border-radius: 8px; }
+.A .b-cell .lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px; }
+.A .b-cell .row { display: flex; align-items: baseline; gap: 4px; font-variant-numeric: tabular-nums; }
+.A .b-cell .from { font-size: 11px; color: var(--muted); }
+.A .b-cell .to { font-size: 14px; font-weight: 700; color: var(--ink); }
+
+.A .weight .head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+.A .weight .h-l .eye { margin-bottom: 2px; }
+.A .weight .h-l .h { font-size: 13px; font-weight: 600; color: var(--ink); }
+.A .weight .h-r { text-align: right; }
+.A .weight .h-r .big { font-size: 20px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1; }
+.A .weight .h-r .big small { font-size: 12px; font-weight: 500; color: var(--muted); }
+.A .weight .h-r .delta { font-size: 11px; font-weight: 600; color: var(--success); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.A .weight svg.chart { width: 100%; height: 140px; display: block; }
+
+/* side-effects (90 day) */
+.A .se-list { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+.A .se-row { display: flex; align-items: center; gap: 10px; }
+.A .se-row .name { flex: 1; font-size: 13px; }
+.A .se-row .count { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.A .se-row .trend { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+.A .se-row .trend.dn { background: var(--success-bg); color: var(--success); }
+.A .se-row .trend.up { background: var(--warning-bg); color: var(--warning); }
+
+/* cost compare */
+.A .cost-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border-soft); }
+.A .cost-row:first-of-type { border-top: 0; padding-top: 6px; }
+.A .cost-row .name { flex: 1; font-size: 13px; font-weight: 600; }
+.A .cost-row .cohort { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.A .cost-row .you { font-size: 13px; font-weight: 600; color: var(--success); font-variant-numeric: tabular-nums; }
+.A .cost-row .savings { font-size: 11px; color: var(--success); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* check-in feed */
+.A .feed-item { display: flex; gap: 10px; padding: 10px 0; border-top: 1px solid var(--border-soft); }
+.A .feed-item:first-of-type { border-top: 0; padding-top: 4px; }
+.A .feed-item .ico { width: 32px; height: 32px; border-radius: 50%; background: var(--tint); display: flex; align-items: center; justify-content: center; color: var(--teal); flex-shrink: 0; }
+.A .feed-item .ico.warn { background: var(--warning-bg); color: var(--warning); }
+.A .feed-item .ico.ok { background: var(--success-bg); color: var(--success); }
+.A .feed-item .text { flex: 1; }
+.A .feed-item .h { font-size: 13px; font-weight: 600; color: var(--ink); }
+.A .feed-item .sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.A .feed-item .when { font-size: 10px; color: var(--subtle); white-space: nowrap; }
+
+/* heatmap */
+.A .heatmap { display: grid; grid-template-columns: repeat(13, 1fr); gap: 3px; margin-top: 10px; }
+.A .heatmap .cell { aspect-ratio: 1; border-radius: 3px; background: var(--border-soft); }
+.A .heatmap .cell.l1 { background: #c5dce6; }
+.A .heatmap .cell.l2 { background: #7fa9c0; }
+.A .heatmap .cell.l3 { background: var(--teal); }
+.A .heatmap-legend { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 10px; color: var(--muted); }
+.A .heatmap-legend .scale { display: flex; gap: 2px; }
+.A .heatmap-legend .scale span { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+/* nav bar */
+.nav-bar {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: white; border-top: 1px solid var(--border);
+  padding: 8px 12px 24px;
+  display: flex; justify-content: space-around; align-items: center;
+  z-index: 5;
+  border-radius: 0 0 36px 36px;
+}
+.nav-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; background: 0; border: 0; cursor: pointer; padding: 6px 12px; color: var(--muted); }
+.nav-btn.active { color: var(--teal); }
+.nav-btn .lbl { font-size: 10px; font-weight: 600; }
+
+
+/* ────────────────────────────────────────────────────────────────────── */
+/* LAYOUT B — Tabbed condensed                                            */
+/* ────────────────────────────────────────────────────────────────────── */
+
+.B .top {
+  background: linear-gradient(180deg, var(--teal) 0%, var(--teal-deep) 100%);
+  color: white;
+  padding: 12px 18px 24px;
+  position: relative;
+}
+.B .top::after {
+  content: '';
+  position: absolute; bottom: -16px; left: 0; right: 0; height: 16px;
+  background: var(--bg); border-radius: 16px 16px 0 0;
+}
+.B .top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.B .logo { font-weight: 700; font-size: 16px; }
+.B .logo small { display: block; font-size: 9px; font-weight: 500; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.18em; }
+.B .top-icons { display: flex; gap: 8px; }
+.B .icon-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); border: 0; color: white; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; position: relative;
+}
+.B .icon-btn:hover { background: rgba(255,255,255,0.25); }
+.B .icon-btn .dot { position: absolute; top: 8px; right: 8px; width: 6px; height: 6px; background: #fbbf24; border-radius: 50%; border: 1.5px solid var(--teal); }
+
+.B .greet-eye { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.7; margin-bottom: 4px; }
+.B .greet-h { font-size: 22px; font-weight: 700; line-height: 1.1; margin-bottom: 4px; }
+.B .greet-sub { font-size: 12px; opacity: 0.85; }
+
+/* hero adherence row */
+.B .hero {
+  display: flex; align-items: center; gap: 16px; margin-top: 18px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 14px;
+  backdrop-filter: blur(10px);
+}
+.B .hero-ring { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
+.B .hero-ring svg { transform: rotate(-90deg); width: 64px; height: 64px; }
+.B .hero-ring .num { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.B .hero-ring .lbl { font-size: 9px; opacity: 0.7; font-weight: 500; margin-top: 2px; }
+.B .hero-text { flex: 1; }
+.B .hero-text .h { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.B .hero-text .sub { font-size: 11px; opacity: 0.85; }
+.B .hero-text .streak { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; margin-top: 4px; padding: 2px 8px; background: rgba(255,255,255,0.15); border-radius: 999px; }
+
+/* metric strip — overlapping the gradient */
+.B .metric-strip {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+  margin: -4px 14px 0;
+  background: white; padding: 12px 8px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 24px -12px rgba(0,0,0,0.15);
+  position: relative; z-index: 2;
+}
+.B .metric { text-align: center; padding: 0 4px; }
+.B .metric + .metric { border-left: 1px solid var(--border-soft); }
+.B .metric .lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px; font-weight: 600; }
+.B .metric .val { font-size: 16px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1; }
+.B .metric .val small { font-size: 10px; font-weight: 500; color: var(--muted); }
+.B .metric .delta { font-size: 10px; font-weight: 600; margin-top: 2px; color: var(--success); }
+.B .metric .delta.dn { color: var(--danger); }
+
+/* segment tabs */
+.B .seg-tabs {
+  display: flex; margin: 14px 14px 0; background: var(--border-soft);
+  border-radius: 10px; padding: 3px;
+}
+.B .seg-tabs button {
+  flex: 1; padding: 8px 0; font: inherit; font-size: 12px; font-weight: 600;
+  background: transparent; border: 0; cursor: pointer; border-radius: 8px; color: var(--muted);
+  transition: all 0.15s;
+}
+.B .seg-tabs button.active { background: white; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+.B .seg-content { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.B .seg-pane { display: none; flex-direction: column; gap: 12px; }
+.B .seg-pane.active { display: flex; }
+
+/* primary action */
+.B .dose-card {
+  background: var(--teal); color: white;
+  border-radius: 14px; padding: 14px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; border: 0; font: inherit; text-align: left; width: 100%;
+}
+.B .dose-card.done { background: var(--success-bg); color: var(--success); border: 2px solid var(--success); padding: 12px; }
+.B .dose-card .ico { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.B .dose-card.done .ico { background: var(--success); color: white; }
+.B .dose-card .text { flex: 1; }
+.B .dose-card .name { font-size: 16px; font-weight: 700; line-height: 1.2; margin-bottom: 2px; }
+.B .dose-card .sub { font-size: 12px; opacity: 0.85; }
+.B .dose-card .badge { background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+
+/* compact regimen */
+.B .reg-row { display: flex; gap: 10px; align-items: center; }
+.B .reg-row .ico { width: 38px; height: 38px; border-radius: 10px; background: var(--tint); display: flex; align-items: center; justify-content: center; color: var(--teal); flex-shrink: 0; }
+.B .reg-row .text { flex: 1; }
+.B .reg-row .name { font-size: 14px; font-weight: 700; }
+.B .reg-row .sub { font-size: 11px; color: var(--muted); }
+.B .reg-row .next { background: var(--tint); color: var(--teal); padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+
+/* quick actions row (B) */
+.B .qa-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 4px; }
+.B .qa-btn {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 64px; border: 1px solid var(--border); border-radius: 10px; background: white;
+  cursor: pointer; font: inherit; padding: 0; gap: 4px; color: var(--ink);
+}
+.B .qa-btn:hover { border-color: var(--teal); color: var(--teal); }
+.B .qa-btn .lbl { font-size: 10px; font-weight: 600; }
+
+/* compact baseline pills */
+.B .factor-pills { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.B .factor-pill { display: flex; align-items: center; gap: 8px; }
+.B .factor-pill .lbl { width: 64px; font-size: 11px; color: var(--muted); }
+.B .factor-pill .bar-wrap { flex: 1; height: 6px; background: var(--border-soft); border-radius: 999px; position: relative; }
+.B .factor-pill .from { position: absolute; top: -2px; width: 10px; height: 10px; border-radius: 50%; background: var(--subtle); border: 2px solid white; }
+.B .factor-pill .to { position: absolute; top: -2px; width: 10px; height: 10px; border-radius: 50%; background: var(--teal); border: 2px solid white; }
+.B .factor-pill .nums { font-size: 11px; font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 600; }
+
+/* weight chart B */
+.B .chart-card { padding: 14px; }
+.B .chart-card .head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+.B .chart-card .h-l .eye { margin-bottom: 0; }
+.B .chart-card .h-l .h { font-size: 13px; font-weight: 600; }
+.B .chart-card .h-r .v { font-size: 22px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.B .chart-card .h-r .v small { font-size: 11px; color: var(--muted); font-weight: 500; }
+.B .chart-card .h-r .d { font-size: 11px; color: var(--success); font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.B .chart-card svg.chart { width: 100%; height: 120px; display: block; }
+
+/* cohort percentile */
+.B .cohort-card { padding: 16px; background: linear-gradient(135deg, var(--teal) 0%, var(--navy) 100%); color: white; }
+.B .cohort-card .eye { color: rgba(255,255,255,0.7); margin-bottom: 4px; }
+.B .cohort-card .big { font-size: 32px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.B .cohort-card .big small { font-size: 14px; opacity: 0.85; font-weight: 500; }
+.B .cohort-card .sub { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+.B .pctile-bar { height: 6px; background: rgba(255,255,255,0.2); border-radius: 999px; margin-top: 12px; position: relative; overflow: hidden; }
+.B .pctile-bar .fill { position: absolute; top: 0; bottom: 0; left: 0; width: 72%; background: white; border-radius: 999px; }
+.B .pctile-bar .marker { position: absolute; top: -3px; width: 12px; height: 12px; background: white; border-radius: 50%; left: calc(72% - 6px); border: 2px solid var(--teal); }
+.B .pctile-labels { display: flex; justify-content: space-between; font-size: 9px; opacity: 0.7; margin-top: 4px; }
+
+/* cost B */
+.B .cost-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.B .cost-row { display: grid; grid-template-columns: 80px 1fr auto; gap: 8px; align-items: center; }
+.B .cost-row .name { font-size: 12px; font-weight: 600; }
+.B .cost-row .bar-wrap { height: 8px; background: var(--border-soft); border-radius: 999px; position: relative; }
+.B .cost-row .bar-cohort { position: absolute; top: 0; bottom: 0; left: 0; background: var(--subtle); border-radius: 999px; }
+.B .cost-row .bar-you { position: absolute; top: 0; bottom: 0; left: 0; background: var(--success); border-radius: 999px; }
+.B .cost-row .nums { font-size: 11px; font-weight: 600; color: var(--success); font-variant-numeric: tabular-nums; }
+
+/* side-effects B (donuts) */
+.B .se-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px; }
+.B .se-cell { text-align: center; padding: 10px 6px; border: 1px solid var(--border); border-radius: 10px; }
+.B .se-cell .name { font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+.B .se-cell .donut { position: relative; width: 56px; height: 56px; margin: 0 auto; }
+.B .se-cell .donut svg { transform: rotate(-90deg); width: 56px; height: 56px; }
+.B .se-cell .donut .num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.B .se-cell .trend { font-size: 10px; font-weight: 600; margin-top: 4px; }
+.B .se-cell .trend.dn { color: var(--success); }
+.B .se-cell .trend.up { color: var(--warning); }
+
+/* heatmap B */
+.B .heatmap-row { display: flex; gap: 4px; align-items: center; margin-top: 8px; }
+.B .heatmap-row .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; flex: 1; }
+.B .heatmap-row .cell { aspect-ratio: 1; border-radius: 2px; background: var(--border-soft); }
+.B .heatmap-row .cell.l1 { background: #c5dce6; }
+.B .heatmap-row .cell.l2 { background: #7fa9c0; }
+.B .heatmap-row .cell.l3 { background: var(--teal); }
+.B .heatmap-row .week-lbl { font-size: 9px; color: var(--muted); width: 24px; text-align: right; }
+
+/* feed B */
+.B .timeline { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.B .tl-item { display: flex; gap: 10px; }
+.B .tl-item .when { width: 40px; flex-shrink: 0; font-size: 10px; color: var(--muted); padding-top: 2px; text-align: right; }
+.B .tl-item .ico { width: 24px; height: 24px; border-radius: 50%; background: var(--tint); display: flex; align-items: center; justify-content: center; color: var(--teal); flex-shrink: 0; position: relative; }
+.B .tl-item .ico::before { content: ''; position: absolute; top: 24px; left: 50%; width: 1px; height: 30px; background: var(--border); }
+.B .tl-item:last-child .ico::before { display: none; }
+.B .tl-item.warn .ico { background: var(--warning-bg); color: var(--warning); }
+.B .tl-item.ok .ico { background: var(--success-bg); color: var(--success); }
+.B .tl-item .text { flex: 1; }
+.B .tl-item .h { font-size: 12px; font-weight: 600; color: var(--ink); }
+.B .tl-item .sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="eyebrow">Trial Weave dashboard</div>
+  <h1>Two layouts to <span class="accent">compare</span></h1>
+  <p class="subhead">Both render in a 390px iPhone frame, both use the same Lokahi tokens, and both match the Flutter widget hierarchy. Tap the dose button, switch tabs, hover the chart — they're live.</p>
+
+  <div class="phones">
+
+    <!-- ───────────────────────────────────────────────────────────────── -->
+    <!-- LAYOUT A — Stacked                                                -->
+    <!-- ───────────────────────────────────────────────────────────────── -->
+    <div class="phone-col">
+      <div class="phone-label">Layout A<strong>Stacked · scroll-everything</strong></div>
+      <div class="phone">
+        <div class="screen A">
+          <div class="screen-scroll">
+            <div class="status-bar">
+              <span>9:41</span>
+              <span class="icons">
+                <svg viewBox="0 0 16 12" fill="currentColor"><path d="M1 8h2v3H1V8zm4-2h2v5H5V6zm4-2h2v7H9V4zm4-2h2v9h-2V2z"/></svg>
+                <svg viewBox="0 0 16 12" fill="currentColor"><path d="M8 3a8 8 0 015.66 2.34l-1.41 1.41a6 6 0 00-8.5 0L2.34 5.34A8 8 0 018 3zm0 4a4 4 0 012.83 1.17l-1.41 1.41a2 2 0 00-2.83 0l-1.41-1.41A4 4 0 018 7z"/></svg>
+                <svg viewBox="0 0 24 12" fill="none" stroke="currentColor"><rect x="1" y="2" width="20" height="8" rx="1.5"/><rect x="2" y="3" width="17" height="6" rx="0.5" fill="currentColor"/><rect x="22" y="4.5" width="1.5" height="3" rx="0.5" fill="currentColor"/></svg>
+              </span>
+            </div>
+
+            <div class="top">
+              <div class="top-row">
+                <div class="logo">Trial Weave<small>Lōkahi · GLP-1</small></div>
+                <div style="display:flex;gap:6px">
+                  <button class="icon-btn" aria-label="Notifications"><i data-lucide="bell"></i><span class="dot"></span></button>
+                  <button class="avatar-btn" aria-label="Profile"><i data-lucide="user"></i></button>
+                </div>
+              </div>
+              <div class="greet-eye">Day 94 · Mounjaro</div>
+              <div class="greet-h1">Good morning, Alex</div>
+            </div>
+
+            <div class="stack">
+
+              <!-- regimen -->
+              <div class="card-base regimen">
+                <div class="section-eyebrow">Current regimen</div>
+                <div class="row1">
+                  <div>
+                    <div class="name">Mounjaro 5 mg</div>
+                    <div class="gen">tirzepatide · weekly</div>
+                  </div>
+                  <div class="ico"><i data-lucide="syringe"></i></div>
+                </div>
+                <div class="meta-grid">
+                  <div><div class="lbl">Days</div><div class="val">94</div></div>
+                  <div><div class="lbl">Weight Δ</div><div class="val" style="color:var(--success)">−14.2 lb</div></div>
+                  <div><div class="lbl">Next dose</div><div class="val hl">Tue 8am</div></div>
+                </div>
+              </div>
+
+              <!-- 1-tap dose -->
+              <button id="A-dose" class="tap-dose">
+                <div class="ico"><i data-lucide="syringe"></i></div>
+                <div class="text">
+                  <div class="eye">Today's dose</div>
+                  <div class="lbl">Mark dose as taken</div>
+                </div>
+                <span class="badge">1 tap</span>
+              </button>
+
+              <!-- cohort cta -->
+              <button class="cohort-cta">
+                <div class="ico"><i data-lucide="users"></i></div>
+                <div class="text">
+                  <div class="eye">Cohort comparison</div>
+                  <div class="h">You're in the top 28% of people like you</div>
+                  <div class="sub">See how your results compare · 1,247 people</div>
+                </div>
+                <i data-lucide="arrow-up-right" style="opacity:0.8"></i>
+              </button>
+
+              <!-- adherence -->
+              <div class="card-base adh">
+                <div class="head">
+                  <div>
+                    <div class="section-eyebrow">Adherence · 30 days</div>
+                    <div class="section-title">Doses on schedule</div>
+                  </div>
+                  <div class="section-meta">92%</div>
+                </div>
+                <div class="ring-row">
+                  <div class="ring">
+                    <svg>
+                      <circle cx="40" cy="40" r="34" stroke="#E5E7EB" stroke-width="6" fill="none"/>
+                      <circle cx="40" cy="40" r="34" stroke="#234a67" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="196.47 213.55"/>
+                    </svg>
+                    <div class="num">92%</div>
+                  </div>
+                  <div>
+                    <div class="meta">11 of 12 doses taken</div>
+                    <div class="sub">Cohort median: <span class="tabular">84%</span> · you're <span class="pos">+8 pts</span></div>
+                  </div>
+                </div>
+                <div class="streak-row">
+                  <div class="streak-pill">
+                    <i data-lucide="flame" style="color:var(--flame-mid);width:14px;height:14px" fill="#F97316"></i>
+                    <span class="num">14</span>
+                    <span class="lbl">day streak</span>
+                  </div>
+                  <div class="longest">Longest: <strong style="color:var(--ink)" class="tabular">21</strong> days</div>
+                </div>
+              </div>
+
+              <!-- quick actions -->
+              <div class="card-base">
+                <div class="section-eyebrow">Log activity</div>
+                <div class="section-title">Quick actions</div>
+                <div class="qa-grid">
+                  <button class="qa primary"><i data-lucide="syringe"></i><span class="lbl">Log dose</span></button>
+                  <button class="qa"><i data-lucide="alert-circle"></i><span class="lbl">Side effect</span></button>
+                  <button class="qa"><i data-lucide="dollar-sign"></i><span class="lbl">Cost</span></button>
+                  <button class="qa"><i data-lucide="scale"></i><span class="lbl">Weight</span></button>
+                </div>
+              </div>
+
+              <!-- baseline shifts -->
+              <div class="card-base">
+                <div class="section-eyebrow">Baseline → now</div>
+                <div class="section-title">Shifts since week 1</div>
+                <div class="baseline-grid">
+                  <div class="b-cell"><div class="lbl">Energy</div><div class="row"><span class="from">2</span>→<span class="to">4</span></div></div>
+                  <div class="b-cell"><div class="lbl">Mood</div><div class="row"><span class="from">3</span>→<span class="to">4</span></div></div>
+                  <div class="b-cell"><div class="lbl">Sleep</div><div class="row"><span class="from">3</span>→<span class="to">4</span></div></div>
+                  <div class="b-cell"><div class="lbl">Appetite</div><div class="row"><span class="from">5</span>→<span class="to">3</span></div></div>
+                  <div class="b-cell"><div class="lbl">Activity</div><div class="row"><span class="from">2</span>→<span class="to">3</span></div></div>
+                  <div class="b-cell"><div class="lbl">Stomach</div><div class="row"><span class="from">4</span>→<span class="to">3</span></div></div>
+                </div>
+              </div>
+
+              <!-- weight chart -->
+              <div class="card-base weight">
+                <div class="head">
+                  <div class="h-l">
+                    <div class="section-eyebrow">Weight trend</div>
+                    <div class="h">Since starting Mounjaro</div>
+                  </div>
+                  <div class="h-r">
+                    <div class="big">172.1<small> lb</small></div>
+                    <div class="delta">−14.2 lb</div>
+                  </div>
+                </div>
+                <svg class="chart" id="A-chart" viewBox="0 0 358 140" preserveAspectRatio="none"></svg>
+              </div>
+
+              <!-- side effects 90d -->
+              <div class="card-base">
+                <div class="section-eyebrow">Side effects · 90 days</div>
+                <div class="section-title">Trends</div>
+                <div class="se-list">
+                  <div class="se-row"><div class="name">Nausea</div><div class="count">12×</div><div class="trend dn">↓ 40%</div></div>
+                  <div class="se-row"><div class="name">Fatigue</div><div class="count">8×</div><div class="trend up">↑ 15%</div></div>
+                  <div class="se-row"><div class="name">Dizziness</div><div class="count">5×</div><div class="trend dn">↓ 10%</div></div>
+                </div>
+              </div>
+
+              <!-- cost -->
+              <div class="card-base">
+                <div class="section-eyebrow">Cost · this month</div>
+                <div class="section-title">You vs. cohort</div>
+                <div style="margin-top:6px">
+                  <div class="cost-row">
+                    <div class="name">Mounjaro</div>
+                    <div class="cohort">Median $62</div>
+                    <div class="you">$45</div>
+                    <div class="savings">−$17</div>
+                  </div>
+                  <div class="cost-row">
+                    <div class="name">All categories</div>
+                    <div class="cohort">Median $158</div>
+                    <div class="you">$92</div>
+                    <div class="savings">−$66</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- check-in feed -->
+              <div class="card-base">
+                <div class="section-eyebrow">Recent check-ins</div>
+                <div class="section-title">Last 7 days</div>
+                <div style="margin-top:6px">
+                  <div class="feed-item">
+                    <div class="ico"><i data-lucide="syringe" style="width:14px;height:14px"></i></div>
+                    <div class="text">
+                      <div class="h">Dose logged · 5 mg</div>
+                      <div class="sub">No side effects reported</div>
+                    </div>
+                    <div class="when">2d</div>
+                  </div>
+                  <div class="feed-item">
+                    <div class="ico ok"><i data-lucide="scale" style="width:14px;height:14px"></i></div>
+                    <div class="text">
+                      <div class="h">Weight 172.1 lb</div>
+                      <div class="sub">−1.0 lb from last week</div>
+                    </div>
+                    <div class="when">3d</div>
+                  </div>
+                  <div class="feed-item">
+                    <div class="ico warn"><i data-lucide="alert-circle" style="width:14px;height:14px"></i></div>
+                    <div class="text">
+                      <div class="h">Mild nausea, severity 2</div>
+                      <div class="sub">Resolved within 4 hours</div>
+                    </div>
+                    <div class="when">4d</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- heatmap -->
+              <div class="card-base">
+                <div class="section-eyebrow">Adherence calendar · 13 weeks</div>
+                <div class="section-title">Daily check-ins</div>
+                <div class="heatmap" id="A-heat"></div>
+                <div class="heatmap-legend">
+                  <span>Less</span>
+                  <span class="scale">
+                    <span style="background:var(--border-soft)"></span>
+                    <span style="background:#c5dce6"></span>
+                    <span style="background:#7fa9c0"></span>
+                    <span style="background:var(--teal)"></span>
+                  </span>
+                  <span>More</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="nav-bar">
+            <button class="nav-btn active"><i data-lucide="home" style="width:20px;height:20px"></i><span class="lbl">Home</span></button>
+            <button class="nav-btn"><i data-lucide="trending-up" style="width:20px;height:20px"></i><span class="lbl">Progress</span></button>
+            <button class="nav-btn"><i data-lucide="plus-circle" style="width:24px;height:24px;color:var(--teal)"></i><span class="lbl" style="color:var(--teal)">Log</span></button>
+            <button class="nav-btn"><i data-lucide="users" style="width:20px;height:20px"></i><span class="lbl">Cohort</span></button>
+            <button class="nav-btn"><i data-lucide="user" style="width:20px;height:20px"></i><span class="lbl">You</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ───────────────────────────────────────────────────────────────── -->
+    <!-- LAYOUT B — Tabbed condensed                                       -->
+    <!-- ───────────────────────────────────────────────────────────────── -->
+    <div class="phone-col">
+      <div class="phone-label">Layout B<strong>Tabbed · gradient hero</strong></div>
+      <div class="phone">
+        <div class="screen B">
+          <div class="screen-scroll">
+            <div class="status-bar" style="color:white">
+              <span>9:41</span>
+              <span class="icons">
+                <svg viewBox="0 0 16 12" fill="currentColor"><path d="M1 8h2v3H1V8zm4-2h2v5H5V6zm4-2h2v7H9V4zm4-2h2v9h-2V2z"/></svg>
+                <svg viewBox="0 0 16 12" fill="currentColor"><path d="M8 3a8 8 0 015.66 2.34l-1.41 1.41a6 6 0 00-8.5 0L2.34 5.34A8 8 0 018 3zm0 4a4 4 0 012.83 1.17l-1.41 1.41a2 2 0 00-2.83 0l-1.41-1.41A4 4 0 018 7z"/></svg>
+                <svg viewBox="0 0 24 12" fill="none" stroke="currentColor"><rect x="1" y="2" width="20" height="8" rx="1.5"/><rect x="2" y="3" width="17" height="6" rx="0.5" fill="currentColor"/><rect x="22" y="4.5" width="1.5" height="3" rx="0.5" fill="currentColor"/></svg>
+              </span>
+            </div>
+
+            <div class="top">
+              <div class="top-row">
+                <div class="logo">Trial Weave<small>Lōkahi · GLP-1</small></div>
+                <div class="top-icons">
+                  <button class="icon-btn"><i data-lucide="bell" style="width:18px;height:18px"></i><span class="dot"></span></button>
+                  <button class="icon-btn"><i data-lucide="user" style="width:18px;height:18px"></i></button>
+                </div>
+              </div>
+              <div class="greet-eye">Day 94 · Mounjaro</div>
+              <div class="greet-h">Good morning, Alex</div>
+              <div class="greet-sub">Tuesday, March 31 · Next dose in 4h 22m</div>
+
+              <div class="hero">
+                <div class="hero-ring">
+                  <svg>
+                    <circle cx="32" cy="32" r="26" stroke="rgba(255,255,255,0.2)" stroke-width="5" fill="none"/>
+                    <circle cx="32" cy="32" r="26" stroke="white" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="150.3 163.36"/>
+                  </svg>
+                  <div class="num"><span>92%</span><span class="lbl">adhere</span></div>
+                </div>
+                <div class="hero-text">
+                  <div class="h">11 of 12 doses on schedule</div>
+                  <div class="sub">+8 pts above cohort median (84%)</div>
+                  <div class="streak">
+                    <i data-lucide="flame" style="width:12px;height:12px" fill="#F97316"></i>
+                    <span>14-day streak · longest 21d</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- metric strip -->
+            <div class="metric-strip">
+              <div class="metric">
+                <div class="lbl">Weight</div>
+                <div class="val">172.1<small>lb</small></div>
+                <div class="delta">−14.2</div>
+              </div>
+              <div class="metric">
+                <div class="lbl">Cohort %</div>
+                <div class="val">72</div>
+                <div class="delta">top 28%</div>
+              </div>
+              <div class="metric">
+                <div class="lbl">Side fx</div>
+                <div class="val">3</div>
+                <div class="delta">↓ 30%</div>
+              </div>
+              <div class="metric">
+                <div class="lbl">Cost / mo</div>
+                <div class="val">$45</div>
+                <div class="delta">−$17</div>
+              </div>
+            </div>
+
+            <!-- segment tabs -->
+            <div class="seg-tabs" id="B-tabs">
+              <button data-seg="today" class="active">Today</button>
+              <button data-seg="trends">Trends</button>
+              <button data-seg="cohort">Cohort</button>
+            </div>
+
+            <div class="seg-content">
+
+              <!-- TODAY pane -->
+              <div class="seg-pane active" data-pane="today">
+
+                <button id="B-dose" class="dose-card">
+                  <div class="ico"><i data-lucide="syringe"></i></div>
+                  <div class="text">
+                    <div class="name">Mounjaro 5 mg</div>
+                    <div class="sub">Weekly dose · due today</div>
+                  </div>
+                  <span class="badge">1 tap</span>
+                </button>
+
+                <div class="card-base">
+                  <div class="reg-row">
+                    <div class="ico"><i data-lucide="pill"></i></div>
+                    <div class="text">
+                      <div class="name">Current regimen</div>
+                      <div class="sub">Mounjaro 5 mg · tirzepatide · day 94</div>
+                    </div>
+                    <div class="next">Tue 8am</div>
+                  </div>
+                </div>
+
+                <div class="card-base">
+                  <div class="section-eyebrow">Quick log</div>
+                  <div class="qa-row">
+                    <button class="qa-btn"><i data-lucide="alert-circle" style="width:18px;height:18px"></i><span class="lbl">Side fx</span></button>
+                    <button class="qa-btn"><i data-lucide="scale" style="width:18px;height:18px"></i><span class="lbl">Weight</span></button>
+                    <button class="qa-btn"><i data-lucide="dollar-sign" style="width:18px;height:18px"></i><span class="lbl">Cost</span></button>
+                    <button class="qa-btn"><i data-lucide="refresh-cw" style="width:18px;height:18px"></i><span class="lbl">Switch</span></button>
+                  </div>
+                </div>
+
+                <div class="card-base">
+                  <div class="section-eyebrow">Recent activity</div>
+                  <div class="section-title">Last 7 days</div>
+                  <div class="timeline">
+                    <div class="tl-item">
+                      <div class="when">Today</div>
+                      <div class="ico"><i data-lucide="circle" style="width:10px;height:10px" fill="currentColor"></i></div>
+                      <div class="text"><div class="h">Dose due in 4h</div><div class="sub">Mounjaro 5 mg</div></div>
+                    </div>
+                    <div class="tl-item">
+                      <div class="when">2d</div>
+                      <div class="ico"><i data-lucide="syringe" style="width:12px;height:12px"></i></div>
+                      <div class="text"><div class="h">Logged dose</div><div class="sub">No side effects</div></div>
+                    </div>
+                    <div class="tl-item ok">
+                      <div class="when">3d</div>
+                      <div class="ico"><i data-lucide="scale" style="width:12px;height:12px"></i></div>
+                      <div class="text"><div class="h">Weight 172.1 lb</div><div class="sub">−1.0 lb from last week</div></div>
+                    </div>
+                    <div class="tl-item warn">
+                      <div class="when">4d</div>
+                      <div class="ico"><i data-lucide="alert-circle" style="width:12px;height:12px"></i></div>
+                      <div class="text"><div class="h">Mild nausea</div><div class="sub">Severity 2 · resolved</div></div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- TRENDS pane -->
+              <div class="seg-pane" data-pane="trends">
+
+                <div class="card-base chart-card">
+                  <div class="head">
+                    <div class="h-l">
+                      <div class="section-eyebrow">Weight · 14 wks</div>
+                      <div class="h">Since starting Mounjaro</div>
+                    </div>
+                    <div class="h-r">
+                      <div class="v">172.1<small> lb</small></div>
+                      <div class="d">−14.2 lb</div>
+                    </div>
+                  </div>
+                  <svg class="chart" id="B-chart" viewBox="0 0 358 120" preserveAspectRatio="none"></svg>
+                </div>
+
+                <div class="card-base">
+                  <div class="section-eyebrow">Baseline → now</div>
+                  <div class="section-title">Well-being shifts</div>
+                  <div class="factor-pills">
+                    <div class="factor-pill"><div class="lbl">Energy</div><div class="bar-wrap"><div class="from" style="left:25%"></div><div class="to" style="left:75%"></div></div><div class="nums">2→4</div></div>
+                    <div class="factor-pill"><div class="lbl">Mood</div><div class="bar-wrap"><div class="from" style="left:50%"></div><div class="to" style="left:75%"></div></div><div class="nums">3→4</div></div>
+                    <div class="factor-pill"><div class="lbl">Sleep</div><div class="bar-wrap"><div class="from" style="left:50%"></div><div class="to" style="left:75%"></div></div><div class="nums">3→4</div></div>
+                    <div class="factor-pill"><div class="lbl">Appetite</div><div class="bar-wrap"><div class="from" style="left:100%"></div><div class="to" style="left:50%"></div></div><div class="nums">5→3</div></div>
+                    <div class="factor-pill"><div class="lbl">Activity</div><div class="bar-wrap"><div class="from" style="left:25%"></div><div class="to" style="left:50%"></div></div><div class="nums">2→3</div></div>
+                    <div class="factor-pill"><div class="lbl">Stomach</div><div class="bar-wrap"><div class="from" style="left:75%"></div><div class="to" style="left:50%"></div></div><div class="nums">4→3</div></div>
+                  </div>
+                </div>
+
+                <div class="card-base">
+                  <div class="section-eyebrow">Side effects · 90d</div>
+                  <div class="section-title">Trending down</div>
+                  <div class="se-grid">
+                    <div class="se-cell">
+                      <div class="name">Nausea</div>
+                      <div class="donut">
+                        <svg><circle cx="28" cy="28" r="22" stroke="#F3F4F6" stroke-width="5" fill="none"/><circle cx="28" cy="28" r="22" stroke="var(--success)" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="55.3 138.23"/></svg>
+                        <div class="num">12</div>
+                      </div>
+                      <div class="trend dn">↓ 40%</div>
+                    </div>
+                    <div class="se-cell">
+                      <div class="name">Fatigue</div>
+                      <div class="donut">
+                        <svg><circle cx="28" cy="28" r="22" stroke="#F3F4F6" stroke-width="5" fill="none"/><circle cx="28" cy="28" r="22" stroke="var(--warning)" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="36.86 138.23"/></svg>
+                        <div class="num">8</div>
+                      </div>
+                      <div class="trend up">↑ 15%</div>
+                    </div>
+                    <div class="se-cell">
+                      <div class="name">Dizziness</div>
+                      <div class="donut">
+                        <svg><circle cx="28" cy="28" r="22" stroke="#F3F4F6" stroke-width="5" fill="none"/><circle cx="28" cy="28" r="22" stroke="var(--success)" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="23.04 138.23"/></svg>
+                        <div class="num">5</div>
+                      </div>
+                      <div class="trend dn">↓ 10%</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card-base">
+                  <div class="section-eyebrow">Adherence calendar · 6 wks</div>
+                  <div class="section-title">Daily doses</div>
+                  <div id="B-heat"></div>
+                </div>
+
+              </div>
+
+              <!-- COHORT pane -->
+              <div class="seg-pane" data-pane="cohort">
+
+                <div class="card-base cohort-card">
+                  <div class="eye section-eyebrow" style="color:rgba(255,255,255,0.7)">Cohort percentile</div>
+                  <div class="big">Top 28<small>%</small></div>
+                  <div class="sub">You're losing weight faster than 72% of similar people on Mounjaro · n=412</div>
+                  <div class="pctile-bar">
+                    <div class="fill"></div>
+                    <div class="marker"></div>
+                  </div>
+                  <div class="pctile-labels"><span>Slowest</span><span>Median</span><span>You</span><span>Fastest</span></div>
+                </div>
+
+                <div class="card-base">
+                  <div class="section-eyebrow">Weight loss by drug</div>
+                  <div class="section-title">12-week mean</div>
+                  <div class="cost-list" style="margin-top:10px">
+                    <div class="cost-row">
+                      <div class="name">Mounjaro</div>
+                      <div class="bar-wrap"><div class="bar-cohort" style="width:91%;background:var(--teal)"></div></div>
+                      <div class="nums" style="color:var(--ink)">18.2%</div>
+                    </div>
+                    <div class="cost-row">
+                      <div class="name">Zepbound</div>
+                      <div class="bar-wrap"><div class="bar-cohort" style="width:88%;background:var(--teal)"></div></div>
+                      <div class="nums" style="color:var(--ink)">17.6%</div>
+                    </div>
+                    <div class="cost-row">
+                      <div class="name">Wegovy</div>
+                      <div class="bar-wrap"><div class="bar-cohort" style="width:74%;background:var(--subtle)"></div></div>
+                      <div class="nums" style="color:var(--ink)">14.9%</div>
+                    </div>
+                    <div class="cost-row">
+                      <div class="name">Ozempic</div>
+                      <div class="bar-wrap"><div class="bar-cohort" style="width:62%;background:var(--subtle)"></div></div>
+                      <div class="nums" style="color:var(--ink)">12.4%</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card-base">
+                  <div class="section-eyebrow">Cost · monthly</div>
+                  <div class="section-title">You vs. cohort median</div>
+                  <div class="cost-list">
+                    <div class="cost-row">
+                      <div class="name">Mounjaro</div>
+                      <div class="bar-wrap"><div class="bar-cohort" style="width:62%"></div><div class="bar-you" style="width:45%"></div></div>
+                      <div class="nums">$45 · −$17</div>
+                    </div>
+                    <div class="cost-row">
+                      <div class="name">Zepbound</div>
+                      <div class="bar-wrap"><div class="bar-cohort" style="width:75%"></div></div>
+                      <div class="nums" style="color:var(--muted)">$75</div>
+                    </div>
+                    <div class="cost-row">
+                      <div class="name">Wegovy</div>
+                      <div class="bar-wrap"><div class="bar-cohort" style="width:85%"></div></div>
+                      <div class="nums" style="color:var(--muted)">$85</div>
+                    </div>
+                    <div class="cost-row">
+                      <div class="name">Ozempic</div>
+                      <div class="bar-wrap"><div class="bar-cohort" style="width:55%"></div></div>
+                      <div class="nums" style="color:var(--muted)">$55</div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+          <div class="nav-bar">
+            <button class="nav-btn active"><i data-lucide="home" style="width:20px;height:20px"></i><span class="lbl">Home</span></button>
+            <button class="nav-btn"><i data-lucide="trending-up" style="width:20px;height:20px"></i><span class="lbl">Progress</span></button>
+            <button class="nav-btn"><i data-lucide="plus-circle" style="width:24px;height:24px;color:var(--teal)"></i><span class="lbl" style="color:var(--teal)">Log</span></button>
+            <button class="nav-btn"><i data-lucide="users" style="width:20px;height:20px"></i><span class="lbl">Cohort</span></button>
+            <button class="nav-btn"><i data-lucide="user" style="width:20px;height:20px"></i><span class="lbl">You</span></button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="text-align:center;color:var(--muted);font-size:11px;margin-top:32px">
+    Both layouts share theme tokens with <code style="color:var(--teal)">flutter_app/lib/theme/app_theme.dart</code> · the Flutter widget tree maps 1:1 to these card structures.
+  </div>
+</div>
+
+<script>
+const WEIGHTS = [185.0, 183.6, 182.1, 181.4, 180.2, 179.5, 178.3, 177.1, 176.4, 175.8, 175.2, 174.4, 173.0, 172.1];
+
+function buildChart(svgId, w, h) {
+  const svg = document.getElementById(svgId);
+  if (!svg) return;
+  const padX = 8, padY = 12;
+  const data = WEIGHTS;
+  const min = Math.min(...data) - 1, max = Math.max(...data) + 1;
+  const xs = data.map((_, i) => padX + (i * (w - 2 * padX)) / (data.length - 1));
+  const ys = data.map(v => padY + (h - 2 * padY) * (1 - (v - min) / (max - min)));
+
+  // smooth path
+  const cmds = ['M ' + xs[0] + ' ' + ys[0]];
+  for (let i = 1; i < xs.length; i++) {
+    const cx = (xs[i - 1] + xs[i]) / 2;
+    cmds.push('Q ' + xs[i - 1] + ' ' + ys[i - 1] + ' ' + cx + ' ' + ((ys[i - 1] + ys[i]) / 2));
+    cmds.push('T ' + xs[i] + ' ' + ys[i]);
+  }
+  const linePath = cmds.join(' ');
+  const fillPath = linePath + ` L ${xs[xs.length - 1]} ${h - padY} L ${xs[0]} ${h - padY} Z`;
+
+  // gridlines
+  let grid = '';
+  for (let i = 1; i <= 3; i++) {
+    const y = padY + ((h - 2 * padY) * i) / 4;
+    grid += `<line x1="${padX}" y1="${y}" x2="${w - padX}" y2="${y}" stroke="#F3F4F6" stroke-width="1"/>`;
+  }
+
+  // dots only at endpoints
+  const dots = `
+    <circle cx="${xs[0]}" cy="${ys[0]}" r="3" fill="white" stroke="#234a67" stroke-width="2"/>
+    <circle cx="${xs[xs.length-1]}" cy="${ys[ys.length-1]}" r="4" fill="#234a67"/>
+  `;
+
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="${svgId}-fill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#234a67" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="#234a67" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    ${grid}
+    <path d="${fillPath}" fill="url(#${svgId}-fill)"/>
+    <path d="${linePath}" fill="none" stroke="#234a67" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    ${dots}
+  `;
+}
+buildChart('A-chart', 358, 140);
+buildChart('B-chart', 358, 120);
+
+// heatmap A — 13 wks * 7 days = 91 cells
+function buildHeatmapA() {
+  const heat = document.getElementById('A-heat');
+  // we render 13 columns of 7 (week-rows), so flat array of 91 by column-major
+  const cells = [];
+  for (let i = 0; i < 91; i++) {
+    const r = Math.random();
+    let cls = '';
+    if (r > 0.92) cls = '';            // missed
+    else if (r > 0.7) cls = 'l1';
+    else if (r > 0.4) cls = 'l2';
+    else cls = 'l3';
+    if (i > 88) cls = '';               // future
+    cells.push(`<div class="cell ${cls}"></div>`);
+  }
+  heat.innerHTML = cells.join('');
+}
+buildHeatmapA();
+
+// heatmap B — 6 weeks * 7 days, each row is a week
+function buildHeatmapB() {
+  const root = document.getElementById('B-heat');
+  let html = '';
+  const labels = ['W1','W2','W3','W4','W5','W6'];
+  for (let w = 0; w < 6; w++) {
+    let cells = '';
+    for (let d = 0; d < 7; d++) {
+      const r = Math.random();
+      let cls = '';
+      if (w === 5 && d > 1) cls = '';
+      else if (r > 0.92) cls = '';
+      else if (r > 0.7) cls = 'l1';
+      else if (r > 0.4) cls = 'l2';
+      else cls = 'l3';
+      cells += `<div class="cell ${cls}"></div>`;
+    }
+    html += `<div class="heatmap-row"><span class="week-lbl">${labels[w]}</span><div class="grid">${cells}</div></div>`;
+  }
+  root.innerHTML = html;
+}
+buildHeatmapB();
+
+// dose tap A
+document.getElementById('A-dose').addEventListener('click', e => {
+  const btn = e.currentTarget;
+  if (btn.classList.contains('tap-dose-done')) return;
+  btn.classList.remove('tap-dose');
+  btn.classList.add('tap-dose-done');
+  btn.innerHTML = `
+    <div class="ico"><i data-lucide="check" stroke-width="3"></i></div>
+    <div class="text">
+      <div class="eye">Logged just now</div>
+      <div class="lbl">Dose taken — tap Log dose to add details</div>
+    </div>
+  `;
+  lucide.createIcons();
+});
+
+// dose tap B
+document.getElementById('B-dose').addEventListener('click', e => {
+  const btn = e.currentTarget;
+  if (btn.classList.contains('done')) return;
+  btn.classList.add('done');
+  btn.innerHTML = `
+    <div class="ico"><i data-lucide="check" stroke-width="3"></i></div>
+    <div class="text">
+      <div class="name">Logged just now</div>
+      <div class="sub">Mounjaro 5 mg · weekly · day 94</div>
+    </div>
+  `;
+  lucide.createIcons();
+});
+
+// segment tabs B
+document.querySelectorAll('#B-tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#B-tabs button').forEach(b => b.classList.toggle('active', b === btn));
+    document.querySelectorAll('.B [data-pane]').forEach(p => p.classList.toggle('active', p.dataset.pane === btn.dataset.seg));
+  });
+});
+
+lucide.createIcons();
+</script>
+</body>
+</html>

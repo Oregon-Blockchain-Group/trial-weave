@@ -89,6 +89,7 @@ hs_err_pid*.log
 # Build / caches — anywhere
 # ------------------------------------------------------------------------------
 build/
+dist/
 .dart_tool/
 .generated/
 coverage/

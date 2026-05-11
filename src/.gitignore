@@ -110,9 +110,11 @@ coverage/
 # ------------------------------------------------------------------------------
 # Secrets, env, config — NEVER commit
 # ------------------------------------------------------------------------------
+# Inline comments break the pattern — keep these clean.
 .env
 .env.*
-!.env.example          # Safe example template — DO commit
+# Safe example templates — DO commit
+!.env.example
 !.env.sample
 secrets/
 *.pem
