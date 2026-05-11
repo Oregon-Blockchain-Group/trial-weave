@@ -4,6 +4,8 @@ class Profile {
     this.age,
     this.sex,
     this.raceEthnicity,
+    this.races = const [],
+    this.otherConditions = const [],
     this.city,
     this.state,
     this.heightFeet,
@@ -15,6 +17,8 @@ class Profile {
   final int? age;
   final String? sex;
   final String? raceEthnicity;
+  final List<String> races;
+  final List<String> otherConditions;
   final String? city;
   final String? state;
   final int? heightFeet;
@@ -26,6 +30,9 @@ class Profile {
     age: json['age'] as int?,
     sex: json['sex'] as String?,
     raceEthnicity: json['race_ethnicity'] as String?,
+    races: (json['races'] as List?)?.cast<String>() ?? const [],
+    otherConditions:
+        (json['other_conditions'] as List?)?.cast<String>() ?? const [],
     city: json['city'] as String?,
     state: json['state'] as String?,
     heightFeet: json['height_feet'] as int?,
@@ -38,6 +45,8 @@ class Profile {
     'age': age,
     'sex': sex,
     'race_ethnicity': raceEthnicity,
+    'races': races,
+    'other_conditions': otherConditions,
     'city': city,
     'state': state,
     'height_feet': heightFeet,

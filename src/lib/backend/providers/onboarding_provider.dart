@@ -23,10 +23,13 @@ class OnboardingState {
     this.indication,
     this.priorGlp1,
     this.supply,
+    this.startedAt,
     // demographics
     this.age,
     this.sex,
     this.raceEthnicity,
+    this.races = const [],
+    this.otherConditions = const [],
     this.city,
     this.stateRegion,
     this.heightFeet,
@@ -34,9 +37,13 @@ class OnboardingState {
     this.startingWeightLb,
     // baseline
     this.baselineRatings = const {},
-    // consent
-    this.consentResearch = false,
-    this.consentCohortShare = false,
+    // consent — required (must all be true to advance)
+    this.consentTerms = false,
+    this.consentPrivacy = false,
+    this.consentHipaa = false,
+    // consent — optional
+    this.consentResearch = true,
+    this.consentSell = false,
     this.consentMarketing = false,
     // commit result
     this.committedRegimen,
@@ -49,11 +56,14 @@ class OnboardingState {
   final String? indication; // weight | t2d | both
   final String? priorGlp1; // naive | switched | restarted
   final String? supply; // branded | compounded
+  final DateTime? startedAt;
 
   // demographics
   final int? age;
   final String? sex;
   final String? raceEthnicity;
+  final List<String> races;
+  final List<String> otherConditions;
   final String? city;
   final String? stateRegion;
   final int? heightFeet;
@@ -63,9 +73,13 @@ class OnboardingState {
   // baseline (key -> 1-5 rating)
   final Map<String, int> baselineRatings;
 
-  // consent
+  // consent — required
+  final bool consentTerms;
+  final bool consentPrivacy;
+  final bool consentHipaa;
+  // consent — optional
   final bool consentResearch;
-  final bool consentCohortShare;
+  final bool consentSell;
   final bool consentMarketing;
 
   /// Set after a successful commit so the Activation Gate knows which
@@ -79,17 +93,23 @@ class OnboardingState {
     String? indication,
     String? priorGlp1,
     String? supply,
+    DateTime? startedAt,
     int? age,
     String? sex,
     String? raceEthnicity,
+    List<String>? races,
+    List<String>? otherConditions,
     String? city,
     String? stateRegion,
     int? heightFeet,
     int? heightInches,
     double? startingWeightLb,
     Map<String, int>? baselineRatings,
+    bool? consentTerms,
+    bool? consentPrivacy,
+    bool? consentHipaa,
     bool? consentResearch,
-    bool? consentCohortShare,
+    bool? consentSell,
     bool? consentMarketing,
     Regimen? committedRegimen,
   }) {
@@ -100,17 +120,23 @@ class OnboardingState {
       indication: indication ?? this.indication,
       priorGlp1: priorGlp1 ?? this.priorGlp1,
       supply: supply ?? this.supply,
+      startedAt: startedAt ?? this.startedAt,
       age: age ?? this.age,
       sex: sex ?? this.sex,
       raceEthnicity: raceEthnicity ?? this.raceEthnicity,
+      races: races ?? this.races,
+      otherConditions: otherConditions ?? this.otherConditions,
       city: city ?? this.city,
       stateRegion: stateRegion ?? this.stateRegion,
       heightFeet: heightFeet ?? this.heightFeet,
       heightInches: heightInches ?? this.heightInches,
       startingWeightLb: startingWeightLb ?? this.startingWeightLb,
       baselineRatings: baselineRatings ?? this.baselineRatings,
+      consentTerms: consentTerms ?? this.consentTerms,
+      consentPrivacy: consentPrivacy ?? this.consentPrivacy,
+      consentHipaa: consentHipaa ?? this.consentHipaa,
       consentResearch: consentResearch ?? this.consentResearch,
-      consentCohortShare: consentCohortShare ?? this.consentCohortShare,
+      consentSell: consentSell ?? this.consentSell,
       consentMarketing: consentMarketing ?? this.consentMarketing,
       committedRegimen: committedRegimen ?? this.committedRegimen,
     );
@@ -128,6 +154,7 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
     required String indication,
     required String priorGlp1,
     required String supply,
+    required DateTime startedAt,
   }) {
     state = state.copyWith(
       drug: drug,
@@ -136,15 +163,15 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
       indication: indication,
       priorGlp1: priorGlp1,
       supply: supply,
+      startedAt: startedAt,
     );
   }
 
   void setDemographics({
     required int age,
     required String sex,
-    required String raceEthnicity,
-    String? city,
-    String? stateRegion,
+    required List<String> races,
+    required List<String> otherConditions,
     required int heightFeet,
     required int heightInches,
     required double startingWeightLb,
@@ -152,9 +179,11 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
     state = state.copyWith(
       age: age,
       sex: sex,
-      raceEthnicity: raceEthnicity,
-      city: city,
-      stateRegion: stateRegion,
+      races: races,
+      otherConditions: otherConditions,
+      // For backward compat with cohort_outcomes RPC (filters on a single
+      // race_ethnicity string), persist the first selected race.
+      raceEthnicity: races.isNotEmpty ? races.first : null,
       heightFeet: heightFeet,
       heightInches: heightInches,
       startingWeightLb: startingWeightLb,
@@ -168,13 +197,19 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
   }
 
   void setConsent({
+    required bool terms,
+    required bool privacy,
+    required bool hipaa,
     required bool research,
-    required bool cohortShare,
+    required bool sell,
     required bool marketing,
   }) {
     state = state.copyWith(
+      consentTerms: terms,
+      consentPrivacy: privacy,
+      consentHipaa: hipaa,
       consentResearch: research,
-      consentCohortShare: cohortShare,
+      consentSell: sell,
       consentMarketing: marketing,
     );
   }
@@ -198,6 +233,8 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
       age: s.age,
       sex: s.sex,
       raceEthnicity: s.raceEthnicity,
+      races: s.races,
+      otherConditions: s.otherConditions,
       city: s.city,
       state: s.stateRegion,
       heightFeet: s.heightFeet,
@@ -217,6 +254,7 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
           indication: s.indication,
           priorGlp1: s.priorGlp1,
           supply: s.supply,
+          startedAt: s.startedAt,
         );
 
     await ref
@@ -228,8 +266,11 @@ class OnboardingNotifier extends Notifier<OnboardingState> {
         .insert(
           version: kConsentVersion,
           grants: {
+            'terms': s.consentTerms,
+            'privacy': s.consentPrivacy,
+            'hipaa': s.consentHipaa,
             'research': s.consentResearch,
-            'cohort_share': s.consentCohortShare,
+            'sell': s.consentSell,
             'marketing': s.consentMarketing,
           },
         );

@@ -16,8 +16,8 @@ import '../frontend/screens/logging/log_dose_screen.dart';
 import '../frontend/screens/logging/log_weight_screen.dart';
 import '../frontend/screens/logging/post_dose_check_in_screen.dart';
 import '../frontend/screens/logging/side_effect_check_in_screen.dart';
-import '../frontend/screens/onboarding/activation_gate_screen.dart';
 import '../frontend/screens/onboarding/baseline_screen.dart';
+import '../frontend/screens/onboarding/complete_screen.dart';
 import '../frontend/screens/onboarding/consent_screen.dart';
 import '../frontend/screens/onboarding/demographics_screen.dart';
 import '../frontend/screens/onboarding/medication_screen.dart';
@@ -107,16 +107,16 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       if (!hasProfile) {
         // Confirmed: no profile row yet → must complete onboarding.
-        return isOnboardingRoute ? null : '/onboarding/medication';
+        return isOnboardingRoute ? null : '/onboarding/demographics';
       }
 
       // Onboarded user. Auth routes funnel to /home. Onboarding routes do
-      // too, EXCEPT /onboarding/activation-gate — that one is the final
-      // onboarding step and runs *after* the consent commit writes the
-      // profile, so the user must remain reachable there to log their
-      // first dose.
+      // too, EXCEPT /onboarding/complete — that one is the final onboarding
+      // step and runs *after* the consent commit writes the profile, so
+      // the user must remain reachable there to see their cohort match
+      // before going to the dashboard.
       if (isAuthRoute) return '/home';
-      if (isOnboardingRoute && loc != '/onboarding/activation-gate') {
+      if (isOnboardingRoute && loc != '/onboarding/complete') {
         return '/home';
       }
       return null;
@@ -143,8 +143,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, _) => const ConsentScreen(),
       ),
       GoRoute(
-        path: '/onboarding/activation-gate',
-        builder: (_, _) => const ActivationGateScreen(),
+        path: '/onboarding/complete',
+        builder: (_, _) => const CompleteScreen(),
       ),
       GoRoute(path: '/log/dose', builder: (_, _) => const LogDoseScreen()),
       GoRoute(path: '/log/weight', builder: (_, _) => const LogWeightScreen()),

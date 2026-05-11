@@ -1,10 +1,49 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../backend/providers/onboarding_provider.dart';
-import '../../../core/theme.dart';
-import '../../components/onboarding/step_indicator.dart';
+import '../../components/onboarding/continue_bar.dart';
+import '../../components/onboarding/onboarding_inputs.dart';
+import '../../components/onboarding/onboarding_theme.dart';
+import '../../components/onboarding/progress_bar.dart';
+
+const _genderOptions = <_Option>[
+  _Option(value: 'female', label: 'Female'),
+  _Option(value: 'male', label: 'Male'),
+  _Option(value: 'other', label: 'Other'),
+  _Option(value: 'prefer_not_to_say', label: 'Prefer not to say'),
+];
+
+const _raceOptions = <String>[
+  'American Indian or Alaska Native',
+  'Asian',
+  'Black or African American',
+  'Hispanic or Latino',
+  'Middle Eastern or North African',
+  'Native Hawaiian or Pacific Islander',
+  'White',
+  'Other',
+  'Prefer not to say',
+];
+
+const _comorbidities = <String>[
+  'Type 2 diabetes',
+  'PCOS',
+  'Hypertension',
+  'Cardiovascular disease',
+  'GI / IBS history',
+  'Pancreatitis history',
+  'Thyroid disease',
+  'None',
+];
+
+class _Option {
+  const _Option({required this.value, required this.label});
+  final String value;
+  final String label;
+}
 
 class DemographicsScreen extends ConsumerStatefulWidget {
   const DemographicsScreen({super.key});
@@ -14,241 +53,256 @@ class DemographicsScreen extends ConsumerStatefulWidget {
 }
 
 class _DemographicsScreenState extends ConsumerState<DemographicsScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _age = TextEditingController();
-  final _city = TextEditingController();
-  final _state = TextEditingController();
-  final _heightFt = TextEditingController();
-  final _heightIn = TextEditingController();
-  final _weight = TextEditingController();
-  String? _sex;
-  String? _race;
+  final _ageController = TextEditingController();
+  final _heightFtController = TextEditingController();
+  final _heightInController = TextEditingController();
+  final _weightController = TextEditingController();
+
+  String _sex = '';
+  List<String> _races = [];
+  List<String> _otherConditions = [];
 
   @override
   void initState() {
     super.initState();
     final s = ref.read(onboardingProvider);
-    if (s.age != null) _age.text = '${s.age}';
-    if (s.city != null) _city.text = s.city!;
-    if (s.stateRegion != null) _state.text = s.stateRegion!;
-    if (s.heightFeet != null) _heightFt.text = '${s.heightFeet}';
-    if (s.heightInches != null) _heightIn.text = '${s.heightInches}';
-    if (s.startingWeightLb != null) _weight.text = '${s.startingWeightLb}';
-    _sex = s.sex;
-    _race = s.raceEthnicity;
+    if (s.age != null) _ageController.text = '${s.age}';
+    if (s.heightFeet != null) _heightFtController.text = '${s.heightFeet}';
+    if (s.heightInches != null) _heightInController.text = '${s.heightInches}';
+    if (s.startingWeightLb != null) {
+      _weightController.text = '${s.startingWeightLb}';
+    }
+    _sex = s.sex ?? '';
+    _races = List<String>.from(s.races);
+    _otherConditions = List<String>.from(s.otherConditions);
   }
 
   @override
   void dispose() {
-    _age.dispose();
-    _city.dispose();
-    _state.dispose();
-    _heightFt.dispose();
-    _heightIn.dispose();
-    _weight.dispose();
+    _ageController.dispose();
+    _heightFtController.dispose();
+    _heightInController.dispose();
+    _weightController.dispose();
     super.dispose();
   }
 
+  bool get _canContinue {
+    final age = int.tryParse(_ageController.text);
+    final ft = int.tryParse(_heightFtController.text);
+    final inches = int.tryParse(_heightInController.text);
+    final lb = double.tryParse(_weightController.text);
+    return age != null &&
+        age >= 13 &&
+        age <= 100 &&
+        _sex.isNotEmpty &&
+        _races.isNotEmpty &&
+        ft != null &&
+        ft >= 3 &&
+        ft <= 8 &&
+        inches != null &&
+        inches >= 0 &&
+        inches <= 11 &&
+        lb != null &&
+        lb > 0 &&
+        _otherConditions.isNotEmpty;
+  }
+
+  void _toggleRace(String option) {
+    setState(() {
+      if (option == 'Prefer not to say') {
+        _races = _races.contains(option) ? [] : [option];
+        return;
+      }
+      final next = _races.where((r) => r != 'Prefer not to say').toList();
+      if (next.contains(option)) {
+        next.remove(option);
+      } else {
+        next.add(option);
+      }
+      _races = next;
+    });
+  }
+
+  void _toggleCondition(String option) {
+    setState(() {
+      if (option == 'None') {
+        _otherConditions =
+            _otherConditions.contains(option) ? [] : [option];
+        return;
+      }
+      final next = _otherConditions.where((c) => c != 'None').toList();
+      if (next.contains(option)) {
+        next.remove(option);
+      } else {
+        next.add(option);
+      }
+      _otherConditions = next;
+    });
+  }
+
   void _onContinue() {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-    if (_sex == null || _race == null) return;
     ref
         .read(onboardingProvider.notifier)
         .setDemographics(
-          age: int.parse(_age.text),
-          sex: _sex!,
-          raceEthnicity: _race!,
-          city: _city.text.trim().isEmpty ? null : _city.text.trim(),
-          stateRegion: _state.text.trim().isEmpty ? null : _state.text.trim(),
-          heightFeet: int.parse(_heightFt.text),
-          heightInches: int.parse(_heightIn.text),
-          startingWeightLb: double.parse(_weight.text),
+          age: int.parse(_ageController.text),
+          sex: _sex,
+          races: _races,
+          otherConditions: _otherConditions,
+          heightFeet: int.parse(_heightFtController.text),
+          heightInches: int.parse(_heightInController.text),
+          startingWeightLb: double.parse(_weightController.text),
         );
-    context.go('/onboarding/baseline');
+    context.go('/onboarding/medication');
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: AppColors.inkBlack,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/onboarding/medication'),
-        ),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.white,
+      child: Material(
+        type: MaterialType.transparency,
+        child: SafeArea(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const StepIndicator(step: 2),
-              const SizedBox(height: 20),
-              const Text('About you', style: AppText.displayLg),
-              const SizedBox(height: 6),
-              const Text(
-                'These help us match you with comparable users in the cohort. '
-                'City and state are optional.',
-                style: AppText.bodyMuted,
-              ),
-              const SizedBox(height: 20),
+              const OnboardingProgressBar(step: 1, totalSteps: 5),
+              const _Header(),
               Expanded(
-                child: Form(
-                  key: _formKey,
+                child: Container(
+                  color: OnboardingColors.bgScroll,
                   child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _Label('Age'),
-                        TextFormField(
-                          controller: _age,
-                          keyboardType: TextInputType.number,
-                          validator: (v) {
-                            final n = int.tryParse(v ?? '');
-                            if (n == null || n < 13 || n > 100) {
-                              return 'Enter an age between 13 and 100';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        _Label('Sex'),
-                        DropdownButtonFormField<String>(
-                          initialValue: _sex,
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'female',
-                              child: Text('Female'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'male',
-                              child: Text('Male'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'intersex',
-                              child: Text('Intersex'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'prefer_not_to_say',
-                              child: Text('Prefer not to say'),
-                            ),
-                          ],
-                          onChanged: (v) => setState(() => _sex = v),
-                        ),
-                        const SizedBox(height: 16),
-                        _Label('Race / ethnicity'),
-                        DropdownButtonFormField<String>(
-                          initialValue: _race,
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'asian',
-                              child: Text('Asian'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'black',
-                              child: Text('Black or African American'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'hispanic',
-                              child: Text('Hispanic or Latino'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'native',
-                              child: Text('Native American or Alaska Native'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'pacific_islander',
-                              child: Text(
-                                'Native Hawaiian or Pacific Islander',
-                              ),
-                            ),
-                            DropdownMenuItem(
-                              value: 'white',
-                              child: Text('White'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'multiple',
-                              child: Text('Two or more'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'prefer_not_to_say',
-                              child: Text('Prefer not to say'),
-                            ),
-                          ],
-                          onChanged: (v) => setState(() => _race = v),
-                        ),
-                        const SizedBox(height: 16),
-                        _Label('Height'),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                controller: _heightFt,
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  hintText: 'ft',
-                                ),
-                                validator: (v) {
-                                  final n = int.tryParse(v ?? '');
-                                  if (n == null || n < 3 || n > 8) {
-                                    return '3-8';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: TextFormField(
-                                controller: _heightIn,
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  hintText: 'in',
-                                ),
-                                validator: (v) {
-                                  final n = int.tryParse(v ?? '');
-                                  if (n == null || n < 0 || n > 11) {
-                                    return '0-11';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        _Label('Starting weight (lb)'),
-                        TextFormField(
-                          controller: _weight,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
+                        OnboardingSection(
+                          label: 'Age',
+                          child: OnboardingTextField(
+                            controller: _ageController,
+                            placeholder: 'e.g., 34',
+                            keyboardType: TextInputType.number,
+                            onChanged: (_) => setState(() {}),
                           ),
-                          validator: (v) {
-                            final n = double.tryParse(v ?? '');
-                            if (n == null || n <= 0) {
-                              return 'Enter a starting weight';
-                            }
-                            return null;
-                          },
                         ),
-                        const SizedBox(height: 16),
-                        _Label('City (optional)'),
-                        TextFormField(controller: _city),
-                        const SizedBox(height: 16),
-                        _Label('State (optional)'),
-                        TextFormField(controller: _state),
+                        const SizedBox(height: 20),
+                        OnboardingSection(
+                          label: 'Gender',
+                          child: OnboardingGrid2(
+                            children: _genderOptions
+                                .map(
+                                  (o) => OnboardingSelectableTile(
+                                    selected: _sex == o.value,
+                                    onTap: () =>
+                                        setState(() => _sex = o.value),
+                                    child: Text(
+                                      o.label,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: _sex == o.value
+                                            ? OnboardingColors.primary
+                                            : OnboardingColors.ink,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        OnboardingSection(
+                          label: 'Race / Ethnicity',
+                          trailing: const Text(
+                            'Select all that apply',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: OnboardingColors.sub,
+                            ),
+                          ),
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: _raceOptions
+                                .map(
+                                  (o) => OnboardingChipTile(
+                                    label: o,
+                                    selected: _races.contains(o),
+                                    onTap: () => _toggleRace(o),
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        OnboardingSection(
+                          label: 'Starting height',
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: OnboardingTextField(
+                                  controller: _heightFtController,
+                                  placeholder: '5',
+                                  keyboardType: TextInputType.number,
+                                  suffix: 'ft',
+                                  onChanged: (_) => setState(() {}),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: OnboardingTextField(
+                                  controller: _heightInController,
+                                  placeholder: '8',
+                                  keyboardType: TextInputType.number,
+                                  suffix: 'in',
+                                  onChanged: (_) => setState(() {}),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        OnboardingSection(
+                          label: 'Starting weight',
+                          child: OnboardingTextField(
+                            controller: _weightController,
+                            placeholder: '185',
+                            keyboardType: TextInputType.number,
+                            suffix: 'lbs',
+                            onChanged: (_) => setState(() {}),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        OnboardingSection(
+                          label: 'Health history',
+                          trailing: const Text(
+                            'Select all that apply',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: OnboardingColors.sub,
+                            ),
+                          ),
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: _comorbidities
+                                .map(
+                                  (o) => OnboardingChipTile(
+                                    label: o,
+                                    selected: _otherConditions.contains(o),
+                                    onTap: () => _toggleCondition(o),
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
-              ElevatedButton(
+              OnboardingContinueBar(
+                enabled: _canContinue,
                 onPressed: _onContinue,
-                child: const Text('Continue'),
               ),
             ],
           ),
@@ -258,14 +312,37 @@ class _DemographicsScreenState extends ConsumerState<DemographicsScreen> {
   }
 }
 
-class _Label extends StatelessWidget {
-  const _Label(this.text);
-  final String text;
+class _Header extends StatelessWidget {
+  const _Header();
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Text(text, style: AppText.bodyMuted),
+    return Container(
+      width: double.infinity,
+      color: CupertinoColors.white,
+      padding: const EdgeInsets.fromLTRB(24, 4, 24, 16),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Tell us about you',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: OnboardingColors.ink,
+            ),
+          ),
+          SizedBox(height: 6),
+          Text(
+            'Demographics help us compare your progress with people like you.',
+            style: TextStyle(
+              fontSize: 14,
+              color: OnboardingColors.sub,
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,12 +1,13 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../backend/models/factor.dart';
 import '../../../backend/providers/onboarding_provider.dart';
-import '../../../core/theme.dart';
-import '../../components/onboarding/step_indicator.dart';
-import '../../components/sliders/factor_slider.dart';
+import '../../components/onboarding/continue_bar.dart';
+import '../../components/onboarding/onboarding_theme.dart';
+import '../../components/onboarding/progress_bar.dart';
 
 class BaselineScreen extends ConsumerStatefulWidget {
   const BaselineScreen({super.key});
@@ -16,75 +17,182 @@ class BaselineScreen extends ConsumerStatefulWidget {
 }
 
 class _BaselineScreenState extends ConsumerState<BaselineScreen> {
-  late Map<String, int> _ratings;
+  late Map<String, int?> _ratings;
 
   @override
   void initState() {
     super.initState();
     final existing = ref.read(onboardingProvider).baselineRatings;
-    _ratings = {for (final f in kBaselineFactors) f.key: existing[f.key] ?? 3};
+    _ratings = {for (final f in kBaselineFactors) f.key: existing[f.key]};
   }
+
+  bool get _canContinue =>
+      kBaselineFactors.every((f) => _ratings[f.key] != null);
 
   void _onContinue() {
     final notifier = ref.read(onboardingProvider.notifier);
-    for (final entry in _ratings.entries) {
-      notifier.setBaselineRating(entry.key, entry.value);
+    for (final f in kBaselineFactors) {
+      notifier.setBaselineRating(f.key, _ratings[f.key]!);
     }
     context.go('/onboarding/consent');
   }
 
+  void _onBack() => context.go('/onboarding/medication');
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: AppColors.inkBlack,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/onboarding/demographics'),
-        ),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.white,
+      child: Material(
+        type: MaterialType.transparency,
+        child: SafeArea(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const StepIndicator(step: 3),
-              const SizedBox(height: 20),
-              const Text('How are you doing now?', style: AppText.displayLg),
-              const SizedBox(height: 6),
-              const Text(
-                'Rate each on a 1-5 scale. This is your baseline — every '
-                'check-in compares back against it.',
-                style: AppText.bodyMuted,
-              ),
-              const SizedBox(height: 20),
+              OnboardingProgressBar(step: 3, totalSteps: 5, onBack: _onBack),
+              const _Header(),
               Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      for (final f in kBaselineFactors) ...[
-                        FactorSlider(
-                          factor: f,
-                          value: _ratings[f.key]!,
-                          onChanged: (v) => setState(() => _ratings[f.key] = v),
-                        ),
-                        const SizedBox(height: 12),
+                child: Container(
+                  color: OnboardingColors.bgScroll,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (var i = 0; i < kBaselineFactors.length; i++) ...[
+                          _factorRow(kBaselineFactors[i]),
+                          if (i < kBaselineFactors.length - 1)
+                            const SizedBox(height: 20),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
-              ElevatedButton(
+              OnboardingContinueBar(
+                enabled: _canContinue,
                 onPressed: _onContinue,
-                child: const Text('Continue'),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _factorRow(Factor factor) {
+    final selected = _ratings[factor.key];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(
+            factor.label,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: OnboardingColors.ink,
+            ),
+          ),
+        ),
+        Row(
+          children: [
+            for (var n = 1; n <= 5; n++) ...[
+              Expanded(child: _ratingButton(factor.key, n, selected == n)),
+              if (n < 5) const SizedBox(width: 8),
+            ],
+          ],
+        ),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                factor.lowAnchor,
+                textAlign: TextAlign.left,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.6,
+                  color: OnboardingColors.primary,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Text(
+                factor.highAnchor,
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.6,
+                  color: OnboardingColors.primary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _ratingButton(String key, int n, bool selected) {
+    return GestureDetector(
+      onTap: () => setState(() => _ratings[key] = n),
+      child: Container(
+        height: 48,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? OnboardingColors.primary : CupertinoColors.white,
+          border: Border.all(
+            color: selected ? OnboardingColors.primary : OnboardingColors.border,
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          '$n',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: selected ? CupertinoColors.white : OnboardingColors.ink,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Header extends StatelessWidget {
+  const _Header();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: CupertinoColors.white,
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Set your baselines',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: OnboardingColors.ink,
+            ),
+          ),
+          SizedBox(height: 6),
+          Text(
+            'Rate each factor 1–5 so we can track how things change over time.',
+            style: TextStyle(
+              fontSize: 14,
+              color: OnboardingColors.sub,
+              height: 1.4,
+            ),
+          ),
+        ],
       ),
     );
   }

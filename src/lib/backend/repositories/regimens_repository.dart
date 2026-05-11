@@ -21,9 +21,10 @@ class RegimensRepository {
     String? indication,
     String? priorGlp1,
     String? supply,
+    DateTime? startedAt,
   }) async {
     final userId = _client.auth.currentUser!.id;
-    final now = DateTime.now().toUtc();
+    final start = (startedAt ?? DateTime.now()).toUtc();
 
     final row = await _client
         .from(_table)
@@ -37,7 +38,7 @@ class RegimensRepository {
           'indication': indication,
           'prior_glp1': priorGlp1,
           'supply': supply,
-          'started_at': now.toIso8601String(),
+          'started_at': start.toIso8601String(),
           'is_active': true,
         })
         .select()
