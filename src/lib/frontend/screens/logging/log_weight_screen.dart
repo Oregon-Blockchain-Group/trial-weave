@@ -142,6 +142,10 @@ class _LogWeightScreenState extends ConsumerState<LogWeightScreen> {
                   ),
                   decoration: InputDecoration(
                     hintText: _unit == _Unit.lb ? '170.8' : '77.5',
+                    hintStyle: const TextStyle(
+                      color: Color(0xFFBFC4CC),
+                      fontWeight: FontWeight.w400,
+                    ),
                     suffixText: unitLabel,
                   ),
                   validator: (v) {
