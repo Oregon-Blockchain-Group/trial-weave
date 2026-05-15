@@ -76,7 +76,9 @@ class _LogWeightScreenState extends ConsumerState<LogWeightScreen> {
     try {
       await ref
           .read(weightLogsRepositoryProvider)
-          .upsertOnDate(date: when, weightLb: weightLb);
+          .insert(loggedAt: when, weightLb: weightLb);
+      ref.invalidate(recentWeightLogsProvider);
+      ref.invalidate(progressWeightLogsProvider);
       if (!mounted) return;
       setState(() => _success = true);
       await Future<void>.delayed(const Duration(milliseconds: 1200));
