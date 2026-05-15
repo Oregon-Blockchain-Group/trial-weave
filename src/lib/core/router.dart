@@ -125,7 +125,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/welcome', builder: (_, _) => const WelcomeScreen()),
       GoRoute(path: '/sign-up', builder: (_, _) => const SignUpScreen()),
       GoRoute(path: '/sign-in', builder: (_, _) => const SignInScreen()),
-      GoRoute(path: '/home', builder: (_, _) => const HomeScreen()),
+      GoRoute(
+        path: '/home',
+        pageBuilder: (_, _) =>
+            const NoTransitionPage(child: HomeScreen()),
+      ),
       GoRoute(
         path: '/onboarding/medication',
         builder: (_, _) => const MedicationScreen(),
@@ -157,8 +161,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/check-in/side-effect',
         builder: (_, _) => const SideEffectCheckInScreen(),
       ),
-      GoRoute(path: '/progress', builder: (_, _) => const ProgressScreen()),
-      GoRoute(path: '/cohort', builder: (_, _) => const CohortHomeScreen()),
+      GoRoute(
+        path: '/progress',
+        pageBuilder: (_, _) =>
+            const NoTransitionPage(child: ProgressScreen()),
+      ),
+      GoRoute(
+        path: '/cohort',
+        pageBuilder: (_, _) =>
+            const NoTransitionPage(child: CohortHomeScreen()),
+      ),
       GoRoute(
         path: '/cohort/outcomes',
         builder: (_, _) => const CohortOutcomesScreen(),
@@ -171,7 +183,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/cohort/cost',
         builder: (_, _) => const CohortCostScreen(),
       ),
-      GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen()),
+      GoRoute(
+        path: '/profile',
+        pageBuilder: (_, _) =>
+            const NoTransitionPage(child: ProfileScreen()),
+      ),
       GoRoute(
         path: '/profile/edit',
         builder: (_, _) => const EditProfileScreen(),
