@@ -6,6 +6,7 @@ import '../../../backend/models/factor.dart';
 import '../../../backend/providers/repositories_providers.dart';
 import '../../../core/theme.dart';
 import '../../components/sliders/factor_slider.dart';
+import 'log_success_view.dart';
 
 class PostDoseCheckInScreen extends ConsumerStatefulWidget {
   const PostDoseCheckInScreen({super.key});
@@ -18,6 +19,7 @@ class PostDoseCheckInScreen extends ConsumerStatefulWidget {
 class _PostDoseCheckInScreenState extends ConsumerState<PostDoseCheckInScreen> {
   late Map<String, int> _ratings;
   bool _busy = false;
+  bool _success = false;
   String? _error;
 
   @override
@@ -33,6 +35,9 @@ class _PostDoseCheckInScreenState extends ConsumerState<PostDoseCheckInScreen> {
     });
     try {
       await ref.read(factorLogsRepositoryProvider).insertCheckIn(_ratings);
+      if (!mounted) return;
+      setState(() => _success = true);
+      await Future<void>.delayed(const Duration(milliseconds: 1200));
       if (mounted) context.go('/home');
     } on Exception catch (e) {
       if (mounted) setState(() => _error = 'Couldn\'t save the check-in: $e');
@@ -43,6 +48,13 @@ class _PostDoseCheckInScreenState extends ConsumerState<PostDoseCheckInScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_success) {
+      return const Scaffold(
+        body: SafeArea(
+          child: LogSuccessView(title: 'Check-in saved'),
+        ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,

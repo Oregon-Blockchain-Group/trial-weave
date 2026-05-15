@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../backend/providers/repositories_providers.dart';
 import '../../../core/theme.dart';
+import 'log_success_view.dart';
 
 class LogDoseScreen extends ConsumerStatefulWidget {
   const LogDoseScreen({super.key});
@@ -15,6 +16,7 @@ class LogDoseScreen extends ConsumerStatefulWidget {
 class _LogDoseScreenState extends ConsumerState<LogDoseScreen> {
   final _notes = TextEditingController();
   bool _busy = false;
+  bool _success = false;
   String? _error;
 
   @override
@@ -43,6 +45,9 @@ class _LogDoseScreenState extends ConsumerState<LogDoseScreen> {
             regimenId: regimen.id,
             notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
           );
+      if (!mounted) return;
+      setState(() => _success = true);
+      await Future<void>.delayed(const Duration(milliseconds: 1200));
       if (mounted) context.go('/check-in/post-dose');
     } on Exception catch (e) {
       if (mounted) setState(() => _error = 'Couldn\'t log the dose: $e');
@@ -53,6 +58,13 @@ class _LogDoseScreenState extends ConsumerState<LogDoseScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_success) {
+      return const Scaffold(
+        body: SafeArea(
+          child: LogSuccessView(title: 'Dose logged'),
+        ),
+      );
+    }
     final regimenAsync = ref.watch(activeRegimenProvider);
     return Scaffold(
       appBar: AppBar(
