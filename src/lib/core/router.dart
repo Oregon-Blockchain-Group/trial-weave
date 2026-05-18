@@ -194,7 +194,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/profile/regimen',
-        builder: (_, _) => const RegimenScreen(),
+        pageBuilder: (_, _) =>
+            const NoTransitionPage(child: RegimenScreen()),
       ),
       GoRoute(
         path: '/profile/regimen/switch',
