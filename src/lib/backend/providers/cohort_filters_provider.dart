@@ -1,61 +1,76 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Currently-applied cohort comparison filters. Null fields = "any."
-/// Equality is value-based so family providers can dedupe by filter combo.
+import 'repositories_providers.dart';
+
+/// Read-only demographic dimensions used to match the User's cohort.
+/// Intentionally excludes regimen-specific dimensions (drug, indication,
+/// prior GLP-1 history, supply) — the cohort page exists so the User can
+/// see how their *demographic* peers perform across different drugs, not
+/// to silo people who already chose the same drug.
 class CohortFilters {
-  const CohortFilters({this.sex, this.indication, this.priorGlp1});
+  const CohortFilters({
+    this.sex,
+    this.raceEthnicity,
+    this.ageMin,
+    this.ageMax,
+  });
 
-  final String? sex; // female | male | intersex | prefer_not_to_say
-  final String? indication; // weight | t2d | both
-  final String? priorGlp1; // naive | switched | restarted
-
-  CohortFilters copyWith({
-    Object? sex = _sentinel,
-    Object? indication = _sentinel,
-    Object? priorGlp1 = _sentinel,
-  }) {
-    return CohortFilters(
-      sex: sex == _sentinel ? this.sex : sex as String?,
-      indication: indication == _sentinel
-          ? this.indication
-          : indication as String?,
-      priorGlp1: priorGlp1 == _sentinel ? this.priorGlp1 : priorGlp1 as String?,
-    );
-  }
+  final String? sex;
+  final String? raceEthnicity;
+  final int? ageMin;
+  final int? ageMax;
 
   /// jsonb payload the cohort_* RPCs expect. Null fields are omitted so the
-  /// SQL `(p_filters->>'key' is null OR ...)` short-circuits.
+  /// SQL `(p_filters->>'key' is null OR ...)` branches short-circuit.
+  ///
+  /// NOTE: `race_ethnicity` is sent but the RPCs in 0001/0002 don't yet
+  /// branch on it — they only honor sex / age_min / age_max. Adding the
+  /// race branch is a small migration; until then race is a visual pill
+  /// only and doesn't constrain the SQL.
   Map<String, dynamic> toJsonForRpc() => {
     if (sex != null) 'sex': sex,
-    if (indication != null) 'indication': indication,
-    if (priorGlp1 != null) 'prior_glp1': priorGlp1,
+    if (raceEthnicity != null) 'race_ethnicity': raceEthnicity,
+    if (ageMin != null) 'age_min': ageMin,
+    if (ageMax != null) 'age_max': ageMax,
   };
 
   @override
   bool operator ==(Object other) =>
       other is CohortFilters &&
       other.sex == sex &&
-      other.indication == indication &&
-      other.priorGlp1 == priorGlp1;
+      other.raceEthnicity == raceEthnicity &&
+      other.ageMin == ageMin &&
+      other.ageMax == ageMax;
 
   @override
-  int get hashCode => Object.hash(sex, indication, priorGlp1);
+  int get hashCode => Object.hash(sex, raceEthnicity, ageMin, ageMax);
 }
 
-const _sentinel = Object();
+/// Demographic cohort filters built from the User's profile. Age matches
+/// the User ±5 years; sex and race are exact-match.
+///
+/// "Prefer not to say" values map to null (no constraint) so users who
+/// opted out of a dimension see comparisons across the whole cohort on
+/// that dimension instead of an empty result.
+final cohortFiltersProvider = Provider<CohortFilters>((ref) {
+  final profile = ref.watch(currentProfileProvider).valueOrNull;
+  if (profile == null) return const CohortFilters();
+  final age = profile.age;
+  return CohortFilters(
+    sex: _normalize(profile.sex),
+    raceEthnicity: _normalize(profile.raceEthnicity),
+    ageMin: age == null ? null : (age - 5).clamp(0, 120),
+    ageMax: age == null ? null : (age + 5).clamp(0, 120),
+  );
+});
 
-class CohortFiltersNotifier extends Notifier<CohortFilters> {
-  @override
-  CohortFilters build() => const CohortFilters();
-
-  void setSex(String? value) => state = state.copyWith(sex: value);
-  void setIndication(String? value) =>
-      state = state.copyWith(indication: value);
-  void setPriorGlp1(String? value) => state = state.copyWith(priorGlp1: value);
-  void reset() => state = const CohortFilters();
+/// Returns null for opt-out values so the RPC's `is null or ...` branch
+/// short-circuits and includes everyone on that dimension. Handles both
+/// the sex slug ("prefer_not_to_say") and the race display label
+/// ("Prefer not to say") that onboarding writes.
+String? _normalize(String? value) {
+  if (value == null) return null;
+  final v = value.toLowerCase();
+  if (v == 'prefer_not_to_say' || v == 'prefer not to say') return null;
+  return value;
 }
-
-final cohortFiltersProvider =
-    NotifierProvider<CohortFiltersNotifier, CohortFilters>(
-      CohortFiltersNotifier.new,
-    );

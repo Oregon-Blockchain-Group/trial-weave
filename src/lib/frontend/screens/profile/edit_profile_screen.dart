@@ -7,6 +7,8 @@ import '../../../backend/providers/auth_state_provider.dart';
 import '../../../backend/providers/repositories_providers.dart';
 import '../../../core/theme.dart';
 import '../../components/dialogs/reason_dialog.dart';
+import '../../components/inputs/state_picker_field.dart';
+import '../logging/log_success_view.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -27,6 +29,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   String? _race;
   bool _busy = false;
   bool _hydrated = false;
+  bool _success = false;
   String? _error;
   Profile? _original;
 
@@ -116,6 +119,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         );
       }
       ref.invalidate(currentProfileProvider);
+      if (!mounted) return;
+      setState(() => _success = true);
+      await Future<void>.delayed(const Duration(milliseconds: 1200));
       if (mounted) context.go('/profile');
     } on Exception catch (e) {
       if (mounted) setState(() => _error = 'Couldn\'t save profile: $e');
@@ -126,6 +132,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_success) {
+      return const Scaffold(
+        body: SafeArea(
+          child: LogSuccessView(eyebrow: 'Saved', title: 'Profile updated'),
+        ),
+      );
+    }
     final profileAsync = ref.watch(currentProfileProvider);
     return Scaffold(
       appBar: AppBar(
@@ -185,12 +198,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                   child: Text('Male'),
                                 ),
                                 DropdownMenuItem(
-                                  value: 'intersex',
-                                  child: Text('Intersex'),
-                                ),
-                                DropdownMenuItem(
                                   value: 'prefer_not_to_say',
                                   child: Text('Prefer not to say'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'other',
+                                  child: Text('Other'),
                                 ),
                               ],
                               onChanged: (v) => setState(() => _sex = v),
@@ -201,39 +214,45 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                               initialValue: _race,
                               items: const [
                                 DropdownMenuItem(
-                                  value: 'asian',
-                                  child: Text('Asian'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'black',
-                                  child: Text('Black or African American'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'hispanic',
-                                  child: Text('Hispanic or Latino'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'native',
+                                  value: 'American Indian or Alaska Native',
                                   child: Text(
-                                    'Native American or Alaska Native',
+                                    'American Indian or Alaska Native',
                                   ),
                                 ),
                                 DropdownMenuItem(
-                                  value: 'pacific_islander',
+                                  value: 'Asian',
+                                  child: Text('Asian'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'Black or African American',
+                                  child: Text('Black or African American'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'Hispanic or Latino',
+                                  child: Text('Hispanic or Latino'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'Middle Eastern or North African',
+                                  child: Text(
+                                    'Middle Eastern or North African',
+                                  ),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'Native Hawaiian or Pacific Islander',
                                   child: Text(
                                     'Native Hawaiian or Pacific Islander',
                                   ),
                                 ),
                                 DropdownMenuItem(
-                                  value: 'white',
+                                  value: 'White',
                                   child: Text('White'),
                                 ),
                                 DropdownMenuItem(
-                                  value: 'multiple',
-                                  child: Text('Two or more'),
+                                  value: 'Other',
+                                  child: Text('Other'),
                                 ),
                                 DropdownMenuItem(
-                                  value: 'prefer_not_to_say',
+                                  value: 'Prefer not to say',
                                   child: Text('Prefer not to say'),
                                 ),
                               ],
@@ -299,7 +318,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             TextFormField(controller: _city),
                             const SizedBox(height: 16),
                             _Label('State (optional)'),
-                            TextFormField(controller: _state),
+                            StatePickerField(
+                              value: _state.text.isEmpty ? null : _state.text,
+                              onChanged: (s) =>
+                                  setState(() => _state.text = s),
+                            ),
                             if (_error != null) ...[
                               const SizedBox(height: 16),
                               Container(

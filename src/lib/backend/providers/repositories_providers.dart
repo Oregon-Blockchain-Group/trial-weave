@@ -7,6 +7,7 @@ import '../models/cohort_side_effect.dart';
 import '../models/cost_log.dart';
 import '../models/dose_log.dart';
 import '../models/factor_log.dart';
+import '../models/consent.dart';
 import '../models/profile.dart';
 import '../models/regimen.dart';
 import '../models/side_effect_log.dart';
@@ -64,6 +65,12 @@ final costLogsRepositoryProvider = Provider<CostLogsRepository>((ref) {
 
 final dataPrivacyRepositoryProvider = Provider<DataPrivacyRepository>((ref) {
   return DataPrivacyRepository(ref.watch(supabaseClientProvider));
+});
+
+/// The caller's most recent consent row, or null if they haven't completed
+/// onboarding yet. Drives the Data & Privacy screen's toggles.
+final latestConsentProvider = FutureProvider<Consent?>((ref) {
+  return ref.watch(consentsRepositoryProvider).latest();
 });
 
 /// The caller's currently-active [Regimen], or null if they have none.

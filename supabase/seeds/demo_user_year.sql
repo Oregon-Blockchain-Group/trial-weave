@@ -62,16 +62,18 @@ BEGIN
   END LOOP;
 
   -- 4. Weekly weights trending from starting → end with light noise.
+  --    Migration 0005 made `date` a generated column derived from
+  --    logged_at, so we insert logged_at directly.
   FOR i IN 0..51 LOOP
-    INSERT INTO weight_logs (user_id, date, weight_lb)
+    INSERT INTO weight_logs (user_id, weight_lb, logged_at)
     VALUES (
       uid,
-      (start_date + (i || ' weeks')::interval)::date,
       round(
         (starting_lb - ((starting_lb - end_lb) * (i::numeric / 51))
           + (random() * 1.5 - 0.75))::numeric,
         1
-      )
+      ),
+      start_date + (i || ' weeks')::interval
     );
   END LOOP;
 

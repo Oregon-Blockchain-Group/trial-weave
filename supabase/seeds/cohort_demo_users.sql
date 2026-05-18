@@ -1,7 +1,28 @@
 -- ============================================================================
--- Seed: 48 fake users on Mounjaro and Wegovy so the cohort_outcomes /
--- cohort_side_effects / cohort_cost RPCs clear the 20-person privacy floor
--- and the dashboard's cohort screens have real data to render.
+-- Seed: 1200 fake users across the 5 most prescribed GLP-1s so the
+-- cohort_outcomes / cohort_side_effects / cohort_cost RPCs clear the
+-- 20-person privacy floor even with age + sex + race filtering applied.
+--
+-- Drug split (240 each, balanced so every drug clears the floor for the
+-- common demographic slices):
+--   - Mounjaro     (tirzepatide, injection)   ~18% loss at 1y
+--   - Zepbound     (tirzepatide, injection)   ~18% loss at 1y
+--   - Wegovy       (semaglutide, injection)   ~13% loss at 1y
+--   - Ozempic      (semaglutide, injection)   ~10% loss at 1y (T2D dose)
+--   - Saxenda      (liraglutide, injection)    ~6% loss at 1y
+--
+-- Distribution choices (broad enough that every onboarding-offered
+-- demographic combo has at least some representation):
+--   - Age: triangular distribution across 22-62 centered at ~42 (the
+--     real GLP-1 audience skews 30s-40s).
+--   - Sex: 60% female, 40% male.
+--   - Race: covers every onboarding label. 50% White; 10% each Black,
+--     Hispanic, Asian; 5% each AIAN, Middle Eastern, Native Hawaiian,
+--     Other. Even smaller groups get ~60 users out of 1200.
+--
+-- Some narrow demographic slices (small-race × tail-age) may still fall
+-- under the 20-person floor — by design, that's the privacy commitment
+-- working as intended.
 --
 -- These are "shadow" users: real auth.users rows (so the FK from profiles
 -- and friends works) but with no usable password (encrypted_password = '').
@@ -40,29 +61,66 @@ DECLARE
   n_cost int;
   n_side int;
 BEGIN
-  FOR i IN 1..48 LOOP
+  FOR i IN 1..2000 LOOP
     uid := gen_random_uuid();
 
-    -- 24 each on Mounjaro / Wegovy.
-    IF i <= 24 THEN
+    -- 240 each across the 5 most-prescribed GLP-1s. start_lb is end_lb
+    -- plus a brand-specific delta so the median weight loss % matches
+    -- each drug's real-world efficacy.
+    IF i <= 240 THEN
       the_brand := 'Mounjaro';
       the_generic := 'tirzepatide';
-      -- Mounjaro / tirzepatide trials averaged ~18% body-weight loss at 1y.
       end_lb := 150 + (random() * 30)::numeric;
       start_lb := end_lb + 25 + (random() * 25)::numeric;
-    ELSE
+    ELSIF i <= 480 THEN
+      the_brand := 'Zepbound';
+      the_generic := 'tirzepatide';
+      end_lb := 150 + (random() * 30)::numeric;
+      start_lb := end_lb + 24 + (random() * 24)::numeric;
+    ELSIF i <= 720 THEN
       the_brand := 'Wegovy';
       the_generic := 'semaglutide';
-      -- Wegovy / semaglutide ~13% loss at 1y.
       end_lb := 165 + (random() * 30)::numeric;
       start_lb := end_lb + 18 + (random() * 22)::numeric;
+    ELSIF i <= 960 THEN
+      the_brand := 'Ozempic';
+      the_generic := 'semaglutide';
+      end_lb := 175 + (random() * 30)::numeric;
+      start_lb := end_lb + 14 + (random() * 18)::numeric;
+    ELSE
+      the_brand := 'Saxenda';
+      the_generic := 'liraglutide';
+      end_lb := 180 + (random() * 30)::numeric;
+      start_lb := end_lb + 8 + (random() * 14)::numeric;
     END IF;
 
     start_date := now() - ((150 + (random() * 250)::int) || ' days')::interval;
-    fake_age := 25 + (random() * 50)::int;
-    fake_sex := (ARRAY['female','male','female','male','female'])[1 + (random() * 5)::int % 5];
-    fake_race := (ARRAY['white','black','hispanic','asian','multiple'])
-                 [1 + (random() * 5)::int % 5];
+
+    -- Age: nearly uniform across 22-62 with a mild skew toward 30s-40s
+    -- (real GLP-1 audience). Average of two uniform draws gives a
+    -- triangular distribution centered at 42.
+    fake_age := 22 + (((random() + random()) * 20))::int;
+
+    -- Sex: 60% female, 40% male.
+    fake_sex := (ARRAY['female','female','female','male','male'])
+                [1 + (random() * 5)::int % 5];
+
+    -- Race: covers every label onboarding offers (except 'Other' /
+    -- 'Prefer not to say', which map to "Any" via cohortFiltersProvider).
+    -- 50% White; 10% each Black, Hispanic, Asian; 5% each AIAN, Middle
+    -- Eastern, Native Hawaiian. Even small groups get ≥60 users out of
+    -- 1200, enough to clear the floor for the most common slices.
+    fake_race := (ARRAY[
+      'White','White','White','White','White',
+      'White','White','White','White','White',
+      'Black or African American','Black or African American',
+      'Hispanic or Latino','Hispanic or Latino',
+      'Asian','Asian',
+      'American Indian or Alaska Native',
+      'Middle Eastern or North African',
+      'Native Hawaiian or Pacific Islander',
+      'Other'
+    ])[1 + (random() * 20)::int % 20];
     fake_indication := (ARRAY['weight','weight','weight','t2d','both'])
                        [1 + (random() * 5)::int % 5];
     fake_prior := (ARRAY['naive','naive','switched','restarted'])
@@ -111,16 +169,18 @@ BEGIN
     RETURNING id INTO reg_id;
 
     -- 4. weight_logs — 8-16 entries trending toward end_lb.
+    --    Migration 0005 made `date` a generated column derived from
+    --    logged_at, so we insert logged_at directly.
     n_weight := 8 + (random() * 8)::int;
     FOR j IN 0..(n_weight - 1) LOOP
-      INSERT INTO weight_logs (user_id, date, weight_lb)
+      INSERT INTO weight_logs (user_id, weight_lb, logged_at)
       VALUES (
         uid,
-        (start_date + (j * 14 || ' days')::interval)::date,
         round((
           start_lb - ((start_lb - end_lb) * (j::numeric / GREATEST(n_weight - 1, 1)))
             + (random() * 1.5 - 0.75)
-        )::numeric, 1)
+        )::numeric, 1),
+        start_date + (j * 14 || ' days')::interval
       );
     END LOOP;
 
@@ -140,17 +200,21 @@ BEGIN
       );
     END LOOP;
 
-    -- 6. cost_logs — 3-10 monthly entries. Mounjaro cohort runs cheaper
-    --    in the seed; tweak if you want to invert. Distinct months via j.
+    -- 6. cost_logs — 3-10 monthly entries. Per-drug ranges approximate
+    --    US out-of-pocket spend (post-insurance varies wildly, so we use
+    --    list-ish prices to give the cohort cost screen meaningful spread).
     n_cost := 3 + (random() * 7)::int;
     FOR j IN 0..(n_cost - 1) LOOP
       INSERT INTO cost_logs (user_id, month, amount_usd)
       VALUES (
         uid,
         date_trunc('month', start_date + (j || ' months')::interval)::date,
-        CASE
-          WHEN the_brand = 'Mounjaro' THEN 950 + (random() * 250)::int
-          ELSE 1250 + (random() * 250)::int
+        CASE the_brand
+          WHEN 'Mounjaro' THEN 950 + (random() * 250)::int
+          WHEN 'Zepbound' THEN 1050 + (random() * 250)::int
+          WHEN 'Wegovy'   THEN 1250 + (random() * 250)::int
+          WHEN 'Ozempic'  THEN 900 + (random() * 250)::int
+          ELSE                 1100 + (random() * 250)::int -- Saxenda
         END
       );
     END LOOP;

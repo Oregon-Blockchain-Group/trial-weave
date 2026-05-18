@@ -6,7 +6,7 @@ import '../../../backend/models/cohort_side_effect.dart';
 import '../../../backend/models/side_effect.dart';
 import '../../../backend/providers/repositories_providers.dart';
 import '../../../core/theme.dart';
-import '../../components/cohort/filter_chips_bar.dart';
+import '../../components/cohort/matched_cohort_card.dart';
 
 class CohortSideEffectsScreen extends ConsumerWidget {
   const CohortSideEffectsScreen({super.key});
@@ -31,7 +31,7 @@ class CohortSideEffectsScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
           children: [
-            const FilterChipsBar(),
+            const MatchedCohortCard(),
             const SizedBox(height: 16),
             const Text(
               'Incidence = % of users in the cohort who reported each side '
@@ -103,7 +103,6 @@ class _BrandCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final n = effects.first.nUsers;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -120,9 +119,7 @@ class _BrandCard extends StatelessWidget {
           Row(
             children: [
               Expanded(child: Text(brand, style: AppText.title)),
-              Text('n=$n', style: AppText.caption),
               if (isYours) ...[
-                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,

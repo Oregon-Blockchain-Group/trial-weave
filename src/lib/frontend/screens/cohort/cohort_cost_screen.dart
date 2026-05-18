@@ -6,7 +6,7 @@ import '../../../backend/models/cohort_cost.dart';
 import '../../../backend/models/cost_log.dart';
 import '../../../backend/providers/repositories_providers.dart';
 import '../../../core/theme.dart';
-import '../../components/cohort/filter_chips_bar.dart';
+import '../../components/cohort/matched_cohort_card.dart';
 
 class CohortCostScreen extends ConsumerWidget {
   const CohortCostScreen({super.key});
@@ -32,7 +32,7 @@ class CohortCostScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
           children: [
-            const FilterChipsBar(),
+            const MatchedCohortCard(),
             const SizedBox(height: 16),
             const Text(
               'Median monthly out-of-pocket cost by drug for the matched '

@@ -304,7 +304,7 @@ fvm flutter build web --release
 
 ## Contributing
 
-1. Branch from `main` (`feat/...`, `fix/...`, `chore/...`).
+1. Branch from `dev` (`feat/...`, `fix/...`, `chore/...`).
 2. Run `fvm flutter analyze` and `fvm flutter test` before pushing.
 3. Open a PR; ensure CI is green.
 4. Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/).
