@@ -1,8 +1,15 @@
 -- ============================================================================
--- Seed: 240 fake users on Mounjaro and Wegovy with a *concentrated*
--- demographic distribution so the cohort_outcomes / cohort_side_effects /
--- cohort_cost RPCs clear the 20-person privacy floor even with age + sex
--- + race filtering all applied.
+-- Seed: 1200 fake users across the 5 most prescribed GLP-1s so the
+-- cohort_outcomes / cohort_side_effects / cohort_cost RPCs clear the
+-- 20-person privacy floor even with age + sex + race filtering applied.
+--
+-- Drug split (240 each, balanced so every drug clears the floor for the
+-- common demographic slices):
+--   - Mounjaro     (tirzepatide, injection)   ~18% loss at 1y
+--   - Zepbound     (tirzepatide, injection)   ~18% loss at 1y
+--   - Wegovy       (semaglutide, injection)   ~13% loss at 1y
+--   - Ozempic      (semaglutide, injection)   ~10% loss at 1y (T2D dose)
+--   - Saxenda      (liraglutide, injection)    ~6% loss at 1y
 --
 -- Distribution choices (intentionally skewed to feel like real product
 -- data, not a stress test):
@@ -13,9 +20,9 @@
 --     US adult GLP-1 prescribing patterns reasonably well.
 --
 -- With these skews, the largest demographic slice (White female, age band
--- around the peak) lands ~40 users per drug; the smallest (e.g. AIAN male)
--- may still fall under the floor — by design, that's the privacy
--- commitment working as intended.
+-- around the peak) lands ~35 users per drug; the smallest slices may still
+-- fall under the floor — by design, that's the privacy commitment working
+-- as intended.
 --
 -- These are "shadow" users: real auth.users rows (so the FK from profiles
 -- and friends works) but with no usable password (encrypted_password = '').
@@ -54,22 +61,37 @@ DECLARE
   n_cost int;
   n_side int;
 BEGIN
-  FOR i IN 1..400 LOOP
+  FOR i IN 1..1200 LOOP
     uid := gen_random_uuid();
 
-    -- 120 each on Mounjaro / Wegovy.
-    IF i <= 120 THEN
+    -- 240 each across the 5 most-prescribed GLP-1s. start_lb is end_lb
+    -- plus a brand-specific delta so the median weight loss % matches
+    -- each drug's real-world efficacy.
+    IF i <= 240 THEN
       the_brand := 'Mounjaro';
       the_generic := 'tirzepatide';
-      -- Mounjaro / tirzepatide trials averaged ~18% body-weight loss at 1y.
       end_lb := 150 + (random() * 30)::numeric;
       start_lb := end_lb + 25 + (random() * 25)::numeric;
-    ELSE
+    ELSIF i <= 480 THEN
+      the_brand := 'Zepbound';
+      the_generic := 'tirzepatide';
+      end_lb := 150 + (random() * 30)::numeric;
+      start_lb := end_lb + 24 + (random() * 24)::numeric;
+    ELSIF i <= 720 THEN
       the_brand := 'Wegovy';
       the_generic := 'semaglutide';
-      -- Wegovy / semaglutide ~13% loss at 1y.
       end_lb := 165 + (random() * 30)::numeric;
       start_lb := end_lb + 18 + (random() * 22)::numeric;
+    ELSIF i <= 960 THEN
+      the_brand := 'Ozempic';
+      the_generic := 'semaglutide';
+      end_lb := 175 + (random() * 30)::numeric;
+      start_lb := end_lb + 14 + (random() * 18)::numeric;
+    ELSE
+      the_brand := 'Saxenda';
+      the_generic := 'liraglutide';
+      end_lb := 180 + (random() * 30)::numeric;
+      start_lb := end_lb + 8 + (random() * 14)::numeric;
     END IF;
 
     start_date := now() - ((150 + (random() * 250)::int) || ' days')::interval;
@@ -175,17 +197,21 @@ BEGIN
       );
     END LOOP;
 
-    -- 6. cost_logs — 3-10 monthly entries. Mounjaro cohort runs cheaper
-    --    in the seed; tweak if you want to invert. Distinct months via j.
+    -- 6. cost_logs — 3-10 monthly entries. Per-drug ranges approximate
+    --    US out-of-pocket spend (post-insurance varies wildly, so we use
+    --    list-ish prices to give the cohort cost screen meaningful spread).
     n_cost := 3 + (random() * 7)::int;
     FOR j IN 0..(n_cost - 1) LOOP
       INSERT INTO cost_logs (user_id, month, amount_usd)
       VALUES (
         uid,
         date_trunc('month', start_date + (j || ' months')::interval)::date,
-        CASE
-          WHEN the_brand = 'Mounjaro' THEN 950 + (random() * 250)::int
-          ELSE 1250 + (random() * 250)::int
+        CASE the_brand
+          WHEN 'Mounjaro' THEN 950 + (random() * 250)::int
+          WHEN 'Zepbound' THEN 1050 + (random() * 250)::int
+          WHEN 'Wegovy'   THEN 1250 + (random() * 250)::int
+          WHEN 'Ozempic'  THEN 900 + (random() * 250)::int
+          ELSE                 1100 + (random() * 250)::int -- Saxenda
         END
       );
     END LOOP;

@@ -85,7 +85,7 @@ class MatchedCohortCard extends ConsumerWidget {
             child: TextButton.icon(
               onPressed: () => context.go('/profile/edit'),
               icon: const Icon(Icons.edit_outlined, size: 16),
-              label: const Text('Change these'),
+              label: const Text('Edit my demographics'),
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.darkTeal,
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
