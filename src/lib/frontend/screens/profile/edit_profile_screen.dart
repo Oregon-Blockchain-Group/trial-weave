@@ -7,6 +7,7 @@ import '../../../backend/providers/auth_state_provider.dart';
 import '../../../backend/providers/repositories_providers.dart';
 import '../../../core/theme.dart';
 import '../../components/dialogs/reason_dialog.dart';
+import '../../components/inputs/state_picker_field.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -305,7 +306,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             TextFormField(controller: _city),
                             const SizedBox(height: 16),
                             _Label('State (optional)'),
-                            TextFormField(controller: _state),
+                            StatePickerField(
+                              value: _state.text.isEmpty ? null : _state.text,
+                              onChanged: (s) =>
+                                  setState(() => _state.text = s),
+                            ),
                             if (_error != null) ...[
                               const SizedBox(height: 16),
                               Container(
