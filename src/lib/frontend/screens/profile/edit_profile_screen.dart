@@ -8,6 +8,7 @@ import '../../../backend/providers/repositories_providers.dart';
 import '../../../core/theme.dart';
 import '../../components/dialogs/reason_dialog.dart';
 import '../../components/inputs/state_picker_field.dart';
+import '../logging/log_success_view.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -28,6 +29,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   String? _race;
   bool _busy = false;
   bool _hydrated = false;
+  bool _success = false;
   String? _error;
   Profile? _original;
 
@@ -117,6 +119,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         );
       }
       ref.invalidate(currentProfileProvider);
+      if (!mounted) return;
+      setState(() => _success = true);
+      await Future<void>.delayed(const Duration(milliseconds: 1200));
       if (mounted) context.go('/profile');
     } on Exception catch (e) {
       if (mounted) setState(() => _error = 'Couldn\'t save profile: $e');
@@ -127,6 +132,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_success) {
+      return const Scaffold(
+        body: SafeArea(
+          child: LogSuccessView(eyebrow: 'Saved', title: 'Profile updated'),
+        ),
+      );
+    }
     final profileAsync = ref.watch(currentProfileProvider);
     return Scaffold(
       appBar: AppBar(
