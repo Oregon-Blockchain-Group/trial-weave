@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../backend/providers/repositories_providers.dart';
 import '../../../core/theme.dart';
+import 'log_success_view.dart';
 
 class LogCostScreen extends ConsumerStatefulWidget {
   const LogCostScreen({super.key});
@@ -17,6 +18,7 @@ class _LogCostScreenState extends ConsumerState<LogCostScreen> {
   final _amount = TextEditingController();
   DateTime _month = DateTime(DateTime.now().year, DateTime.now().month, 1);
   bool _busy = false;
+  bool _success = false;
   bool _hydrated = false;
   String? _error;
 
@@ -52,6 +54,9 @@ class _LogCostScreenState extends ConsumerState<LogCostScreen> {
           .upsertForMonth(month: _month, amountUsd: int.parse(_amount.text));
       ref.invalidate(currentMonthCostProvider);
       ref.invalidate(filteredCohortCostProvider);
+      if (!mounted) return;
+      setState(() => _success = true);
+      await Future<void>.delayed(const Duration(milliseconds: 1200));
       if (mounted) context.go('/home');
     } on Exception catch (e) {
       if (mounted) setState(() => _error = 'Couldn\'t save the cost: $e');
@@ -62,6 +67,13 @@ class _LogCostScreenState extends ConsumerState<LogCostScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_success) {
+      return const Scaffold(
+        body: SafeArea(
+          child: LogSuccessView(title: 'Cost recorded'),
+        ),
+      );
+    }
     final monthLabel =
         '${_month.year}-${_month.month.toString().padLeft(2, '0')}';
     final isCurrentMonth =

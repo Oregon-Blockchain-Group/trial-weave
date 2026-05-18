@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../backend/models/side_effect.dart';
 import '../../../backend/providers/repositories_providers.dart';
 import '../../../core/theme.dart';
+import 'log_success_view.dart';
 
 class SideEffectCheckInScreen extends ConsumerStatefulWidget {
   const SideEffectCheckInScreen({super.key});
@@ -19,6 +20,7 @@ class _SideEffectCheckInScreenState
   /// Map of side-effect key → severity (1-5). Absent key = not selected.
   final Map<String, int> _selected = {};
   bool _busy = false;
+  bool _success = false;
   String? _error;
 
   void _toggle(String key) {
@@ -34,7 +36,9 @@ class _SideEffectCheckInScreenState
   Future<void> _save() async {
     if (_selected.isEmpty) {
       // Skip = no side effects this dose, which is meaningful. Just navigate.
-      context.go('/home');
+      setState(() => _success = true);
+      await Future<void>.delayed(const Duration(milliseconds: 1200));
+      if (mounted) context.go('/home');
       return;
     }
     setState(() {
@@ -46,6 +50,9 @@ class _SideEffectCheckInScreenState
       await ref
           .read(sideEffectLogsRepositoryProvider)
           .insertBatch(regimenId: regimen?.id, severityByName: _selected);
+      if (!mounted) return;
+      setState(() => _success = true);
+      await Future<void>.delayed(const Duration(milliseconds: 1200));
       if (mounted) context.go('/home');
     } on Exception catch (e) {
       if (mounted) {
@@ -58,6 +65,13 @@ class _SideEffectCheckInScreenState
 
   @override
   Widget build(BuildContext context) {
+    if (_success) {
+      return const Scaffold(
+        body: SafeArea(
+          child: LogSuccessView(title: 'Side effects saved'),
+        ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
