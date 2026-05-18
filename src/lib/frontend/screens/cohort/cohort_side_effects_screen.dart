@@ -103,7 +103,6 @@ class _BrandCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final n = effects.first.nUsers;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -120,9 +119,7 @@ class _BrandCard extends StatelessWidget {
           Row(
             children: [
               Expanded(child: Text(brand, style: AppText.title)),
-              Text('n=$n', style: AppText.caption),
               if (isYours) ...[
-                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,

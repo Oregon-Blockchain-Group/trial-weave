@@ -11,18 +11,18 @@
 --   - Ozempic      (semaglutide, injection)   ~10% loss at 1y (T2D dose)
 --   - Saxenda      (liraglutide, injection)    ~6% loss at 1y
 --
--- Distribution choices (intentionally skewed to feel like real product
--- data, not a stress test):
---   - Age: min-of-three random draws between 18-50 → peaked around 22-30,
---     long tail to 50. P(age in any ±5 window around 25) ≈ 60%.
---   - Sex: 60% female, 40% male (realistic for GLP-1 audience).
---   - Race: 60% White, 10% each of Black, Hispanic, Asian, AIAN. Matches
---     US adult GLP-1 prescribing patterns reasonably well.
+-- Distribution choices (broad enough that every onboarding-offered
+-- demographic combo has at least some representation):
+--   - Age: triangular distribution across 22-62 centered at ~42 (the
+--     real GLP-1 audience skews 30s-40s).
+--   - Sex: 60% female, 40% male.
+--   - Race: covers every onboarding label. 50% White; 10% each Black,
+--     Hispanic, Asian; 5% each AIAN, Middle Eastern, Native Hawaiian,
+--     Other. Even smaller groups get ~60 users out of 1200.
 --
--- With these skews, the largest demographic slice (White female, age band
--- around the peak) lands ~35 users per drug; the smallest slices may still
--- fall under the floor — by design, that's the privacy commitment working
--- as intended.
+-- Some narrow demographic slices (small-race × tail-age) may still fall
+-- under the 20-person floor — by design, that's the privacy commitment
+-- working as intended.
 --
 -- These are "shadow" users: real auth.users rows (so the FK from profiles
 -- and friends works) but with no usable password (encrypted_password = '').
@@ -61,7 +61,7 @@ DECLARE
   n_cost int;
   n_side int;
 BEGIN
-  FOR i IN 1..1200 LOOP
+  FOR i IN 1..2000 LOOP
     uid := gen_random_uuid();
 
     -- 240 each across the 5 most-prescribed GLP-1s. start_lb is end_lb
@@ -96,28 +96,31 @@ BEGIN
 
     start_date := now() - ((150 + (random() * 250)::int) || ' days')::interval;
 
-    -- Age: min of three uniform draws over 0..32, added to 18. Skews
-    -- young (peak around 22-30) with a long tail to 50.
-    fake_age := 18 + LEAST(
-      (random() * 32)::int,
-      (random() * 32)::int,
-      (random() * 32)::int
-    );
+    -- Age: nearly uniform across 22-62 with a mild skew toward 30s-40s
+    -- (real GLP-1 audience). Average of two uniform draws gives a
+    -- triangular distribution centered at 42.
+    fake_age := 22 + (((random() + random()) * 20))::int;
 
     -- Sex: 60% female, 40% male.
     fake_sex := (ARRAY['female','female','female','male','male'])
                 [1 + (random() * 5)::int % 5];
 
-    -- Race: 60% White, 10% each across the four largest non-White
-    -- categories. Display labels match onboarding's _raceOptions in
-    -- demographics_screen.dart.
+    -- Race: covers every label onboarding offers (except 'Other' /
+    -- 'Prefer not to say', which map to "Any" via cohortFiltersProvider).
+    -- 50% White; 10% each Black, Hispanic, Asian; 5% each AIAN, Middle
+    -- Eastern, Native Hawaiian. Even small groups get ≥60 users out of
+    -- 1200, enough to clear the floor for the most common slices.
     fake_race := (ARRAY[
-      'White','White','White','White','White','White',
-      'Black or African American',
-      'Hispanic or Latino',
-      'Asian',
-      'American Indian or Alaska Native'
-    ])[1 + (random() * 10)::int % 10];
+      'White','White','White','White','White',
+      'White','White','White','White','White',
+      'Black or African American','Black or African American',
+      'Hispanic or Latino','Hispanic or Latino',
+      'Asian','Asian',
+      'American Indian or Alaska Native',
+      'Middle Eastern or North African',
+      'Native Hawaiian or Pacific Islander',
+      'Other'
+    ])[1 + (random() * 20)::int % 20];
     fake_indication := (ARRAY['weight','weight','weight','t2d','both'])
                        [1 + (random() * 5)::int % 5];
     fake_prior := (ARRAY['naive','naive','switched','restarted'])

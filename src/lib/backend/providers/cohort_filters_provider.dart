@@ -48,14 +48,29 @@ class CohortFilters {
 
 /// Demographic cohort filters built from the User's profile. Age matches
 /// the User ±5 years; sex and race are exact-match.
+///
+/// "Prefer not to say" values map to null (no constraint) so users who
+/// opted out of a dimension see comparisons across the whole cohort on
+/// that dimension instead of an empty result.
 final cohortFiltersProvider = Provider<CohortFilters>((ref) {
   final profile = ref.watch(currentProfileProvider).valueOrNull;
   if (profile == null) return const CohortFilters();
   final age = profile.age;
   return CohortFilters(
-    sex: profile.sex,
-    raceEthnicity: profile.raceEthnicity,
+    sex: _normalize(profile.sex),
+    raceEthnicity: _normalize(profile.raceEthnicity),
     ageMin: age == null ? null : (age - 5).clamp(0, 120),
     ageMax: age == null ? null : (age + 5).clamp(0, 120),
   );
 });
+
+/// Returns null for opt-out values so the RPC's `is null or ...` branch
+/// short-circuits and includes everyone on that dimension. Handles both
+/// the sex slug ("prefer_not_to_say") and the race display label
+/// ("Prefer not to say") that onboarding writes.
+String? _normalize(String? value) {
+  if (value == null) return null;
+  final v = value.toLowerCase();
+  if (v == 'prefer_not_to_say' || v == 'prefer not to say') return null;
+  return value;
+}
