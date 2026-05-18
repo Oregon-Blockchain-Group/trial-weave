@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../backend/providers/repositories_providers.dart';
 import '../../../core/theme.dart';
-import '../../components/cohort/filter_chips_bar.dart';
+import '../../components/cohort/matched_cohort_card.dart';
 import '../../components/nav/bottom_nav.dart';
 
 class CohortHomeScreen extends ConsumerWidget {
@@ -28,15 +28,7 @@ class CohortHomeScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
           children: [
-            const Text('Filters', style: AppText.eyebrow),
-            const SizedBox(height: 4),
-            const Text(
-              'Narrow the cohort to people like you. Privacy floor still '
-              'applies — drugs with under 20 matched users are dropped.',
-              style: AppText.bodyMuted,
-            ),
-            const SizedBox(height: 12),
-            const FilterChipsBar(),
+            const MatchedCohortCard(),
             const SizedBox(height: 24),
             const Text('EXPLORE', style: AppText.eyebrow),
             const SizedBox(height: 8),

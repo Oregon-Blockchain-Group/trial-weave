@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../backend/models/cohort_outcome.dart';
 import '../../../backend/providers/repositories_providers.dart';
 import '../../../core/theme.dart';
-import '../../components/cohort/filter_chips_bar.dart';
+import '../../components/cohort/matched_cohort_card.dart';
 
 class CohortOutcomesScreen extends ConsumerWidget {
   const CohortOutcomesScreen({super.key});
@@ -30,7 +30,7 @@ class CohortOutcomesScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
           children: [
-            const FilterChipsBar(),
+            const MatchedCohortCard(),
             const SizedBox(height: 16),
             const Text(
               'Median weight loss % by drug for the matched cohort. Higher '

@@ -1,7 +1,21 @@
 -- ============================================================================
--- Seed: 48 fake users on Mounjaro and Wegovy so the cohort_outcomes /
--- cohort_side_effects / cohort_cost RPCs clear the 20-person privacy floor
--- and the dashboard's cohort screens have real data to render.
+-- Seed: 240 fake users on Mounjaro and Wegovy with a *concentrated*
+-- demographic distribution so the cohort_outcomes / cohort_side_effects /
+-- cohort_cost RPCs clear the 20-person privacy floor even with age + sex
+-- + race filtering all applied.
+--
+-- Distribution choices (intentionally skewed to feel like real product
+-- data, not a stress test):
+--   - Age: min-of-three random draws between 18-50 → peaked around 22-30,
+--     long tail to 50. P(age in any ±5 window around 25) ≈ 60%.
+--   - Sex: 60% female, 40% male (realistic for GLP-1 audience).
+--   - Race: 60% White, 10% each of Black, Hispanic, Asian, AIAN. Matches
+--     US adult GLP-1 prescribing patterns reasonably well.
+--
+-- With these skews, the largest demographic slice (White female, age band
+-- around the peak) lands ~40 users per drug; the smallest (e.g. AIAN male)
+-- may still fall under the floor — by design, that's the privacy
+-- commitment working as intended.
 --
 -- These are "shadow" users: real auth.users rows (so the FK from profiles
 -- and friends works) but with no usable password (encrypted_password = '').
@@ -40,11 +54,11 @@ DECLARE
   n_cost int;
   n_side int;
 BEGIN
-  FOR i IN 1..48 LOOP
+  FOR i IN 1..400 LOOP
     uid := gen_random_uuid();
 
-    -- 24 each on Mounjaro / Wegovy.
-    IF i <= 24 THEN
+    -- 120 each on Mounjaro / Wegovy.
+    IF i <= 120 THEN
       the_brand := 'Mounjaro';
       the_generic := 'tirzepatide';
       -- Mounjaro / tirzepatide trials averaged ~18% body-weight loss at 1y.
@@ -59,10 +73,29 @@ BEGIN
     END IF;
 
     start_date := now() - ((150 + (random() * 250)::int) || ' days')::interval;
-    fake_age := 25 + (random() * 50)::int;
-    fake_sex := (ARRAY['female','male','female','male','female'])[1 + (random() * 5)::int % 5];
-    fake_race := (ARRAY['white','black','hispanic','asian','multiple'])
-                 [1 + (random() * 5)::int % 5];
+
+    -- Age: min of three uniform draws over 0..32, added to 18. Skews
+    -- young (peak around 22-30) with a long tail to 50.
+    fake_age := 18 + LEAST(
+      (random() * 32)::int,
+      (random() * 32)::int,
+      (random() * 32)::int
+    );
+
+    -- Sex: 60% female, 40% male.
+    fake_sex := (ARRAY['female','female','female','male','male'])
+                [1 + (random() * 5)::int % 5];
+
+    -- Race: 60% White, 10% each across the four largest non-White
+    -- categories. Display labels match onboarding's _raceOptions in
+    -- demographics_screen.dart.
+    fake_race := (ARRAY[
+      'White','White','White','White','White','White',
+      'Black or African American',
+      'Hispanic or Latino',
+      'Asian',
+      'American Indian or Alaska Native'
+    ])[1 + (random() * 10)::int % 10];
     fake_indication := (ARRAY['weight','weight','weight','t2d','both'])
                        [1 + (random() * 5)::int % 5];
     fake_prior := (ARRAY['naive','naive','switched','restarted'])
@@ -111,16 +144,18 @@ BEGIN
     RETURNING id INTO reg_id;
 
     -- 4. weight_logs — 8-16 entries trending toward end_lb.
+    --    Migration 0005 made `date` a generated column derived from
+    --    logged_at, so we insert logged_at directly.
     n_weight := 8 + (random() * 8)::int;
     FOR j IN 0..(n_weight - 1) LOOP
-      INSERT INTO weight_logs (user_id, date, weight_lb)
+      INSERT INTO weight_logs (user_id, weight_lb, logged_at)
       VALUES (
         uid,
-        (start_date + (j * 14 || ' days')::interval)::date,
         round((
           start_lb - ((start_lb - end_lb) * (j::numeric / GREATEST(n_weight - 1, 1)))
             + (random() * 1.5 - 0.75)
-        )::numeric, 1)
+        )::numeric, 1),
+        start_date + (j * 14 || ' days')::interval
       );
     END LOOP;
 
