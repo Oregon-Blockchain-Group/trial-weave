@@ -185,12 +185,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                   child: Text('Male'),
                                 ),
                                 DropdownMenuItem(
-                                  value: 'intersex',
-                                  child: Text('Intersex'),
-                                ),
-                                DropdownMenuItem(
                                   value: 'prefer_not_to_say',
                                   child: Text('Prefer not to say'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'other',
+                                  child: Text('Other'),
                                 ),
                               ],
                               onChanged: (v) => setState(() => _sex = v),
@@ -201,39 +201,45 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                               initialValue: _race,
                               items: const [
                                 DropdownMenuItem(
-                                  value: 'asian',
-                                  child: Text('Asian'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'black',
-                                  child: Text('Black or African American'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'hispanic',
-                                  child: Text('Hispanic or Latino'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'native',
+                                  value: 'American Indian or Alaska Native',
                                   child: Text(
-                                    'Native American or Alaska Native',
+                                    'American Indian or Alaska Native',
                                   ),
                                 ),
                                 DropdownMenuItem(
-                                  value: 'pacific_islander',
+                                  value: 'Asian',
+                                  child: Text('Asian'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'Black or African American',
+                                  child: Text('Black or African American'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'Hispanic or Latino',
+                                  child: Text('Hispanic or Latino'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'Middle Eastern or North African',
+                                  child: Text(
+                                    'Middle Eastern or North African',
+                                  ),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'Native Hawaiian or Pacific Islander',
                                   child: Text(
                                     'Native Hawaiian or Pacific Islander',
                                   ),
                                 ),
                                 DropdownMenuItem(
-                                  value: 'white',
+                                  value: 'White',
                                   child: Text('White'),
                                 ),
                                 DropdownMenuItem(
-                                  value: 'multiple',
-                                  child: Text('Two or more'),
+                                  value: 'Other',
+                                  child: Text('Other'),
                                 ),
                                 DropdownMenuItem(
-                                  value: 'prefer_not_to_say',
+                                  value: 'Prefer not to say',
                                   child: Text('Prefer not to say'),
                                 ),
                               ],
