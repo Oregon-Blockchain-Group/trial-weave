@@ -477,9 +477,9 @@ class _SeeMoreButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OutlinedButton.icon(
-      onPressed: () => context.go('/cohort'),
+      onPressed: () => context.go('/insights'),
       icon: const Icon(Icons.arrow_forward, size: 16),
-      label: const Text('See full cohort screens'),
+      label: const Text('See full Insights'),
     );
   }
 }

@@ -6,11 +6,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../backend/models/profile.dart';
 import '../backend/providers/auth_state_provider.dart';
 import '../backend/providers/repositories_providers.dart';
-import '../frontend/screens/cohort/cohort_cost_screen.dart';
-import '../frontend/screens/cohort/cohort_home_screen.dart';
-import '../frontend/screens/cohort/cohort_outcomes_screen.dart';
-import '../frontend/screens/cohort/cohort_side_effects_screen.dart';
+import '../frontend/screens/adherence_screen.dart';
 import '../frontend/screens/home_screen.dart';
+import '../frontend/screens/insights_screen.dart';
 import '../frontend/screens/logging/log_cost_screen.dart';
 import '../frontend/screens/logging/log_dose_screen.dart';
 import '../frontend/screens/logging/log_weight_screen.dart';
@@ -26,7 +24,6 @@ import '../frontend/screens/profile/edit_profile_screen.dart';
 import '../frontend/screens/profile/profile_screen.dart';
 import '../frontend/screens/profile/regimen_screen.dart';
 import '../frontend/screens/profile/switch_drug_screen.dart';
-import '../frontend/screens/progress_screen.dart';
 import '../frontend/screens/sign_in_screen.dart';
 import '../frontend/screens/sign_up_screen.dart';
 import '../frontend/screens/welcome_screen.dart';
@@ -119,6 +116,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (isOnboardingRoute && loc != '/onboarding/complete') {
         return '/home';
       }
+      // Legacy routes from the pre-Insights nav. Bookmarks / deep-links
+      // still land somewhere sensible.
+      if (loc == '/progress' || loc.startsWith('/cohort')) {
+        return '/insights';
+      }
       return null;
     },
     routes: [
@@ -162,26 +164,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, _) => const SideEffectCheckInScreen(),
       ),
       GoRoute(
-        path: '/progress',
+        path: '/insights',
         pageBuilder: (_, _) =>
-            const NoTransitionPage(child: ProgressScreen()),
+            const NoTransitionPage(child: InsightsScreen()),
       ),
       GoRoute(
-        path: '/cohort',
+        path: '/adherence',
         pageBuilder: (_, _) =>
-            const NoTransitionPage(child: CohortHomeScreen()),
-      ),
-      GoRoute(
-        path: '/cohort/outcomes',
-        builder: (_, _) => const CohortOutcomesScreen(),
-      ),
-      GoRoute(
-        path: '/cohort/side-effects',
-        builder: (_, _) => const CohortSideEffectsScreen(),
-      ),
-      GoRoute(
-        path: '/cohort/cost',
-        builder: (_, _) => const CohortCostScreen(),
+            const NoTransitionPage(child: AdherenceScreen()),
       ),
       GoRoute(
         path: '/profile',

@@ -18,7 +18,7 @@ class CohortTeaserTile extends ConsumerWidget {
     final weightsAsync = ref.watch(recentWeightLogsProvider);
 
     return HomeCard(
-      onTap: () => context.go('/cohort'),
+      onTap: () => context.go('/insights'),
       child: regimenAsync.when(
         loading: () => const _Loading(),
         error: (e, _) =>

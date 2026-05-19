@@ -52,11 +52,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               onRefresh: _refreshAll,
               child: CustomScrollView(
                 slivers: [
-                  const SliverToBoxAdapter(child: DashboardTop()),
-                  SliverToBoxAdapter(
-                    child: Transform.translate(
-                      offset: const Offset(0, -16),
-                      child: const MetricStrip(),
+                  const SliverToBoxAdapter(
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(bottom: 32),
+                          child: DashboardTop(),
+                        ),
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: MetricStrip(),
+                        ),
+                      ],
                     ),
                   ),
                   SliverToBoxAdapter(

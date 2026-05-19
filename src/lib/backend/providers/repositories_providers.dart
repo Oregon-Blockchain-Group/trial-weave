@@ -1,9 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/activity_entry.dart';
+import '../models/cohort_adherence.dart';
 import '../models/cohort_cost.dart';
 import '../models/cohort_outcome.dart';
+import '../models/cohort_outcome_distribution.dart';
 import '../models/cohort_side_effect.dart';
+import '../models/cohort_side_effect_severity.dart';
+import '../models/cohort_weight_trajectory_point.dart';
 import '../models/cost_log.dart';
 import '../models/dose_log.dart';
 import '../models/factor_log.dart';
@@ -140,6 +144,19 @@ final recentDoseLogsProvider = FutureProvider<List<DoseLog>>((ref) {
   return ref.watch(doseLogsRepositoryProvider).listInWindow(30);
 });
 
+/// All dose logs for the caller's active regimen, oldest first, since the
+/// regimen's `started_at`. Empty when there's no active regimen. Drives
+/// the Adherence screen's headline %, streak, and timeline.
+final activeRegimenDoseLogsProvider = FutureProvider<List<DoseLog>>((
+  ref,
+) async {
+  final regimen = await ref.watch(activeRegimenProvider.future);
+  if (regimen == null) return const [];
+  return ref
+      .watch(doseLogsRepositoryProvider)
+      .listSince(regimen.startedAt, regimenId: regimen.id);
+});
+
 /// Recent weight logs (newest first, up to 30). Drives the Weight tile +
 /// Stage 5 Progress chart.
 final recentWeightLogsProvider = FutureProvider<List<WeightLog>>((ref) {
@@ -203,6 +220,48 @@ final filteredCohortCostProvider = FutureProvider<List<CohortCost>>((ref) {
   return ref
       .watch(cohortRepositoryProvider)
       .cost(filters: filters.toJsonForRpc());
+});
+
+// ── Insights / Adherence analytics providers ────────────────────────────
+
+/// Median + IQR weight-loss trajectory per drug brand, bucketed weekly.
+/// Drives the Insights → Cohort trajectory chart.
+final filteredCohortWeightTrajectoryProvider =
+    FutureProvider<List<CohortWeightTrajectoryPoint>>((ref) {
+      final filters = ref.watch(cohortFiltersProvider);
+      return ref
+          .watch(cohortRepositoryProvider)
+          .weightTrajectory(filters: filters.toJsonForRpc());
+    });
+
+/// Quartiles + responder rates per drug brand. Drives the outcomes table.
+final filteredCohortOutcomesDistributionProvider =
+    FutureProvider<List<CohortOutcomeDistribution>>((ref) {
+      final filters = ref.watch(cohortFiltersProvider);
+      return ref
+          .watch(cohortRepositoryProvider)
+          .outcomesDistribution(filters: filters.toJsonForRpc());
+    });
+
+/// Incidence + severity distribution per (drug, side_effect). Drives the
+/// side-effects table.
+final filteredCohortSideEffectSeverityProvider =
+    FutureProvider<List<CohortSideEffectSeverity>>((ref) {
+      final filters = ref.watch(cohortFiltersProvider);
+      return ref
+          .watch(cohortRepositoryProvider)
+          .sideEffectSeverity(filters: filters.toJsonForRpc());
+    });
+
+/// Adherence quartiles per drug brand. Drives the Adherence tab's
+/// "your adherence vs. cohort median" comparison.
+final filteredCohortAdherenceProvider = FutureProvider<List<CohortAdherence>>((
+  ref,
+) {
+  final filters = ref.watch(cohortFiltersProvider);
+  return ref
+      .watch(cohortRepositoryProvider)
+      .adherence(filters: filters.toJsonForRpc());
 });
 
 /// The User's cost_log row for the current calendar month, or null.

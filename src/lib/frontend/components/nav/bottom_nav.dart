@@ -6,7 +6,7 @@ import '../../../core/theme.dart';
 /// Persistent 5-item bottom nav. Center "Log" item opens a bottom sheet
 /// with the four logging actions instead of navigating directly.
 ///
-/// Embed in every top-level screen (Home, Progress, Cohort, Profile) so
+/// Embed in every top-level screen (Home, Insights, Adherence, Profile) so
 /// the nav is always visible. The currently-active tab is determined by
 /// the [currentRoute].
 class BottomNav extends StatelessWidget {
@@ -36,19 +36,19 @@ class BottomNav extends StatelessWidget {
                 onTap: () => context.go('/home'),
               ),
               _Tab(
-                icon: Icons.trending_up,
-                activeIcon: Icons.trending_up,
-                label: 'Progress',
-                active: currentRoute == '/progress',
-                onTap: () => context.go('/progress'),
+                icon: Icons.insights_outlined,
+                activeIcon: Icons.insights,
+                label: 'Insights',
+                active: currentRoute == '/insights',
+                onTap: () => context.go('/insights'),
               ),
               _LogTab(onTap: () => _showLogSheet(context)),
               _Tab(
-                icon: Icons.groups_outlined,
-                activeIcon: Icons.groups,
-                label: 'Cohort',
-                active: currentRoute.startsWith('/cohort'),
-                onTap: () => context.go('/cohort'),
+                icon: Icons.check_circle_outline,
+                activeIcon: Icons.check_circle,
+                label: 'Adherence',
+                active: currentRoute == '/adherence',
+                onTap: () => context.go('/adherence'),
               ),
               _Tab(
                 icon: Icons.person_outline,

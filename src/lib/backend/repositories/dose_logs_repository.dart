@@ -54,4 +54,25 @@ class DoseLogsRepository {
         .order('taken_at', ascending: false);
     return rows.map((r) => DoseLog.fromJson(r)).toList();
   }
+
+  /// All dose logs since [since], oldest first. Optionally filter to a
+  /// single [regimenId] — used by the Adherence screen to scope to the
+  /// active regimen's history without dragging in prior-regimen doses.
+  Future<List<DoseLog>> listSince(
+    DateTime since, {
+    String? regimenId,
+  }) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return const [];
+    var query = _client
+        .from(_table)
+        .select()
+        .eq('user_id', userId)
+        .gte('taken_at', since.toUtc().toIso8601String());
+    if (regimenId != null) {
+      query = query.eq('regimen_id', regimenId);
+    }
+    final rows = await query.order('taken_at', ascending: true);
+    return rows.map((r) => DoseLog.fromJson(r)).toList();
+  }
 }
