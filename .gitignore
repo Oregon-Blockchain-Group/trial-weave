@@ -92,6 +92,7 @@ build/
 dist/
 .dart_tool/
 .generated/
+.vite/
 coverage/
 *.lcov
 # Flutter web build output at repo root
